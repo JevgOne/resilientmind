@@ -20,22 +20,22 @@ const Hero = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/20 backdrop-blur-sm rounded-full mb-8 animate-fade-in border border-gold/30">
             <span className="w-2 h-2 bg-gold rounded-full animate-pulse" />
             <span className="text-sm font-sans font-semibold text-gold-dark">
-              Pro expat ženy ve Španělsku
+              For Expat Women in Spain
             </span>
           </div>
 
           {/* Heading */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-tight mb-6 animate-slide-up drop-shadow-sm">
-            <span className="text-foreground">Vybudujte svou</span>{" "}
-            <span className="text-gradient-gold drop-shadow-md">Odolnou Mysl</span>
+            <span className="text-foreground">Build Your</span>{" "}
+            <span className="text-gradient-gold drop-shadow-md">Resilient Mind</span>
             <br />
-            <span className="text-foreground/95 font-semibold">Prosperujte kdekoliv jste</span>
+            <span className="text-foreground/95 font-semibold">Thrive Wherever You Are</span>
           </h1>
 
           {/* Subheading */}
           <p className="text-lg md:text-xl text-foreground/80 font-sans font-medium leading-relaxed max-w-2xl mx-auto mb-10 animate-fade-in drop-shadow-sm" style={{ animationDelay: "0.2s" }}>
-            Transformační 12měsíční cesta kombinující kreativní art terapii a 
-            ověřené techniky resilience pro expat rodiny žijící v zahraničí.
+            A transformative 12-month journey combining creative art therapy and
+            proven resilience techniques for expat families living abroad.
           </p>
 
           {/* CTA Buttons */}
@@ -44,7 +44,7 @@ const Hero = () => {
               to="/resilient-hub"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-gold text-primary-foreground font-sans font-semibold rounded-full shadow-gold hover:shadow-elevated transition-all duration-300 hover:scale-105"
             >
-              Začít svou cestu
+              Start Your Journey
               <ArrowRight size={18} />
             </Link>
             <button
@@ -53,16 +53,16 @@ const Hero = () => {
               <span className="w-10 h-10 flex items-center justify-center bg-gold/20 rounded-full group-hover:bg-gold/30 transition-colors">
                 <Play size={16} className="text-gold ml-0.5" />
               </span>
-              Moje příběh
+              My Story
             </button>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto animate-fade-in" style={{ animationDelay: "0.6s" }}>
             {[
-              { number: "500+", label: "Rodinám pomohla" },
-              { number: "12", label: "Měsíční program" },
-              { number: "10+", label: "Let zkušeností" },
+              { number: "500+", label: "Families Helped" },
+              { number: "12", label: "Month Program" },
+              { number: "10+", label: "Years Experience" },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-2xl md:text-3xl font-serif font-bold text-gold drop-shadow-sm mb-1">
