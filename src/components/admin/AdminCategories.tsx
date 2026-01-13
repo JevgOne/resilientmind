@@ -20,17 +20,17 @@ interface Category {
 }
 
 const iconOptions = [
-  { value: 'heart', label: '❤️ Srdce' },
-  { value: 'brain', label: '🧠 Mozek' },
-  { value: 'shield', label: '🛡️ Štít' },
-  { value: 'palette', label: '🎨 Paleta' },
-  { value: 'eye', label: '👁️ Oko' },
-  { value: 'users', label: '👥 Lidé' },
-  { value: 'zap', label: '⚡ Blesk' },
-  { value: 'compass', label: '🧭 Kompas' },
-  { value: 'target', label: '🎯 Cíl' },
-  { value: 'globe', label: '🌍 Svět' },
-  { value: 'sun', label: '☀️ Slunce' },
+  { value: 'heart', label: '❤️ Heart' },
+  { value: 'brain', label: '🧠 Brain' },
+  { value: 'shield', label: '🛡️ Shield' },
+  { value: 'palette', label: '🎨 Palette' },
+  { value: 'eye', label: '👁️ Eye' },
+  { value: 'users', label: '👥 People' },
+  { value: 'zap', label: '⚡ Lightning' },
+  { value: 'compass', label: '🧭 Compass' },
+  { value: 'target', label: '🎯 Target' },
+  { value: 'globe', label: '🌍 Globe' },
+  { value: 'sun', label: '☀️ Sun' },
   { value: 'puzzle', label: '🧩 Puzzle' }
 ];
 
@@ -58,7 +58,7 @@ const AdminCategories = () => {
       .order('month_number');
 
     if (error) {
-      toast.error('Chyba při načítání kategorií');
+      toast.error('Error loading categories');
       return;
     }
     
@@ -107,7 +107,7 @@ const AdminCategories = () => {
         toast.error('Chyba při ukládání: ' + error.message);
         return;
       }
-      toast.success('Kategorie aktualizována');
+      toast.success('Category updated');
     } else {
       const { error } = await supabase
         .from('video_categories')
@@ -117,7 +117,7 @@ const AdminCategories = () => {
         toast.error('Chyba při vytváření: ' + error.message);
         return;
       }
-      toast.success('Kategorie přidána');
+      toast.success('Category added');
     }
 
     setDialogOpen(false);
@@ -126,7 +126,7 @@ const AdminCategories = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Opravdu chcete smazat tuto kategorii? Smaže se i všechna přidružená videa!')) return;
+    if (!confirm('Are you sure you want to delete this category? All associated videos will be deleted!')) return;
 
     const { error } = await supabase.from('video_categories').delete().eq('id', id);
     
@@ -135,32 +135,32 @@ const AdminCategories = () => {
       return;
     }
     
-    toast.success('Kategorie smazána');
+    toast.success('Category deleted');
     fetchCategories();
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-muted-foreground">Načítám kategorie...</div>;
+    return <div className="text-center py-8 text-muted-foreground">Loading categories...</div>;
   }
 
   return (
     <Card className="border-gold/20">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="font-serif">Správa kategorií (měsíců)</CardTitle>
+        <CardTitle className="font-serif">Category Management (months)</CardTitle>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="bg-gold hover:bg-gold-dark text-white">
               <Plus className="h-4 w-4 mr-2" />
-              Přidat kategorii
+              Add Category
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingCategory ? 'Upravit kategorii' : 'Nová kategorie'}</DialogTitle>
+              <DialogTitle>{editingCategory ? 'Edit Category' : 'New Category'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Název</Label>
+                <Label htmlFor="name">Title</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -175,13 +175,13 @@ const AdminCategories = () => {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Krátký popis měsíce..."
+                  placeholder="Short description of the month..."
                   rows={3}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="month_number">Číslo měsíce</Label>
+                  <Label htmlFor="month_number">Month Number</Label>
                   <Input
                     id="month_number"
                     type="number"
@@ -193,7 +193,7 @@ const AdminCategories = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="icon">Ikona</Label>
+                  <Label htmlFor="icon">Icon</Label>
                   <Select
                     value={formData.icon}
                     onValueChange={(value) => setFormData({ ...formData, icon: value })}
@@ -225,15 +225,15 @@ const AdminCategories = () => {
       </CardHeader>
       <CardContent>
         {categories.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">Zatím žádné kategorie</p>
+          <p className="text-center text-muted-foreground py-8">No categories yet</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Měsíc</TableHead>
-                <TableHead>Název</TableHead>
+                <TableHead>Month</TableHead>
+                <TableHead>Title</TableHead>
                 <TableHead>Popis</TableHead>
-                <TableHead>Ikona</TableHead>
+                <TableHead>Icon</TableHead>
                 <TableHead className="text-right">Akce</TableHead>
               </TableRow>
             </TableHeader>

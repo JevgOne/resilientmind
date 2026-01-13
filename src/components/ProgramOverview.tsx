@@ -95,7 +95,7 @@ const ProgramOverview = () => {
   if (loading) {
     return (
       <div className="py-16 text-center">
-        <div className="animate-pulse text-gold">Načítám obsah programu...</div>
+        <div className="animate-pulse text-gold">Loading program content...</div>
       </div>
     );
   }
@@ -104,9 +104,9 @@ const ProgramOverview = () => {
     return (
       <div className="py-16 text-center">
         <Lock className="h-16 w-16 text-gold/30 mx-auto mb-4" />
-        <h3 className="font-serif text-2xl mb-2">Obsah se připravuje</h3>
+        <h3 className="font-serif text-2xl mb-2">Content in Preparation</h3>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Pracujeme na přípravě video lekcí a materiálů. Přihlaste se k odběru novinek!
+          We're preparing video lessons and materials. Subscribe for updates!
         </p>
       </div>
     );
@@ -148,7 +148,7 @@ const ProgramOverview = () => {
               ))
             ) : (
               <div className="col-span-full text-center py-8 bg-muted/50 rounded-xl">
-                <p className="text-muted-foreground">Videa budou brzy přidána</p>
+                <p className="text-muted-foreground">Videos coming soon</p>
               </div>
             )}
           </CategorySection>
@@ -164,28 +164,28 @@ const ProgramOverview = () => {
             onClick={() => setVisibleCategories(prev => prev + 3)}
             className="border-gold text-gold hover:bg-gold hover:text-white mb-4"
           >
-            Zobrazit další měsíce ({categories.length - visibleCategories} zbývá)
+            Show More Months ({categories.length - visibleCategories} remaining)
           </Button>
         )}
 
         {!user && (
           <div className="mt-8 p-8 bg-gradient-warm rounded-2xl border border-gold/20">
             <h3 className="font-serif text-2xl mb-3">
-              Získejte plný přístup k programu
+              Get Full Program Access
             </h3>
             <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-              Přihlaste se nebo se zaregistrujte a odemkněte všechny video lekce, 
-              pracovní materiály a exkluzivní obsah.
+              Sign up or log in and unlock all video lessons, 
+              workbooks and exclusive content.
             </p>
             <div className="flex gap-4 justify-center">
               <Link to="/auth">
                 <Button className="bg-gold hover:bg-gold-dark text-white shadow-gold">
-                  Začít zdarma
+                  Start Free
                 </Button>
               </Link>
               <Link to="#pricing">
                 <Button variant="outline" className="border-gold text-gold">
-                  Zobrazit ceník
+                  View Pricing
                 </Button>
               </Link>
             </div>

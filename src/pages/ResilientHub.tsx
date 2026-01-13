@@ -97,22 +97,22 @@ const ResilientHub = () => {
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
                       <Play size={16} className="text-primary" />
                       <span className="text-sm font-sans font-medium text-primary">
-                        Obsah programu
+                        Program Content
                       </span>
                     </div>
                     <h2 className="text-2xl md:text-4xl font-serif font-semibold">
-                      12 měsíců, 12 pilířů odolnosti
+                      12 Months, 12 Pillars of Resilience
                     </h2>
                   </div>
                   
                   <TabsList className="bg-cream-dark/50 self-start">
                     <TabsTrigger value="videos" className="data-[state=active]:bg-gold data-[state=active]:text-white">
                       <Video size={16} className="mr-2" />
-                      Video lekce
+                      Video Lessons
                     </TabsTrigger>
                     <TabsTrigger value="overview" className="data-[state=active]:bg-gold data-[state=active]:text-white">
                       <Calendar size={16} className="mr-2" />
-                      Přehled
+                      Overview
                     </TabsTrigger>
                   </TabsList>
                 </div>
@@ -129,7 +129,7 @@ const ResilientHub = () => {
                         className="group p-5 bg-background rounded-xl border border-border hover:shadow-soft hover:border-gold/30 transition-all cursor-pointer"
                       >
                         <div className="text-xs font-sans font-semibold text-primary mb-2">
-                          Měsíc {item.month}
+                          Month {item.month}
                         </div>
                         <h3 className="font-serif font-semibold text-lg mb-1 group-hover:text-gold transition-colors">
                           {item.title}

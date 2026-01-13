@@ -66,8 +66,8 @@ const iconMap: { [key: string]: React.ElementType } = {
 };
 
 const membershipLabels = {
-  free: 'Zdarma',
-  basic: 'Základní',
+  free: 'Free',
+  basic: 'Basic',
   premium: 'Premium'
 };
 
@@ -136,7 +136,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-gold">Načítám...</div>
+        <div className="animate-pulse text-gold">Loading...</div>
       </div>
     );
   }
@@ -155,7 +155,7 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
               <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-2">
-                Vítejte, {profile?.full_name || 'člene'}
+                Welcome, {profile?.full_name || 'member'}
               </h1>
               <div className="flex items-center gap-3">
                 <Badge className={membershipColors[profile?.membership_type || 'free']}>
@@ -165,7 +165,7 @@ const Dashboard = () => {
                 {profile?.membership_type === 'free' && (
                   <Link to="/resilient-hub">
                     <Button variant="outline" size="sm" className="border-gold text-gold hover:bg-gold hover:text-white">
-                      Upgradovat členství
+                      Upgrade Membership
                     </Button>
                   </Link>
                 )}
@@ -174,11 +174,11 @@ const Dashboard = () => {
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => navigate('/profile')}>
                 <Settings className="h-4 w-4 mr-2" />
-                Nastavení
+                Settings
               </Button>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Odhlásit
+                Sign Out
               </Button>
             </div>
           </div>
@@ -192,7 +192,7 @@ const Dashboard = () => {
                     <Play className="h-6 w-6 text-gold" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Dostupná videa</p>
+                    <p className="text-sm text-muted-foreground">Available Videos</p>
                     <p className="text-2xl font-semibold">
                       {videos.filter(v => canAccessVideo(v)).length} / {videos.length}
                     </p>
@@ -207,7 +207,7 @@ const Dashboard = () => {
                     <Calendar className="h-6 w-6 text-gold" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Měsíc programu</p>
+                    <p className="text-sm text-muted-foreground">Program Month</p>
                     <p className="text-2xl font-semibold">1 / 12</p>
                   </div>
                 </div>
@@ -220,7 +220,7 @@ const Dashboard = () => {
                     <Crown className="h-6 w-6 text-gold" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Členství</p>
+                    <p className="text-sm text-muted-foreground">Membership</p>
                     <p className="text-2xl font-semibold capitalize">
                       {membershipLabels[profile?.membership_type || 'free']}
                     </p>
@@ -234,27 +234,27 @@ const Dashboard = () => {
           <Tabs defaultValue="program" className="w-full">
             <TabsList className="bg-cream/50 mb-6">
               <TabsTrigger value="program" className="data-[state=active]:bg-gold data-[state=active]:text-white">
-                12 Měsíců Program
+                12-Month Program
               </TabsTrigger>
               <TabsTrigger value="resources" className="data-[state=active]:bg-gold data-[state=active]:text-white">
-                Zdroje
+                Resources
               </TabsTrigger>
               <TabsTrigger value="sessions" className="data-[state=active]:bg-gold data-[state=active]:text-white">
-                Konzultace
+                Sessions
               </TabsTrigger>
             </TabsList>
 
             {/* Program Tab */}
             <TabsContent value="program">
               {loadingContent ? (
-                <div className="text-center py-12 text-muted-foreground">Načítám obsah...</div>
+                <div className="text-center py-12 text-muted-foreground">Loading content...</div>
               ) : categories.length === 0 ? (
                 <Card className="border-gold/20">
                   <CardContent className="py-12 text-center">
                     <Play className="h-12 w-12 text-gold/50 mx-auto mb-4" />
-                    <h3 className="font-serif text-xl mb-2">Brzy přidáme obsah</h3>
+                    <h3 className="font-serif text-xl mb-2">Content Coming Soon</h3>
                     <p className="text-muted-foreground">
-                      Pracujeme na přípravě video lekcí a materiálů. Sledujte novinky!
+                      We're preparing video lessons and materials. Stay tuned for updates!
                     </p>
                   </CardContent>
                 </Card>
@@ -276,7 +276,7 @@ const Dashboard = () => {
                               <IconComponent className="h-5 w-5 text-gold" />
                             </div>
                             <Badge variant="outline" className="text-xs">
-                              Měsíc {category.month_number}
+                              Month {category.month_number}
                             </Badge>
                           </div>
                           <CardTitle className="font-serif text-xl flex items-center gap-2">
@@ -288,17 +288,17 @@ const Dashboard = () => {
                         <CardContent>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">
-                              {categoryVideos.length} {categoryVideos.length === 1 ? 'video' : 'videí'}
+                              {categoryVideos.length} {categoryVideos.length === 1 ? 'video' : 'videos'}
                             </span>
                             {hasAccess ? (
                               <Button size="sm" className="bg-gold hover:bg-gold-dark text-white">
                                 <Play className="h-4 w-4 mr-1" />
-                                Spustit
+                                Start
                               </Button>
                             ) : (
                               <Link to="/resilient-hub">
                                 <Button size="sm" variant="outline" className="border-gold text-gold">
-                                  Odemknout
+                                  Unlock
                                 </Button>
                               </Link>
                             )}
@@ -318,18 +318,18 @@ const Dashboard = () => {
                   <div className="p-4 bg-gold/10 rounded-full w-fit mx-auto mb-4">
                     <Palette className="h-8 w-8 text-gold" />
                   </div>
-                  <h3 className="font-serif text-xl mb-2">Pracovní materiály</h3>
+                  <h3 className="font-serif text-xl mb-2">Workbook Materials</h3>
                   <p className="text-muted-foreground mb-6">
-                    Ke stažení pracovní listy, meditace a kreativní cvičení
+                    Downloadable worksheets, meditations, and creative exercises
                   </p>
                   {profile?.membership_type === 'free' ? (
                     <Link to="/resilient-hub">
                       <Button className="bg-gold hover:bg-gold-dark text-white">
-                        Získat přístup k materiálům
+                        Get Access to Materials
                       </Button>
                     </Link>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Materiály budou brzy k dispozici</p>
+                    <p className="text-sm text-muted-foreground">Materials will be available soon</p>
                   )}
                 </CardContent>
               </Card>
@@ -342,33 +342,33 @@ const Dashboard = () => {
                   <div className="p-4 bg-gold/10 rounded-full w-fit mx-auto mb-4">
                     <Calendar className="h-8 w-8 text-gold" />
                   </div>
-                  <h3 className="font-serif text-xl mb-2">Osobní konzultace</h3>
+                  <h3 className="font-serif text-xl mb-2">Personal Consultations</h3>
                   {profile?.membership_type === 'premium' ? (
                     <>
                       <p className="text-muted-foreground mb-6">
-                        Jako Premium člen máte nárok na 4 hodinové konzultace ročně
+                        As a Premium member, you're entitled to 4 hour-long consultations per year
                       </p>
                       <Link to="/booking">
                         <Button className="bg-gold hover:bg-gold-dark text-white">
                           <Calendar className="h-4 w-4 mr-2" />
-                          Rezervovat konzultaci
+                          Book Consultation
                         </Button>
                       </Link>
                     </>
                   ) : (
                     <>
                       <p className="text-muted-foreground mb-6">
-                        Osobní konzultace jsou dostupné pro Premium členy nebo jako jednotlivé sezení
+                        Personal consultations are available for Premium members or as individual sessions
                       </p>
                       <div className="flex gap-4 justify-center">
                         <Link to="/booking">
                           <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-white">
-                            Rezervovat jednotlivě (87€/h)
+                            Book Individual Session (87€/h)
                           </Button>
                         </Link>
                         <Link to="/resilient-hub">
                           <Button className="bg-gold hover:bg-gold-dark text-white">
-                            Upgradovat na Premium
+                            Upgrade to Premium
                           </Button>
                         </Link>
                       </div>

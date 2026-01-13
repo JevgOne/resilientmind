@@ -50,7 +50,7 @@ const AdminTestimonials = () => {
       .order('sort_order');
 
     if (error) {
-      toast.error('Chyba při načítání recenzí');
+      toast.error('Error loading testimonials');
       return;
     }
     
@@ -108,7 +108,7 @@ const AdminTestimonials = () => {
         toast.error('Chyba při ukládání: ' + error.message);
         return;
       }
-      toast.success('Recenze aktualizována');
+      toast.success('Testimonial updated');
     } else {
       const { error } = await supabase
         .from('testimonials')
@@ -118,7 +118,7 @@ const AdminTestimonials = () => {
         toast.error('Chyba při vytváření: ' + error.message);
         return;
       }
-      toast.success('Recenze přidána');
+      toast.success('Testimonial added');
     }
 
     setDialogOpen(false);
@@ -127,7 +127,7 @@ const AdminTestimonials = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Opravdu chcete smazat tuto recenzi?')) return;
+    if (!confirm('Are you sure you want to delete this testimonial?')) return;
 
     const { error } = await supabase.from('testimonials').delete().eq('id', id);
     
@@ -136,7 +136,7 @@ const AdminTestimonials = () => {
       return;
     }
     
-    toast.success('Recenze smazána');
+    toast.success('Testimonial deleted');
     fetchTestimonials();
   };
 
@@ -147,7 +147,7 @@ const AdminTestimonials = () => {
       .eq('id', testimonial.id);
 
     if (error) {
-      toast.error('Chyba při změně viditelnosti');
+      toast.error('Error changing visibility');
       return;
     }
     
@@ -155,27 +155,27 @@ const AdminTestimonials = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-muted-foreground">Načítám recenze...</div>;
+    return <div className="text-center py-8 text-muted-foreground">Loading testimonials...</div>;
   }
 
   return (
     <Card className="border-gold/20">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="font-serif">Správa recenzí</CardTitle>
+        <CardTitle className="font-serif">Testimonial Management</CardTitle>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="bg-gold hover:bg-gold-dark text-white">
               <Plus className="h-4 w-4 mr-2" />
-              Přidat recenzi
+              Add Testimonial
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editingTestimonial ? 'Upravit recenzi' : 'Nová recenze'}</DialogTitle>
+              <DialogTitle>{editingTestimonial ? 'Edit Testimonial' : 'New Testimonial'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Jméno</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -185,7 +185,7 @@ const AdminTestimonials = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="role">Role / Lokace</Label>
+                <Label htmlFor="role">Role / Location</Label>
                 <Input
                   id="role"
                   value={formData.role}
@@ -194,18 +194,18 @@ const AdminTestimonials = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="content">Text recenze</Label>
+                <Label htmlFor="content">Testimonial Text</Label>
                 <Textarea
                   id="content"
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Text recenze..."
+                  placeholder="Testimonial Text..."
                   rows={4}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="avatar_url">URL profilového obrázku</Label>
+                <Label htmlFor="avatar_url">Profile Image URL</Label>
                 <Input
                   id="avatar_url"
                   type="url"
@@ -216,7 +216,7 @@ const AdminTestimonials = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="rating">Hodnocení (1-5)</Label>
+                  <Label htmlFor="rating">Rating (1-5)</Label>
                   <Input
                     id="rating"
                     type="number"
@@ -228,7 +228,7 @@ const AdminTestimonials = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="sort_order">Pořadí</Label>
+                  <Label htmlFor="sort_order">Sort Order</Label>
                   <Input
                     id="sort_order"
                     type="number"
@@ -243,14 +243,14 @@ const AdminTestimonials = () => {
                   checked={formData.is_visible}
                   onCheckedChange={(checked) => setFormData({ ...formData, is_visible: checked })}
                 />
-                <Label htmlFor="is_visible">Zobrazit na webu</Label>
+                <Label htmlFor="is_visible">Show on Website</Label>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Zrušit
                 </Button>
                 <Button type="submit" className="bg-gold hover:bg-gold-dark text-white">
-                  {editingTestimonial ? 'Uložit změny' : 'Vytvořit'}
+                  {editingTestimonial ? 'Uložit změny' : 'Create'}
                 </Button>
               </div>
             </form>
@@ -259,15 +259,15 @@ const AdminTestimonials = () => {
       </CardHeader>
       <CardContent>
         {testimonials.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">Zatím žádné recenze</p>
+          <p className="text-center text-muted-foreground py-8">No testimonials yet</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Jméno</TableHead>
-                <TableHead>Recenze</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Review</TableHead>
                 <TableHead>Hodnocení</TableHead>
-                <TableHead>Viditelnost</TableHead>
+                <TableHead>Visibility</TableHead>
                 <TableHead className="text-right">Akce</TableHead>
               </TableRow>
             </TableHeader>
@@ -298,11 +298,11 @@ const AdminTestimonials = () => {
                     >
                       {testimonial.is_visible ? (
                         <Badge variant="outline" className="gap-1">
-                          <Eye className="h-3 w-3" /> Viditelné
+                          <Eye className="h-3 w-3" /> Visible
                         </Badge>
                       ) : (
                         <Badge variant="secondary" className="gap-1">
-                          <EyeOff className="h-3 w-3" /> Skryté
+                          <EyeOff className="h-3 w-3" /> Hidden
                         </Badge>
                       )}
                     </Button>

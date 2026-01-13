@@ -33,8 +33,8 @@ interface Category {
 }
 
 const membershipLabels = {
-  free: 'Zdarma',
-  basic: 'Základní',
+  free: 'Free',
+  basic: 'Basic',
   premium: 'Premium'
 };
 
@@ -125,20 +125,20 @@ const AdminVideos = () => {
         .eq('id', editingVideo.id);
 
       if (error) {
-        toast.error('Chyba při ukládání: ' + error.message);
+        toast.error('Error saving: ' + error.message);
         return;
       }
-      toast.success('Video aktualizováno');
+      toast.success('Video updated');
     } else {
       const { error } = await supabase
         .from('videos')
         .insert(videoData);
 
       if (error) {
-        toast.error('Chyba při vytváření: ' + error.message);
+        toast.error('Error creating: ' + error.message);
         return;
       }
-      toast.success('Video přidáno');
+      toast.success('Video added');
     }
 
     setDialogOpen(false);
@@ -147,42 +147,42 @@ const AdminVideos = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Opravdu chcete smazat toto video?')) return;
+    if (!confirm('Are you sure you want to delete this video?')) return;
 
     const { error } = await supabase.from('videos').delete().eq('id', id);
-    
+
     if (error) {
-      toast.error('Chyba při mazání: ' + error.message);
+      toast.error('Error deleting: ' + error.message);
       return;
     }
-    
-    toast.success('Video smazáno');
+
+    toast.success('Video deleted');
     fetchData();
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-muted-foreground">Načítám videa...</div>;
+    return <div className="text-center py-8 text-muted-foreground">Loading videos...</div>;
   }
 
   return (
     <Card className="border-gold/20">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="font-serif">Správa videí</CardTitle>
+        <CardTitle className="font-serif">Video Management</CardTitle>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="bg-gold hover:bg-gold-dark text-white">
               <Plus className="h-4 w-4 mr-2" />
-              Přidat video
+              Add Video
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingVideo ? 'Upravit video' : 'Nové video'}</DialogTitle>
+              <DialogTitle>{editingVideo ? 'Edit Video' : 'New Video'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <Label htmlFor="title">Název</Label>
+                  <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -191,7 +191,7 @@ const AdminVideos = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label htmlFor="description">Popis</Label>
+                  <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
@@ -200,7 +200,7 @@ const AdminVideos = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label htmlFor="video_url">URL videa</Label>
+                  <Label htmlFor="video_url">Video URL</Label>
                   <Input
                     id="video_url"
                     type="url"
@@ -210,7 +210,7 @@ const AdminVideos = () => {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label htmlFor="thumbnail_url">URL náhledu</Label>
+                  <Label htmlFor="thumbnail_url">Thumbnail URL</Label>
                   <Input
                     id="thumbnail_url"
                     type="url"
@@ -219,13 +219,13 @@ const AdminVideos = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="category_id">Kategorie</Label>
+                  <Label htmlFor="category_id">Category</Label>
                   <Select
                     value={formData.category_id}
                     onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Vyberte kategorii" />
+                      <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat) => (
@@ -237,7 +237,7 @@ const AdminVideos = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="min_membership">Minimální členství</Label>
+                  <Label htmlFor="min_membership">Minimum Membership</Label>
                   <Select
                     value={formData.min_membership}
                     onValueChange={(value: 'free' | 'basic' | 'premium') => setFormData({ ...formData, min_membership: value })}
@@ -246,14 +246,14 @@ const AdminVideos = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="free">Zdarma</SelectItem>
-                      <SelectItem value="basic">Základní</SelectItem>
+                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="basic">Basic</SelectItem>
                       <SelectItem value="premium">Premium</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="duration_minutes">Délka (minuty)</Label>
+                  <Label htmlFor="duration_minutes">Duration (minutes)</Label>
                   <Input
                     id="duration_minutes"
                     type="number"
@@ -262,7 +262,7 @@ const AdminVideos = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="sort_order">Pořadí</Label>
+                  <Label htmlFor="sort_order">Sort Order</Label>
                   <Input
                     id="sort_order"
                     type="number"
@@ -276,15 +276,15 @@ const AdminVideos = () => {
                     checked={formData.is_free}
                     onCheckedChange={(checked) => setFormData({ ...formData, is_free: checked })}
                   />
-                  <Label htmlFor="is_free">Zdarma pro všechny</Label>
+                  <Label htmlFor="is_free">Free for Everyone</Label>
                 </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Zrušit
+                  Cancel
                 </Button>
                 <Button type="submit" className="bg-gold hover:bg-gold-dark text-white">
-                  {editingVideo ? 'Uložit změny' : 'Vytvořit'}
+                  {editingVideo ? 'Save Changes' : 'Create'}
                 </Button>
               </div>
             </form>
@@ -293,16 +293,16 @@ const AdminVideos = () => {
       </CardHeader>
       <CardContent>
         {videos.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">Zatím žádná videa</p>
+          <p className="text-center text-muted-foreground py-8">No videos yet</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Název</TableHead>
-                <TableHead>Kategorie</TableHead>
-                <TableHead>Přístup</TableHead>
-                <TableHead>Délka</TableHead>
-                <TableHead className="text-right">Akce</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Access</TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -321,7 +321,7 @@ const AdminVideos = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant={video.is_free ? 'secondary' : 'outline'}>
-                        {video.is_free ? 'Zdarma' : membershipLabels[video.min_membership]}
+                        {video.is_free ? 'Free' : membershipLabels[video.min_membership]}
                       </Badge>
                     </TableCell>
                     <TableCell>{video.duration_minutes ? `${video.duration_minutes} min` : '-'}</TableCell>

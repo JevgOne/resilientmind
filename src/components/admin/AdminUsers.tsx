@@ -80,7 +80,7 @@ const AdminUsers = () => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      toast.error('Chyba při načítání uživatelů');
+      toast.error('Error loading users');
       return;
     }
     
@@ -120,11 +120,11 @@ const AdminUsers = () => {
       .eq('id', editingUser.id);
 
     if (error) {
-      toast.error('Chyba při ukládání: ' + error.message);
+      toast.error('Error saving: ' + error.message);
       return;
     }
     
-    toast.success('Uživatel aktualizován');
+    toast.success('User updated');
     setDialogOpen(false);
     setEditingUser(null);
     fetchUsers();
@@ -136,18 +136,18 @@ const AdminUsers = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-muted-foreground">Načítám uživatele...</div>;
+    return <div className="text-center py-8 text-muted-foreground">Loading users...</div>;
   }
 
   return (
     <Card className="border-gold/20">
       <CardHeader>
-        <CardTitle className="font-serif">Správa uživatelů</CardTitle>
+        <CardTitle className="font-serif">User Management</CardTitle>
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Hledat podle jména nebo emailu..."
+              placeholder="Search by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -155,10 +155,10 @@ const AdminUsers = () => {
           </div>
           <Select value={membershipFilter} onValueChange={setMembershipFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrovat členství" />
+              <SelectValue placeholder="Filter membership" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Všichni</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="free">Zdarma</SelectItem>
               <SelectItem value="basic">Základní</SelectItem>
               <SelectItem value="premium">Premium</SelectItem>
@@ -168,21 +168,21 @@ const AdminUsers = () => {
       </CardHeader>
       <CardContent>
         <div className="mb-4 text-sm text-muted-foreground">
-          Celkem: {users.length} uživatelů | Zobrazeno: {filteredUsers.length}
+          Total: {users.length} users | Displayed: {filteredUsers.length}
         </div>
         
         {filteredUsers.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">Žádní uživatelé nenalezeni</p>
+          <p className="text-center text-muted-foreground py-8">No users found</p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Uživatel</TableHead>
-                  <TableHead>Členství</TableHead>
-                  <TableHead>Platnost do</TableHead>
-                  <TableHead>Registrace</TableHead>
-                  <TableHead className="text-right">Akce</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Membership</TableHead>
+                  <TableHead>Valid Until</TableHead>
+                  <TableHead>Registration</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -192,7 +192,7 @@ const AdminUsers = () => {
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
                         <div>
-                          <div className="font-medium">{user.full_name || 'Bez jména'}</div>
+                          <div className="font-medium">{user.full_name || 'No name'}</div>
                           <div className="text-sm text-muted-foreground">{user.email}</div>
                         </div>
                       </div>
@@ -209,7 +209,7 @@ const AdminUsers = () => {
                           <Calendar className="h-4 w-4" />
                           {format(new Date(user.membership_expires_at), 'd. M. yyyy', { locale: cs })}
                           {isExpired(user.membership_expires_at) && (
-                            <Badge variant="destructive" className="ml-2 text-xs">Vypršelo</Badge>
+                            <Badge variant="destructive" className="ml-2 text-xs">Expired</Badge>
                           )}
                         </div>
                       ) : (
@@ -234,16 +234,16 @@ const AdminUsers = () => {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Upravit členství</DialogTitle>
+              <DialogTitle>Edit Membership</DialogTitle>
             </DialogHeader>
             {editingUser && (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="p-4 bg-muted rounded-lg">
-                  <div className="font-medium">{editingUser.full_name || 'Bez jména'}</div>
+                  <div className="font-medium">{editingUser.full_name || 'No name'}</div>
                   <div className="text-sm text-muted-foreground">{editingUser.email}</div>
                 </div>
                 <div>
-                  <Label htmlFor="membership_type">Typ členství</Label>
+                  <Label htmlFor="membership_type">Membership Type</Label>
                   <Select
                     value={formData.membership_type}
                     onValueChange={(value: 'free' | 'basic' | 'premium') => 
@@ -262,7 +262,7 @@ const AdminUsers = () => {
                 </div>
                 {formData.membership_type !== 'free' && (
                   <div>
-                    <Label htmlFor="membership_expires_at">Platnost do</Label>
+                    <Label htmlFor="membership_expires_at">Valid Until</Label>
                     <Input
                       id="membership_expires_at"
                       type="date"
@@ -270,16 +270,16 @@ const AdminUsers = () => {
                       onChange={(e) => setFormData({ ...formData, membership_expires_at: e.target.value })}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Nechte prázdné pro neomezenou platnost
+                      Leave empty for unlimited validity
                     </p>
                   </div>
                 )}
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    Zrušit
+                    Cancel
                   </Button>
                   <Button type="submit" className="bg-gold hover:bg-gold-dark text-white">
-                    Uložit změny
+                    Save Changes
                   </Button>
                 </div>
               </form>

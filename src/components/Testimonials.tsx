@@ -39,7 +39,7 @@ const Testimonials = () => {
   }, []);
 
   if (loading) {
-    return <section className="py-24 bg-background"><div className="container px-4 text-center text-muted-foreground">Načítám...</div></section>;
+    return <section className="py-24 bg-background"><div className="container px-4 text-center text-muted-foreground">Loading...</div></section>;
   }
 
   return (

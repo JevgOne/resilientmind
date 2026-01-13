@@ -27,44 +27,44 @@ interface RecentSubscription {
 const plans = [
   {
     id: 'basic_monthly',
-    name: 'Základní měsíční',
+    name: 'Basic Monthly',
     price: 27,
-    interval: 'měsíčně',
+    interval: 'monthly',
     type: 'basic' as const,
-    features: ['Měsíční videa', 'Pracovní listy', 'Přístup k programu']
+    features: ['Monthly videos', 'Worksheets', 'Program access']
   },
   {
     id: 'basic_yearly',
-    name: 'Základní roční',
+    name: 'Basic Yearly',
     price: 270,
-    interval: 'ročně',
+    interval: 'yearly',
     type: 'basic' as const,
-    savings: '2 měsíce zdarma',
-    features: ['Měsíční videa', 'Pracovní listy', 'Přístup k programu']
+    savings: '2 months free',
+    features: ['Monthly videos', 'Worksheets', 'Program access']
   },
   {
     id: 'premium_monthly',
-    name: 'Premium měsíční',
+    name: 'Premium Monthly',
     price: 47,
-    interval: 'měsíčně',
+    interval: 'monthly',
     type: 'premium' as const,
-    features: ['Vše ze Základního', 'Čtvrtletní 1:1 konzultace', 'Materiály pro art terapii']
+    features: ['Everything from Basic', 'Quarterly 1:1 consultations', 'Art therapy materials']
   },
   {
     id: 'premium_yearly',
-    name: 'Premium roční',
+    name: 'Premium Yearly',
     price: 470,
-    interval: 'ročně',
+    interval: 'yearly',
     type: 'premium' as const,
-    savings: '2 měsíce zdarma',
-    features: ['Vše ze Základního', 'Čtvrtletní 1:1 konzultace', 'Materiály pro art terapii']
+    savings: '2 months free',
+    features: ['Everything from Basic', 'Quarterly 1:1 consultations', 'Art therapy materials']
   }
 ];
 
 const paymentMethods = [
-  { id: 'card', name: 'Platební karta', icon: '💳', description: 'Visa, Mastercard, AMEX' },
-  { id: 'apple_pay', name: 'Apple Pay', icon: '🍎', description: 'Pro zařízení Apple' },
-  { id: 'google_pay', name: 'Google Pay', icon: '📱', description: 'Pro Android zařízení' }
+  { id: 'card', name: 'Payment Card', icon: '💳', description: 'Visa, Mastercard, AMEX' },
+  { id: 'apple_pay', name: 'Apple Pay', icon: '🍎', description: 'For Apple devices' },
+  { id: 'google_pay', name: 'Google Pay', icon: '📱', description: 'For Android devices' }
 ];
 
 const membershipColors = {
@@ -126,7 +126,7 @@ const AdminSubscriptions = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-muted-foreground">Načítám statistiky...</div>;
+    return <div className="text-center py-8 text-muted-foreground">Loading statistics...</div>;
   }
 
   const totalPaid = stats.basic + stats.premium;
@@ -140,7 +140,7 @@ const AdminSubscriptions = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Celkem uživatelů</p>
+                <p className="text-sm text-muted-foreground">Total Users</p>
                 <p className="text-3xl font-bold">{stats.free + stats.basic + stats.premium}</p>
               </div>
               <Users className="h-8 w-8 text-gold" />
@@ -152,7 +152,7 @@ const AdminSubscriptions = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Platící členové</p>
+                <p className="text-sm text-muted-foreground">Paying Members</p>
                 <p className="text-3xl font-bold text-gold">{totalPaid}</p>
               </div>
               <Crown className="h-8 w-8 text-gold" />
@@ -164,7 +164,7 @@ const AdminSubscriptions = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Měsíční příjem (odhad)</p>
+                <p className="text-sm text-muted-foreground">Monthly Revenue (estimate)</p>
                 <p className="text-3xl font-bold text-green-600">{monthlyRevenue}€</p>
               </div>
               <Euro className="h-8 w-8 text-green-600" />
@@ -176,7 +176,7 @@ const AdminSubscriptions = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Konverze</p>
+                <p className="text-sm text-muted-foreground">Conversion</p>
                 <p className="text-3xl font-bold">
                   {((totalPaid / (stats.free + totalPaid || 1)) * 100).toFixed(1)}%
                 </p>
@@ -190,8 +190,8 @@ const AdminSubscriptions = () => {
       {/* Membership Breakdown */}
       <Card className="border-gold/20">
         <CardHeader>
-          <CardTitle className="font-serif">Přehled členství</CardTitle>
-          <CardDescription>Rozdělení uživatelů podle typu předplatného</CardDescription>
+          <CardTitle className="font-serif">Membership Overview</CardTitle>
+          <CardDescription>User distribution by subscription type</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
@@ -217,8 +217,8 @@ const AdminSubscriptions = () => {
       {/* Subscription Plans */}
       <Card className="border-gold/20">
         <CardHeader>
-          <CardTitle className="font-serif">Cenové balíčky (3 typy)</CardTitle>
-          <CardDescription>Přehled dostupných předplatných</CardDescription>
+          <CardTitle className="font-serif">Pricing Plans (3 types)</CardTitle>
+          <CardDescription>Overview of available subscriptions</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -262,9 +262,9 @@ const AdminSubscriptions = () => {
         <CardHeader>
           <CardTitle className="font-serif flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            Platební metody (3 druhy)
+            Payment Methods (3 types)
           </CardTitle>
-          <CardDescription>Podporované způsoby platby přes Stripe</CardDescription>
+          <CardDescription>Supported payment methods via Stripe</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -287,19 +287,19 @@ const AdminSubscriptions = () => {
       {/* Recent Subscriptions */}
       <Card className="border-gold/20">
         <CardHeader>
-          <CardTitle className="font-serif">Nedávné předplatné</CardTitle>
-          <CardDescription>Posledních 10 platících členů</CardDescription>
+          <CardTitle className="font-serif">Recent Subscriptions</CardTitle>
+          <CardDescription>Last 10 paying members</CardDescription>
         </CardHeader>
         <CardContent>
           {recentSubs.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Zatím žádné platící členy</p>
+            <p className="text-center text-muted-foreground py-8">No paying members yet</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Uživatel</TableHead>
                   <TableHead>Typ</TableHead>
-                  <TableHead>Začátek</TableHead>
+                  <TableHead>Start</TableHead>
                   <TableHead>Platnost do</TableHead>
                 </TableRow>
               </TableHeader>
@@ -330,7 +330,7 @@ const AdminSubscriptions = () => {
                       {sub.membership_expires_at ? (
                         format(new Date(sub.membership_expires_at), 'd. M. yyyy', { locale: cs })
                       ) : (
-                        <span className="text-muted-foreground">Neomezeno</span>
+                        <span className="text-muted-foreground">Unlimited</span>
                       )}
                     </TableCell>
                   </TableRow>

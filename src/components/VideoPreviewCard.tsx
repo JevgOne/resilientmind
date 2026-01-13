@@ -105,7 +105,7 @@ const VideoPreviewCard = ({
             size="sm" 
             className="mt-3 w-full border-gold text-gold hover:bg-gold hover:text-white"
           >
-            Odemknout přístup
+            Unlock Access
           </Button>
         )}
       </CardContent>

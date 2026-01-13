@@ -30,11 +30,11 @@ const CategorySection = ({
           <div>
             <div className="flex items-center gap-3 mb-1">
               <span className="text-xs font-semibold uppercase tracking-wider text-gold">
-                Měsíc {monthNumber}
+                Month {monthNumber}
               </span>
               {isLocked && (
                 <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
-                  Zamčeno
+                  Locked
                 </span>
               )}
             </div>
@@ -55,7 +55,7 @@ const CategorySection = ({
             size="sm" 
             className="hidden md:flex text-gold hover:text-gold-dark hover:bg-gold/10"
           >
-            Zobrazit vše
+            View All
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         )}

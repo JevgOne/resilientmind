@@ -14,8 +14,8 @@ import { ArrowLeft, Crown, User, Mail, Calendar, CreditCard } from 'lucide-react
 import { Link } from 'react-router-dom';
 
 const membershipLabels = {
-  free: 'Zdarma',
-  basic: 'Základní',
+  free: 'Free',
+  basic: 'Basic',
   premium: 'Premium'
 };
 
@@ -57,15 +57,15 @@ const Profile = () => {
     
     if (error) {
       toast({
-        title: 'Chyba',
-        description: 'Nepodařilo se uložit změny',
+        title: 'Error',
+        description: 'Failed to save changes',
         variant: 'destructive'
       });
     } else {
       await refreshProfile();
       toast({
-        title: 'Uloženo',
-        description: 'Vaše změny byly uloženy'
+        title: 'Saved',
+        description: 'Your changes have been saved'
       });
     }
     
@@ -75,7 +75,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-gold">Načítám...</div>
+        <div className="animate-pulse text-gold">Loading...</div>
       </div>
     );
   }
@@ -96,16 +96,16 @@ const Profile = () => {
       <main className="pt-24 pb-16">
         <div className="container max-w-2xl mx-auto px-4">
           {/* Back button */}
-          <Link 
-            to="/dashboard" 
+          <Link
+            to="/dashboard"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
-            Zpět na dashboard
+            Back to Dashboard
           </Link>
 
           <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-8">
-            Nastavení profilu
+            Profile Settings
           </h1>
 
           <div className="space-y-6">
@@ -114,15 +114,15 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5 text-gold" />
-                  Osobní údaje
+                  Personal Information
                 </CardTitle>
                 <CardDescription>
-                  Upravte své osobní informace
+                  Edit your personal information
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Celé jméno</Label>
+                  <Label htmlFor="fullName">Full Name</Label>
                   <Input
                     id="fullName"
                     value={fullName}
@@ -137,12 +137,12 @@ const Profile = () => {
                     <span className="text-muted-foreground">{profile.email}</span>
                   </div>
                 </div>
-                <Button 
-                  onClick={handleSave} 
+                <Button
+                  onClick={handleSave}
                   disabled={isSaving}
                   className="bg-gold hover:bg-gold-dark text-white"
                 >
-                  {isSaving ? 'Ukládám...' : 'Uložit změny'}
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </CardContent>
             </Card>
@@ -152,36 +152,36 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Crown className="h-5 w-5 text-gold" />
-                  Členství
+                  Membership
                 </CardTitle>
                 <CardDescription>
-                  Informace o vašem členství
+                  Information about your membership
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Aktuální plán</span>
+                  <span className="text-muted-foreground">Current Plan</span>
                   <Badge className={membershipColors[profile.membership_type]}>
                     {profile.membership_type === 'premium' && <Crown className="h-3 w-3 mr-1" />}
                     {membershipLabels[profile.membership_type]}
                   </Badge>
                 </div>
-                
+
                 {profile.membership_started_at && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      Začátek členství
+                      Membership Start
                     </span>
                     <span>{formatDate(profile.membership_started_at)}</span>
                   </div>
                 )}
-                
+
                 {profile.membership_expires_at && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      Platnost do
+                      Valid Until
                     </span>
                     <span>{formatDate(profile.membership_expires_at)}</span>
                   </div>
@@ -190,11 +190,11 @@ const Profile = () => {
                 {profile.membership_type === 'free' && (
                   <div className="pt-4 border-t border-gold/10">
                     <p className="text-sm text-muted-foreground mb-4">
-                      Upgradujte na placené členství a získejte přístup ke všem materiálům
+                      Upgrade to a paid membership and get access to all materials
                     </p>
                     <Link to="/resilient-hub">
                       <Button className="w-full bg-gold hover:bg-gold-dark text-white">
-                        Upgradovat členství
+                        Upgrade Membership
                       </Button>
                     </Link>
                   </div>
@@ -204,7 +204,7 @@ const Profile = () => {
                   <div className="pt-4 border-t border-gold/10">
                     <Button variant="outline" className="w-full border-gold/30">
                       <CreditCard className="h-4 w-4 mr-2" />
-                      Spravovat platbu
+                      Manage Payment
                     </Button>
                   </div>
                 )}
