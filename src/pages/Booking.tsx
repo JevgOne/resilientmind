@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Calendar, Clock, Video, MapPin, Check, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const sessionTypes = [
   {
@@ -28,6 +30,20 @@ const sessionTypes = [
 ];
 
 const Booking = () => {
+  const { user, profile } = useAuth();
+
+  useEffect(() => {
+    // Load Cal.com embed script
+    const script = document.createElement('script');
+    script.src = 'https://app.cal.com/embed/embed.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -145,27 +161,56 @@ const Booking = () => {
           </div>
         </section>
 
-        {/* Booking Calendar Placeholder */}
+        {/* Booking Calendar */}
         <section className="py-16 md:py-24 bg-background">
           <div className="container px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="bg-card border border-border rounded-2xl p-12">
-                <Calendar size={48} className="text-primary mx-auto mb-6" />
-                <h2 className="text-2xl font-serif font-semibold mb-4">
-                  Booking Calendar Coming Soon
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-4xl font-serif font-semibold mb-4">
+                  Book Your Session
                 </h2>
-                <p className="text-muted-foreground font-sans mb-8">
-                  Our online booking system is being set up. In the meantime, 
-                  please email me directly to schedule your session.
+                <p className="text-muted-foreground font-sans">
+                  {profile?.membership_type === 'premium'
+                    ? "Select a time for your complimentary Premium consultation"
+                    : "Choose your preferred session type and select an available time slot"
+                  }
                 </p>
-                <a
-                  href="mailto:hello@resilientmind.com"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-gold text-primary-foreground font-sans font-semibold rounded-full shadow-gold hover:shadow-elevated transition-all"
-                >
-                  Email to Book
-                  <ArrowRight size={18} />
-                </a>
               </div>
+
+              {/* Cal.com Embed */}
+              <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
+                {/* Replace 'your-username/30min' with your actual Cal.com booking link */}
+                <div
+                  data-cal-link="your-username/30min"
+                  data-cal-config='{"theme":"light"}'
+                  className="min-h-[600px]"
+                >
+                  {/* Fallback while loading */}
+                  <div className="flex flex-col items-center justify-center py-16">
+                    <Calendar size={48} className="text-gold mb-4 animate-pulse" />
+                    <p className="text-muted-foreground">Loading calendar...</p>
+                    <p className="text-sm text-muted-foreground mt-4">
+                      Or email directly:
+                      <a href="mailto:hello@resilientmind.com" className="text-gold hover:underline ml-1">
+                        hello@resilientmind.com
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Alternative: Manual Calendly Embed (comment out Cal.com above and uncomment this) */}
+              {/*
+              <div className="bg-card border border-border rounded-2xl overflow-hidden">
+                <iframe
+                  src="https://calendly.com/your-username/30min"
+                  width="100%"
+                  height="700"
+                  frameBorder="0"
+                  title="Book a session"
+                />
+              </div>
+              */}
             </div>
           </div>
         </section>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Lock, Crown, Play, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, Lock, Crown, Play, Clock, Calendar, CheckCircle2, Circle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
 type Video = Database['public']['Tables']['videos']['Row'];
@@ -29,27 +30,87 @@ const VideoPlayer = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const navigate = useNavigate();
   const { user, profile, loading: authLoading } = useAuth();
-  
+
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
   const [requiredMembership, setRequiredMembership] = useState<MembershipType>('basic');
 
+  // Progress tracking state
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [progressLoading, setProgressLoading] = useState(false);
+
   // Check if user has access based on membership
   const hasAccess = (videoMinMembership: MembershipType, isFree: boolean): boolean => {
     if (isFree) return true;
     if (!profile) return false;
-    
+
     const userLevel = membershipHierarchy[profile.membership_type as MembershipType] || 0;
     const requiredLevel = membershipHierarchy[videoMinMembership] || 1;
-    
+
     // Check if membership is still valid
     if (profile.membership_expires_at) {
       const expiresAt = new Date(profile.membership_expires_at);
       if (expiresAt < new Date()) return false;
     }
-    
+
     return userLevel >= requiredLevel;
+  };
+
+  // Fetch user progress for this video
+  const fetchProgress = async () => {
+    if (!user || !videoId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_progress')
+        .select('completed')
+        .eq('user_id', user.id)
+        .eq('video_id', videoId)
+        .maybeSingle();
+
+      if (!error && data) {
+        setIsCompleted(data.completed || false);
+      }
+    } catch (err) {
+      console.error('Error fetching progress:', err);
+    }
+  };
+
+  // Toggle video completion status
+  const toggleCompletion = async () => {
+    if (!user || !videoId || progressLoading) return;
+
+    setProgressLoading(true);
+    try {
+      const newStatus = !isCompleted;
+
+      const { error } = await supabase
+        .from('user_progress')
+        .upsert({
+          user_id: user.id,
+          video_id: videoId,
+          completed: newStatus,
+          completed_at: newStatus ? new Date().toISOString() : null,
+          last_watched_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,video_id'
+        });
+
+      if (error) throw error;
+
+      setIsCompleted(newStatus);
+      toast.success(
+        newStatus
+          ? '✅ Video označeno jako dokončené!'
+          : 'Dokončení zrušeno'
+      );
+    } catch (err) {
+      console.error('Error updating progress:', err);
+      toast.error('Nepodařilo se aktualizovat progress');
+    } finally {
+      setProgressLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -83,6 +144,8 @@ const VideoPlayer = () => {
             setRequiredMembership(data.min_membership as MembershipType);
           } else {
             setVideo(data);
+            // Fetch progress after video loads successfully
+            fetchProgress();
           }
         }
       } catch (err) {
@@ -255,12 +318,49 @@ const VideoPlayer = () => {
               <h1 className="text-2xl md:text-3xl font-serif font-semibold mb-4">
                 {video?.title}
               </h1>
-              
+
               {video?.description && (
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground text-lg mb-6">
                   {video.description}
                 </p>
               )}
+
+              {/* Progress tracking button */}
+              <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-border">
+                <Button
+                  onClick={toggleCompletion}
+                  disabled={progressLoading}
+                  variant={isCompleted ? "default" : "outline"}
+                  className={
+                    isCompleted
+                      ? "bg-green-600 hover:bg-green-700 text-white"
+                      : "border-gold text-gold hover:bg-gold hover:text-white"
+                  }
+                >
+                  {progressLoading ? (
+                    <>
+                      <Circle className="mr-2 h-5 w-5 animate-spin" />
+                      Ukládám...
+                    </>
+                  ) : isCompleted ? (
+                    <>
+                      <CheckCircle2 className="mr-2 h-5 w-5" />
+                      Dokončeno
+                    </>
+                  ) : (
+                    <>
+                      <Circle className="mr-2 h-5 w-5" />
+                      Označit jako dokončené
+                    </>
+                  )}
+                </Button>
+
+                {isCompleted && (
+                  <span className="text-sm text-muted-foreground">
+                    🎉 Skvělá práce! Pokračuj dalším videem.
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

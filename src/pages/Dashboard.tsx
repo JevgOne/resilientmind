@@ -8,13 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  User, 
-  Crown, 
-  Play, 
-  Lock, 
-  Calendar, 
-  Settings, 
+import { toast } from 'sonner';
+import {
+  User,
+  Crown,
+  Play,
+  Lock,
+  Calendar,
+  Settings,
   LogOut,
   Heart,
   Brain,
@@ -27,7 +28,11 @@ import {
   Target,
   Globe,
   Sun,
-  Puzzle
+  Puzzle,
+  Download,
+  FileText,
+  Music,
+  File
 } from 'lucide-react';
 
 interface VideoCategory {
@@ -48,6 +53,20 @@ interface Video {
   is_free: boolean;
   min_membership: 'free' | 'basic' | 'premium';
   category_id: string;
+}
+
+interface Resource {
+  id: string;
+  category_id: string | null;
+  video_id: string | null;
+  title: string;
+  description: string | null;
+  resource_type: 'worksheet' | 'meditation' | 'pdf' | 'audio' | 'video' | 'other';
+  file_url: string;
+  file_size_mb: number | null;
+  min_membership: 'free' | 'basic' | 'premium';
+  is_free: boolean;
+  download_count?: number;
 }
 
 const iconMap: { [key: string]: React.ElementType } = {
@@ -82,7 +101,11 @@ const Dashboard = () => {
   const { user, profile, loading, signOut } = useAuth();
   const [categories, setCategories] = useState<VideoCategory[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [loadingContent, setLoadingContent] = useState(true);
+  const [completedVideos, setCompletedVideos] = useState(0);
+  const [totalAccessibleVideos, setTotalAccessibleVideos] = useState(0);
+  const [premiumCredits, setPremiumCredits] = useState<{ total: number; used: number } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -97,7 +120,7 @@ const Dashboard = () => {
         .from('video_categories')
         .select('*')
         .order('month_number');
-      
+
       if (categoriesData) {
         setCategories(categoriesData);
       }
@@ -107,9 +130,63 @@ const Dashboard = () => {
         .from('videos')
         .select('*')
         .order('sort_order');
-      
+
       if (videosData) {
         setVideos(videosData as Video[]);
+
+        // Calculate accessible videos
+        const accessible = (videosData as Video[]).filter(v => canAccessVideo(v));
+        setTotalAccessibleVideos(accessible.length);
+      }
+
+      // Fetch user progress
+      if (user) {
+        const { data: progressData } = await supabase
+          .from('user_progress')
+          .select('completed')
+          .eq('user_id', user.id)
+          .eq('completed', true);
+
+        if (progressData) {
+          setCompletedVideos(progressData.length);
+        }
+      }
+
+      // Fetch resources (RLS will filter by membership)
+      const { data: resourcesData } = await supabase
+        .from('resources')
+        .select('*')
+        .order('sort_order');
+
+      if (resourcesData) {
+        setResources(resourcesData as Resource[]);
+      }
+
+      // Fetch premium credits if user is premium
+      if (user && profile?.membership_type === 'premium') {
+        const currentYear = new Date().getFullYear();
+        const { data: creditsData } = await supabase
+          .from('premium_credits')
+          .select('total_credits, used_credits')
+          .eq('user_id', user.id)
+          .eq('year', currentYear)
+          .maybeSingle();
+
+        if (creditsData) {
+          setPremiumCredits({
+            total: creditsData.total_credits,
+            used: creditsData.used_credits
+          });
+        } else {
+          // Create credits for current year if not exists
+          await supabase.from('premium_credits').insert({
+            user_id: user.id,
+            year: currentYear,
+            total_credits: 4,
+            used_credits: 0
+          });
+          setPremiumCredits({ total: 4, used: 0 });
+        }
       }
 
       setLoadingContent(false);
@@ -128,9 +205,39 @@ const Dashboard = () => {
   const canAccessVideo = (video: Video) => {
     if (video.is_free) return true;
     if (!profile) return false;
-    
+
     const membershipOrder = { free: 0, basic: 1, premium: 2 };
     return membershipOrder[profile.membership_type] >= membershipOrder[video.min_membership];
+  };
+
+  const getResourceIcon = (type: Resource['resource_type']) => {
+    switch (type) {
+      case 'worksheet':
+      case 'pdf':
+        return FileText;
+      case 'meditation':
+      case 'audio':
+        return Music;
+      default:
+        return File;
+    }
+  };
+
+  const handleDownloadResource = async (resource: Resource) => {
+    try {
+      // Increment download count
+      await supabase
+        .from('resources')
+        .update({ download_count: (resource.download_count || 0) + 1 })
+        .eq('id', resource.id);
+
+      // Open file in new tab
+      window.open(resource.file_url, '_blank');
+      toast.success(`Stahování: ${resource.title}`);
+    } catch (err) {
+      console.error('Error downloading resource:', err);
+      toast.error('Nepodařilo se stáhnout soubor');
+    }
   };
 
   if (loading) {
@@ -192,10 +299,18 @@ const Dashboard = () => {
                     <Play className="h-6 w-6 text-gold" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Available Videos</p>
+                    <p className="text-sm text-muted-foreground">Dokončeno</p>
                     <p className="text-2xl font-semibold">
-                      {videos.filter(v => canAccessVideo(v)).length} / {videos.length}
+                      {completedVideos} / {totalAccessibleVideos}
                     </p>
+                    {totalAccessibleVideos > 0 && (
+                      <div className="mt-2 w-full bg-muted rounded-full h-2">
+                        <div
+                          className="bg-gradient-gold h-2 rounded-full transition-all"
+                          style={{ width: `${(completedVideos / totalAccessibleVideos) * 100}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -313,69 +428,167 @@ const Dashboard = () => {
 
             {/* Resources Tab */}
             <TabsContent value="resources">
-              <Card className="border-gold/20">
-                <CardContent className="py-12 text-center">
-                  <div className="p-4 bg-gold/10 rounded-full w-fit mx-auto mb-4">
-                    <Palette className="h-8 w-8 text-gold" />
-                  </div>
-                  <h3 className="font-serif text-xl mb-2">Workbook Materials</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Downloadable worksheets, meditations, and creative exercises
-                  </p>
-                  {profile?.membership_type === 'free' ? (
-                    <Link to="/resilient-hub">
-                      <Button className="bg-gold hover:bg-gold-dark text-white">
-                        Get Access to Materials
-                      </Button>
-                    </Link>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Materials will be available soon</p>
-                  )}
-                </CardContent>
-              </Card>
+              {loadingContent ? (
+                <div className="text-center py-12 text-muted-foreground">Loading resources...</div>
+              ) : resources.length === 0 ? (
+                <Card className="border-gold/20">
+                  <CardContent className="py-12 text-center">
+                    <div className="p-4 bg-gold/10 rounded-full w-fit mx-auto mb-4">
+                      <Palette className="h-8 w-8 text-gold" />
+                    </div>
+                    <h3 className="font-serif text-xl mb-2">Workbook Materials</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Downloadable worksheets, meditations, and creative exercises
+                    </p>
+                    {profile?.membership_type === 'free' ? (
+                      <Link to="/resilient-hub">
+                        <Button className="bg-gold hover:bg-gold-dark text-white">
+                          Get Access to Materials
+                        </Button>
+                      </Link>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Materials will be available soon</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resources.map((resource) => {
+                    const IconComponent = getResourceIcon(resource.resource_type);
+                    return (
+                      <Card key={resource.id} className="border-gold/20 hover:shadow-elegant transition-all">
+                        <CardHeader>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="p-2 bg-gold/10 rounded-lg">
+                                <IconComponent className="h-5 w-5 text-gold" />
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {resource.resource_type}
+                              </Badge>
+                            </div>
+                            {resource.file_size_mb && (
+                              <span className="text-xs text-muted-foreground">
+                                {resource.file_size_mb.toFixed(1)} MB
+                              </span>
+                            )}
+                          </div>
+                          <CardTitle className="font-serif text-lg mt-2">
+                            {resource.title}
+                          </CardTitle>
+                          {resource.description && (
+                            <CardDescription className="text-sm">
+                              {resource.description}
+                            </CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardContent>
+                          <Button
+                            onClick={() => handleDownloadResource(resource)}
+                            className="w-full bg-gold hover:bg-gold-dark text-white"
+                            size="sm"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </TabsContent>
 
             {/* Sessions Tab */}
             <TabsContent value="sessions">
-              <Card className="border-gold/20">
-                <CardContent className="py-12 text-center">
-                  <div className="p-4 bg-gold/10 rounded-full w-fit mx-auto mb-4">
-                    <Calendar className="h-8 w-8 text-gold" />
-                  </div>
-                  <h3 className="font-serif text-xl mb-2">Personal Consultations</h3>
-                  {profile?.membership_type === 'premium' ? (
-                    <>
+              {profile?.membership_type === 'premium' ? (
+                <div className="space-y-6">
+                  {/* Premium Credits Widget */}
+                  {premiumCredits && (
+                    <Card className="border-gold/20 bg-gradient-to-br from-gold/5 to-transparent">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-3 bg-gradient-gold rounded-full">
+                              <Crown className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                              <CardTitle className="font-serif text-xl">Premium Consultations</CardTitle>
+                              <CardDescription>Your annual consultation credits for {new Date().getFullYear()}</CardDescription>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="text-3xl font-semibold text-gold">
+                              {premiumCredits.total - premiumCredits.used} / {premiumCredits.total}
+                            </p>
+                            <p className="text-sm text-muted-foreground">Sessions remaining</p>
+                          </div>
+                          <Link to="/booking">
+                            <Button className="bg-gold hover:bg-gold-dark text-white">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              Book Consultation
+                            </Button>
+                          </Link>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-3">
+                          <div
+                            className="bg-gradient-gold h-3 rounded-full transition-all"
+                            style={{ width: `${((premiumCredits.total - premiumCredits.used) / premiumCredits.total) * 100}%` }}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Booking Info */}
+                  <Card className="border-gold/20">
+                    <CardContent className="py-12 text-center">
+                      <div className="p-4 bg-gold/10 rounded-full w-fit mx-auto mb-4">
+                        <Calendar className="h-8 w-8 text-gold" />
+                      </div>
+                      <h3 className="font-serif text-xl mb-2">Book Your Session</h3>
                       <p className="text-muted-foreground mb-6">
-                        As a Premium member, you're entitled to 4 hour-long consultations per year
+                        Schedule a 60-minute consultation at your convenience
                       </p>
                       <Link to="/booking">
                         <Button className="bg-gold hover:bg-gold-dark text-white">
                           <Calendar className="h-4 w-4 mr-2" />
-                          Book Consultation
+                          View Available Times
                         </Button>
                       </Link>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-muted-foreground mb-6">
-                        Personal consultations are available for Premium members or as individual sessions
-                      </p>
-                      <div className="flex gap-4 justify-center">
-                        <Link to="/booking">
-                          <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-white">
-                            Book Individual Session (87€/h)
-                          </Button>
-                        </Link>
-                        <Link to="/resilient-hub">
-                          <Button className="bg-gold hover:bg-gold-dark text-white">
-                            Upgrade to Premium
-                          </Button>
-                        </Link>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <Card className="border-gold/20">
+                  <CardContent className="py-12 text-center">
+                    <div className="p-4 bg-gold/10 rounded-full w-fit mx-auto mb-4">
+                      <Calendar className="h-8 w-8 text-gold" />
+                    </div>
+                    <h3 className="font-serif text-xl mb-2">Personal Consultations</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Personal consultations are available for Premium members or as individual sessions
+                    </p>
+                    <div className="flex flex-wrap gap-4 justify-center">
+                      <Link to="/booking">
+                        <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-white">
+                          Book Individual Session (87€/h)
+                        </Button>
+                      </Link>
+                      <Link to="/resilient-hub">
+                        <Button className="bg-gold hover:bg-gold-dark text-white">
+                          <Crown className="h-4 w-4 mr-2" />
+                          Upgrade to Premium
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         </div>
