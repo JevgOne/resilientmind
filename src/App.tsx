@@ -9,6 +9,9 @@ import About from "./pages/About";
 import ResilientHub from "./pages/ResilientHub";
 import Booking from "./pages/Booking";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import Workshopy from "./pages/Workshopy";
+import WorkshopPost from "./pages/WorkshopPost";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -33,6 +36,9 @@ const App = () => (
             <Route path="/resilient-hub" element={<ResilientHub />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/workshopy" element={<Workshopy />} />
+            <Route path="/workshopy/:slug" element={<WorkshopPost />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />

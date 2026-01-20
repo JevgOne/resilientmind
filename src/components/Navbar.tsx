@@ -17,8 +17,9 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/resilient-hub", label: "Resilient Hub" },
-  { href: "/booking", label: "Booking" },
   { href: "/blog", label: "Blog" },
+  { href: "/workshopy", label: "Workshopy" },
+  { href: "/booking", label: "Booking" },
 ];
 
 const Navbar = () => {
