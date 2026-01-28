@@ -13,65 +13,65 @@ const plans = {
   basic_monthly: {
     id: 'basic_monthly',
     name: 'Basic',
-    subtitle: 'Měsíční',
+    subtitle: 'Monthly',
     price: 27,
-    interval: 'měsíc',
+    interval: 'month',
     membershipType: 'basic' as const,
     features: [
-      '4 video lekce měsíčně',
-      'Stažitelné pracovní listy',
-      'Knihovna meditací',
-      'Přístup do komunity',
-      'Měsíční Q&A',
+      '4 video lessons per month',
+      'Downloadable worksheets',
+      'Meditation library',
+      'Community access',
+      'Monthly Q&A',
     ],
   },
   basic_yearly: {
     id: 'basic_yearly',
     name: 'Basic',
-    subtitle: 'Roční',
+    subtitle: 'Yearly',
     price: 270,
-    interval: 'rok',
+    interval: 'year',
     membershipType: 'basic' as const,
     savings: 54,
     features: [
-      '4 video lekce měsíčně',
-      'Stažitelné pracovní listy',
-      'Knihovna meditací',
-      'Přístup do komunity',
-      'Měsíční Q&A',
+      '4 video lessons per month',
+      'Downloadable worksheets',
+      'Meditation library',
+      'Community access',
+      'Monthly Q&A',
     ],
   },
   premium_monthly: {
     id: 'premium_monthly',
     name: 'Premium',
-    subtitle: 'Měsíční',
+    subtitle: 'Monthly',
     price: 47,
-    interval: 'měsíc',
+    interval: 'month',
     membershipType: 'premium' as const,
     features: [
-      'Vše z Basic',
-      '4 osobní konzultace/rok',
-      'Art expressive therapy materiály',
-      'Prioritní email podpora',
-      'Exkluzivní workshopy',
-      'Materiály pro partnery',
+      'Everything in Basic',
+      '4 personal consultations/year',
+      'Art expressive therapy materials',
+      'Priority email support',
+      'Exclusive workshops',
+      'Partner materials',
     ],
   },
   premium_yearly: {
     id: 'premium_yearly',
     name: 'Premium',
-    subtitle: 'Roční',
+    subtitle: 'Yearly',
     price: 470,
-    interval: 'rok',
+    interval: 'year',
     membershipType: 'premium' as const,
     savings: 94,
     features: [
-      'Vše z Basic',
-      '4 osobní konzultace/rok',
-      'Art expressive therapy materiály',
-      'Prioritní email podpora',
-      'Exkluzivní workshopy',
-      'Materiály pro partnery',
+      'Everything in Basic',
+      '4 personal consultations/year',
+      'Art expressive therapy materials',
+      'Priority email support',
+      'Exclusive workshops',
+      'Partner materials',
     ],
   },
 };
@@ -82,10 +82,10 @@ const Checkout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, profile, loading: authLoading } = useAuth();
-  
+
   const planId = (searchParams.get('plan') || 'basic_monthly') as PlanId;
   const plan = plans[planId] || plans.basic_monthly;
-  
+
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -109,18 +109,18 @@ const Checkout = () => {
       });
 
       if (fnError) {
-        throw new Error(fnError.message || 'Chyba při vytváření platby');
+        throw new Error(fnError.message || 'Error creating payment');
       }
 
       if (data?.url) {
         // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
-        throw new Error('Nepodařilo se získat odkaz na platbu');
+        throw new Error('Could not get payment link');
       }
     } catch (err: any) {
       console.error('Checkout error:', err);
-      setError(err.message || 'Došlo k chybě při zpracování platby');
+      setError(err.message || 'An error occurred while processing payment');
       setProcessing(false);
     }
   };
@@ -140,22 +140,22 @@ const Checkout = () => {
         <div className="container px-4">
           <div className="max-w-lg mx-auto">
             {/* Back button */}
-            <Button 
-              variant="ghost" 
-              className="mb-6" 
+            <Button
+              variant="ghost"
+              className="mb-6"
               onClick={() => navigate('/resilient-hub')}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Zpět na program
+              Back to program
             </Button>
 
             <Card className="border-gold/30">
               <CardHeader className="text-center pb-2">
                 <CardTitle className="text-2xl font-serif">
-                  Dokončit objednávku
+                  Complete Your Order
                 </CardTitle>
               </CardHeader>
-              
+
               <CardContent className="space-y-6">
                 {/* Plan summary */}
                 <div className="p-4 bg-gradient-warm rounded-xl">
@@ -166,7 +166,7 @@ const Checkout = () => {
                       </h3>
                       {'savings' in plan && plan.savings && (
                         <span className="text-sm text-gold font-medium">
-                          Ušetříte €{String(plan.savings)}
+                          You save €{String(plan.savings)}
                         </span>
                       )}
                     </div>
@@ -175,7 +175,7 @@ const Checkout = () => {
                       <span className="text-muted-foreground text-sm">/{plan.interval}</span>
                     </div>
                   </div>
-                  
+
                   <ul className="space-y-2 mt-4">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm">
@@ -197,7 +197,7 @@ const Checkout = () => {
                 {/* User info */}
                 {user && (
                   <div className="text-sm text-muted-foreground">
-                    Přihlášen jako: <span className="font-medium">{user.email}</span>
+                    Signed in as: <span className="font-medium">{user.email}</span>
                   </div>
                 )}
 
@@ -210,12 +210,12 @@ const Checkout = () => {
                   {processing ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Zpracování...
+                      Processing...
                     </>
                   ) : (
                     <>
                       <CreditCard className="mr-2 h-5 w-5" />
-                      Zaplatit €{plan.price}
+                      Pay €{plan.price}
                     </>
                   )}
                 </Button>
@@ -223,24 +223,24 @@ const Checkout = () => {
                 {/* Not logged in */}
                 {!user && (
                   <div className="text-center text-sm text-muted-foreground">
-                    Nemáte účet?{' '}
+                    Don't have an account?{' '}
                     <Link to={`/auth?redirect=/checkout?plan=${planId}`} className="text-gold hover:underline">
-                      Zaregistrujte se
+                      Sign up
                     </Link>
                   </div>
                 )}
 
                 {/* Security note */}
                 <p className="text-xs text-center text-muted-foreground">
-                  Platba je zabezpečena pomocí Stripe. 
-                  Vaše údaje jsou šifrovány.
+                  Payment is secured by Stripe.
+                  Your data is encrypted.
                 </p>
               </CardContent>
             </Card>
 
             {/* Other plans */}
             <div className="mt-8 text-center">
-              <p className="text-muted-foreground mb-3">Jiný plán?</p>
+              <p className="text-muted-foreground mb-3">Different plan?</p>
               <div className="flex flex-wrap justify-center gap-2">
                 {(Object.entries(plans) as [PlanId, typeof plans[PlanId]][]).map(([id, p]) => (
                   <Button

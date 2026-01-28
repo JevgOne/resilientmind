@@ -15,7 +15,7 @@ type Video = Database['public']['Tables']['videos']['Row'];
 type MembershipType = Database['public']['Enums']['membership_type'];
 
 const membershipLabels: Record<MembershipType, string> = {
-  free: 'Zdarma',
+  free: 'Free',
   basic: 'Basic',
   premium: 'Premium',
 };
@@ -102,12 +102,12 @@ const VideoPlayer = () => {
       setIsCompleted(newStatus);
       toast.success(
         newStatus
-          ? '✅ Video označeno jako dokončené!'
-          : 'Dokončení zrušeno'
+          ? 'Video marked as completed!'
+          : 'Completion unmarked'
       );
     } catch (err) {
       console.error('Error updating progress:', err);
-      toast.error('Nepodařilo se aktualizovat progress');
+      toast.error('Could not update progress');
     } finally {
       setProgressLoading(false);
     }
@@ -193,17 +193,17 @@ const VideoPlayer = () => {
               <Card className="p-8">
                 <Lock className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
                 <h1 className="text-2xl font-serif font-semibold mb-4">
-                  Přihlaste se pro přístup
+                  Sign in to access
                 </h1>
                 <p className="text-muted-foreground mb-6">
-                  Pro sledování videí je nutné se přihlásit do svého účtu.
+                  You need to sign in to watch videos.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button asChild className="bg-gradient-gold text-white">
-                    <Link to="/auth">Přihlásit se</Link>
+                    <Link to="/auth">Sign in</Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link to="/resilient-hub">Zpět na program</Link>
+                    <Link to="/resilient-hub">Back to program</Link>
                   </Button>
                 </div>
               </Card>
@@ -228,24 +228,24 @@ const VideoPlayer = () => {
                   <Crown className="h-10 w-10 text-white" />
                 </div>
                 <Badge className="mb-4 bg-gold/20 text-gold-dark border-gold/30">
-                  Vyžaduje {membershipLabels[requiredMembership]} členství
+                  Requires {membershipLabels[requiredMembership]} membership
                 </Badge>
                 <h1 className="text-2xl font-serif font-semibold mb-4">
-                  Obsah pro členy
+                  Members Only Content
                 </h1>
                 <p className="text-muted-foreground mb-6">
-                  Toto video je dostupné pro členy s úrovní{' '}
-                  <strong>{membershipLabels[requiredMembership]}</strong> nebo vyšší.
-                  Upgradujte své členství pro přístup k veškerému obsahu.
+                  This video is available for members with{' '}
+                  <strong>{membershipLabels[requiredMembership]}</strong> level or higher.
+                  Upgrade your membership to access all content.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button asChild className="bg-gradient-gold text-white">
-                    <Link to="/resilient-hub#pricing">Zobrazit ceník</Link>
+                    <Link to="/resilient-hub#pricing">View pricing</Link>
                   </Button>
                   <Button variant="outline" asChild>
                     <Link to="/resilient-hub">
                       <ArrowLeft className="mr-2 h-4 w-4" />
-                      Zpět na program
+                      Back to program
                     </Link>
                   </Button>
                 </div>
@@ -266,13 +266,13 @@ const VideoPlayer = () => {
         <div className="container px-4">
           <div className="max-w-4xl mx-auto">
             {/* Back button */}
-            <Button 
-              variant="ghost" 
-              className="mb-6" 
+            <Button
+              variant="ghost"
+              className="mb-6"
               onClick={() => navigate(-1)}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Zpět
+              Back
             </Button>
 
             {/* Video player */}
@@ -295,17 +295,17 @@ const VideoPlayer = () => {
             {/* Video info */}
             <div className="mb-8">
               <div className="flex flex-wrap items-center gap-3 mb-4">
-                <Badge 
+                <Badge
                   className={
-                    video?.is_free 
-                      ? "bg-muted text-muted-foreground" 
+                    video?.is_free
+                      ? "bg-muted text-muted-foreground"
                       : video?.min_membership === 'premium'
                         ? "bg-gradient-gold text-white border-0"
                         : "bg-gold/20 text-gold-dark border-gold/30"
                   }
                   variant="outline"
                 >
-                  {video?.is_free ? 'Zdarma' : membershipLabels[video?.min_membership as MembershipType]}
+                  {video?.is_free ? 'Free' : membershipLabels[video?.min_membership as MembershipType]}
                 </Badge>
                 {video?.duration_minutes && (
                   <span className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -314,7 +314,7 @@ const VideoPlayer = () => {
                   </span>
                 )}
               </div>
-              
+
               <h1 className="text-2xl md:text-3xl font-serif font-semibold mb-4">
                 {video?.title}
               </h1>
@@ -340,24 +340,24 @@ const VideoPlayer = () => {
                   {progressLoading ? (
                     <>
                       <Circle className="mr-2 h-5 w-5 animate-spin" />
-                      Ukládám...
+                      Saving...
                     </>
                   ) : isCompleted ? (
                     <>
                       <CheckCircle2 className="mr-2 h-5 w-5" />
-                      Dokončeno
+                      Completed
                     </>
                   ) : (
                     <>
                       <Circle className="mr-2 h-5 w-5" />
-                      Označit jako dokončené
+                      Mark as completed
                     </>
                   )}
                 </Button>
 
                 {isCompleted && (
                   <span className="text-sm text-muted-foreground">
-                    🎉 Skvělá práce! Pokračuj dalším videem.
+                    Great job! Continue with the next video.
                   </span>
                 )}
               </div>

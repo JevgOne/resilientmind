@@ -11,7 +11,7 @@ const CheckoutSuccess = () => {
   const [searchParams] = useSearchParams();
   const { refreshProfile, profile } = useAuth();
   const [loading, setLoading] = useState(true);
-  
+
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const CheckoutSuccess = () => {
       await refreshProfile();
       setLoading(false);
     };
-    
+
     // Wait a bit for webhook to process
     const timer = setTimeout(refreshMembership, 2000);
     return () => clearTimeout(timer);
@@ -42,27 +42,27 @@ const CheckoutSuccess = () => {
                   )}
                 </div>
               </div>
-              
+
               <CardContent className="p-8">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <PartyPopper className="h-6 w-6 text-gold" />
-                  <span className="text-gold font-semibold">Děkujeme!</span>
+                  <span className="text-gold font-semibold">Thank you!</span>
                 </div>
-                
+
                 <h1 className="text-2xl md:text-3xl font-serif font-semibold mb-4">
-                  Platba byla úspěšná
+                  Payment Successful
                 </h1>
-                
+
                 <p className="text-muted-foreground mb-6">
-                  {loading 
-                    ? 'Aktivujeme vaše členství...'
-                    : 'Vaše členství bylo aktivováno. Nyní máte přístup k veškerému obsahu podle vaší úrovně členství.'
+                  {loading
+                    ? 'Activating your membership...'
+                    : 'Your membership has been activated. You now have access to all content based on your membership level.'
                   }
                 </p>
 
                 {!loading && profile && (
                   <div className="mb-6 p-4 bg-gradient-warm rounded-xl">
-                    <p className="text-sm text-muted-foreground mb-1">Vaše členství</p>
+                    <p className="text-sm text-muted-foreground mb-1">Your membership</p>
                     <p className="font-serif font-semibold text-lg capitalize">
                       {profile.membership_type}
                     </p>
@@ -71,10 +71,10 @@ const CheckoutSuccess = () => {
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button asChild className="bg-gradient-gold text-white">
-                    <Link to="/dashboard">Přejít do dashboardu</Link>
+                    <Link to="/dashboard">Go to Dashboard</Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link to="/resilient-hub">Prozkoumat program</Link>
+                    <Link to="/resilient-hub">Explore Program</Link>
                   </Button>
                 </div>
               </CardContent>

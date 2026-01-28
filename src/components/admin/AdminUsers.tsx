@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 import { Pencil, User, Crown, Calendar, Search, Shield, Mail, Trash2, MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { cs } from 'date-fns/locale';
 import { Switch } from '@/components/ui/switch';
 import {
   DropdownMenu,
@@ -45,8 +44,8 @@ interface Profile {
 }
 
 const membershipLabels = {
-  free: 'Zdarma',
-  basic: 'Základní',
+  free: 'Free',
+  basic: 'Basic',
   premium: 'Premium'
 };
 
@@ -230,8 +229,8 @@ const AdminUsers = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="free">Zdarma</SelectItem>
-              <SelectItem value="basic">Základní</SelectItem>
+              <SelectItem value="free">Free</SelectItem>
+              <SelectItem value="basic">Basic</SelectItem>
               <SelectItem value="premium">Premium</SelectItem>
             </SelectContent>
           </Select>
@@ -294,7 +293,7 @@ const AdminUsers = () => {
                       {user.membership_expires_at ? (
                         <div className={`flex items-center gap-1 ${isExpired(user.membership_expires_at) ? 'text-destructive' : ''}`}>
                           <Calendar className="h-4 w-4" />
-                          {format(new Date(user.membership_expires_at), 'd. M. yyyy', { locale: cs })}
+                          {format(new Date(user.membership_expires_at), 'MMM d, yyyy')}
                           {isExpired(user.membership_expires_at) && (
                             <Badge variant="destructive" className="ml-2 text-xs">Expired</Badge>
                           )}
@@ -304,7 +303,7 @@ const AdminUsers = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      {format(new Date(user.created_at), 'd. M. yyyy', { locale: cs })}
+                      {format(new Date(user.created_at), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="outline" onClick={() => handleEdit(user)}>
@@ -341,9 +340,9 @@ const AdminUsers = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="free">Zdarma</SelectItem>
-                      <SelectItem value="basic">Základní (27€/měsíc)</SelectItem>
-                      <SelectItem value="premium">Premium (47€/měsíc)</SelectItem>
+                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="basic">Basic (€27/month)</SelectItem>
+                      <SelectItem value="premium">Premium (€47/month)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

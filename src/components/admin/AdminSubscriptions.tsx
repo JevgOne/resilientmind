@@ -6,7 +6,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, Users, Crown, TrendingUp, Euro, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import { cs } from 'date-fns/locale';
 
 interface MembershipStats {
   free: number;
@@ -74,8 +73,8 @@ const membershipColors = {
 };
 
 const membershipLabels = {
-  free: 'Zdarma',
-  basic: 'Základní',
+  free: 'Free',
+  basic: 'Basic',
   premium: 'Premium'
 };
 
@@ -197,18 +196,18 @@ const AdminSubscriptions = () => {
           <div className="grid grid-cols-3 gap-4">
             <div className="p-4 bg-muted/50 rounded-lg text-center">
               <p className="text-4xl font-bold">{stats.free}</p>
-              <p className="text-sm text-muted-foreground mt-1">Zdarma</p>
-              <Badge variant="secondary" className="mt-2">0€</Badge>
+              <p className="text-sm text-muted-foreground mt-1">Free</p>
+              <Badge variant="secondary" className="mt-2">€0</Badge>
             </div>
             <div className="p-4 bg-gold/10 rounded-lg text-center border border-gold/20">
               <p className="text-4xl font-bold text-gold">{stats.basic}</p>
-              <p className="text-sm text-muted-foreground mt-1">Základní</p>
-              <Badge className="mt-2 bg-gold text-white">27€/měsíc</Badge>
+              <p className="text-sm text-muted-foreground mt-1">Basic</p>
+              <Badge className="mt-2 bg-gold text-white">€27/month</Badge>
             </div>
             <div className="p-4 bg-gradient-to-br from-gold/20 to-gold/5 rounded-lg text-center border border-gold/30">
               <p className="text-4xl font-bold text-gold-dark">{stats.premium}</p>
               <p className="text-sm text-muted-foreground mt-1">Premium</p>
-              <Badge className="mt-2 bg-gradient-gold text-white">47€/měsíc</Badge>
+              <Badge className="mt-2 bg-gradient-gold text-white">€47/month</Badge>
             </div>
           </div>
         </CardContent>
@@ -297,10 +296,10 @@ const AdminSubscriptions = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Uživatel</TableHead>
-                  <TableHead>Typ</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Start</TableHead>
-                  <TableHead>Platnost do</TableHead>
+                  <TableHead>Valid Until</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -308,7 +307,7 @@ const AdminSubscriptions = () => {
                   <TableRow key={sub.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{sub.full_name || 'Bez jména'}</div>
+                        <div className="font-medium">{sub.full_name || 'No name'}</div>
                         <div className="text-sm text-muted-foreground">{sub.email}</div>
                       </div>
                     </TableCell>
@@ -322,13 +321,13 @@ const AdminSubscriptions = () => {
                       {sub.membership_started_at ? (
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {format(new Date(sub.membership_started_at), 'd. M. yyyy', { locale: cs })}
+                          {format(new Date(sub.membership_started_at), 'MMM d, yyyy')}
                         </div>
                       ) : '-'}
                     </TableCell>
                     <TableCell>
                       {sub.membership_expires_at ? (
-                        format(new Date(sub.membership_expires_at), 'd. M. yyyy', { locale: cs })
+                        format(new Date(sub.membership_expires_at), 'MMM d, yyyy')
                       ) : (
                         <span className="text-muted-foreground">Unlimited</span>
                       )}
