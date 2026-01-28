@@ -8,10 +8,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Pencil, User, Crown, Calendar, Search } from 'lucide-react';
+import { Pencil, User, Crown, Calendar, Search, Shield, Mail, Trash2, MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
+import { Switch } from '@/components/ui/switch';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Profile {
   id: string;
@@ -23,6 +41,7 @@ interface Profile {
   membership_expires_at: string | null;
   stripe_customer_id: string | null;
   created_at: string;
+  isAdmin?: boolean;
 }
 
 const membershipLabels = {
@@ -43,12 +62,16 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [membershipFilter, setMembershipFilter] = useState<string>('all');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<Profile | null>(null);
   const [editingUser, setEditingUser] = useState<Profile | null>(null);
-  
+
   const [formData, setFormData] = useState({
     membership_type: 'free' as 'free' | 'basic' | 'premium',
-    membership_expires_at: ''
+    membership_expires_at: '',
+    full_name: ''
   });
 
   useEffect(() => {
@@ -74,17 +97,32 @@ const AdminUsers = () => {
   }, [users, searchTerm, membershipFilter]);
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase
+    // Fetch profiles
+    const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) {
+    if (profilesError) {
       toast.error('Error loading users');
       return;
     }
-    
-    setUsers((data || []) as Profile[]);
+
+    // Fetch admin roles
+    const { data: rolesData } = await supabase
+      .from('user_roles')
+      .select('user_id, role')
+      .eq('role', 'admin');
+
+    const adminUserIds = new Set((rolesData || []).map(r => r.user_id));
+
+    // Combine data
+    const usersWithRoles = (profilesData || []).map(p => ({
+      ...p,
+      isAdmin: adminUserIds.has(p.user_id)
+    })) as Profile[];
+
+    setUsers(usersWithRoles);
     setLoading(false);
   };
 
@@ -135,6 +173,39 @@ const AdminUsers = () => {
     return new Date(expiresAt) < new Date();
   };
 
+  const toggleAdminRole = async (user: Profile) => {
+    try {
+      if (user.isAdmin) {
+        // Remove admin role
+        const { error } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', user.user_id)
+          .eq('role', 'admin');
+
+        if (error) throw error;
+        toast.success(`Admin role removed from ${user.email}`);
+      } else {
+        // Add admin role
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({ user_id: user.user_id, role: 'admin' });
+
+        if (error) throw error;
+        toast.success(`Admin role granted to ${user.email}`);
+      }
+
+      // Update local state
+      setUsers(prev =>
+        prev.map(u =>
+          u.id === user.id ? { ...u, isAdmin: !u.isAdmin } : u
+        )
+      );
+    } catch (err: any) {
+      toast.error('Error updating role: ' + err.message);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-8 text-muted-foreground">Loading users...</div>;
   }
@@ -179,6 +250,7 @@ const AdminUsers = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
+                  <TableHead>Role</TableHead>
                   <TableHead>Membership</TableHead>
                   <TableHead>Valid Until</TableHead>
                   <TableHead>Registration</TableHead>
@@ -190,11 +262,26 @@ const AdminUsers = () => {
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
+                        {user.isAdmin ? (
+                          <Shield className="h-4 w-4 text-gold" />
+                        ) : (
+                          <User className="h-4 w-4 text-muted-foreground" />
+                        )}
                         <div>
                           <div className="font-medium">{user.full_name || 'No name'}</div>
                           <div className="text-sm text-muted-foreground">{user.email}</div>
                         </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={user.isAdmin}
+                          onCheckedChange={() => toggleAdminRole(user)}
+                        />
+                        <span className={`text-sm ${user.isAdmin ? 'text-gold font-medium' : 'text-muted-foreground'}`}>
+                          {user.isAdmin ? 'Admin' : 'User'}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
