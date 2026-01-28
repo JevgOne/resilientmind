@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Video, Users, Star, Settings, FileText, CreditCard, Download, BookOpen, Type, CalendarDays } from 'lucide-react';
+import { Shield, Video, Users, Star, Settings, FileText, CreditCard, Download, BookOpen, Type, Calendar, Clock } from 'lucide-react';
 import AdminVideos from '@/components/admin/AdminVideos';
 import AdminUsers from '@/components/admin/AdminUsers';
 import AdminTestimonials from '@/components/admin/AdminTestimonials';
@@ -16,6 +16,7 @@ import AdminResources from '@/components/admin/AdminResources';
 import AdminBlog from '@/components/admin/AdminBlog';
 import AdminCMS from '@/components/admin/AdminCMS';
 import AdminBookings from '@/components/admin/AdminBookings';
+import AdminAvailability from '@/components/admin/AdminAvailability';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -103,6 +104,14 @@ const Admin = () => {
                 <BookOpen className="h-4 w-4 mr-2" />
                 Blog & Workshopy
               </TabsTrigger>
+              <TabsTrigger value="bookings" className="data-[state=active]:bg-gold data-[state=active]:text-white">
+                <Calendar className="h-4 w-4 mr-2" />
+                Rezervace
+              </TabsTrigger>
+              <TabsTrigger value="availability" className="data-[state=active]:bg-gold data-[state=active]:text-white">
+                <Clock className="h-4 w-4 mr-2" />
+                Dostupnost
+              </TabsTrigger>
               <TabsTrigger value="cms" className="data-[state=active]:bg-gold data-[state=active]:text-white">
                 <Type className="h-4 w-4 mr-2" />
                 Website Content
@@ -110,10 +119,6 @@ const Admin = () => {
               <TabsTrigger value="resources" className="data-[state=active]:bg-gold data-[state=active]:text-white">
                 <Download className="h-4 w-4 mr-2" />
                 Resources
-              </TabsTrigger>
-              <TabsTrigger value="bookings" className="data-[state=active]:bg-gold data-[state=active]:text-white">
-                <CalendarDays className="h-4 w-4 mr-2" />
-                Bookings
               </TabsTrigger>
               <TabsTrigger value="subscriptions" className="data-[state=active]:bg-gold data-[state=active]:text-white">
                 <CreditCard className="h-4 w-4 mr-2" />
@@ -145,16 +150,20 @@ const Admin = () => {
               <AdminBlog />
             </TabsContent>
 
+            <TabsContent value="bookings">
+              <AdminBookings />
+            </TabsContent>
+
+            <TabsContent value="availability">
+              <AdminAvailability />
+            </TabsContent>
+
             <TabsContent value="cms">
               <AdminCMS />
             </TabsContent>
 
             <TabsContent value="resources">
               <AdminResources />
-            </TabsContent>
-
-            <TabsContent value="bookings">
-              <AdminBookings />
             </TabsContent>
 
             <TabsContent value="subscriptions">

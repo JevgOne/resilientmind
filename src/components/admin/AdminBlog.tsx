@@ -25,6 +25,7 @@ interface BlogPost {
   featured_image_url: string | null;
   is_published: boolean;
   published_at: string | null;
+  scheduled_at: string | null;
   min_membership: 'free' | 'basic' | 'premium';
   tags: string[];
   meta_title: string | null;
@@ -54,6 +55,7 @@ const AdminBlog = () => {
     category: 'blog' as 'blog' | 'workshop',
     featured_image_url: '',
     is_published: false,
+    scheduled_at: '',
     min_membership: 'free' as 'free' | 'basic' | 'premium',
     tags: '',
     meta_title: '',
@@ -89,6 +91,7 @@ const AdminBlog = () => {
       category: activeCategory,
       featured_image_url: '',
       is_published: false,
+      scheduled_at: '',
       min_membership: 'free',
       tags: '',
       meta_title: '',
@@ -114,6 +117,7 @@ const AdminBlog = () => {
       category: post.category,
       featured_image_url: post.featured_image_url || '',
       is_published: post.is_published,
+      scheduled_at: post.scheduled_at || '',
       min_membership: post.min_membership,
       tags: post.tags.join(', '),
       meta_title: post.meta_title || '',
@@ -125,6 +129,21 @@ const AdminBlog = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Determine publish status
+    let shouldPublish = formData.is_published;
+    let publishedAt = undefined;
+    let scheduledAt = formData.scheduled_at || null;
+
+    if (formData.scheduled_at) {
+      // If scheduled_at is set, don't publish immediately
+      shouldPublish = false;
+      publishedAt = undefined;
+    } else if (formData.is_published && !editingPost?.is_published) {
+      // If "Publish immediately" is checked and not already published
+      shouldPublish = true;
+      publishedAt = new Date().toISOString();
+    }
+
     const postData = {
       title: formData.title,
       slug: formData.slug || generateSlug(formData.title),
@@ -132,8 +151,9 @@ const AdminBlog = () => {
       content: formData.content,
       category: formData.category,
       featured_image_url: formData.featured_image_url || null,
-      is_published: formData.is_published,
-      published_at: formData.is_published && !editingPost?.is_published ? new Date().toISOString() : undefined,
+      is_published: shouldPublish,
+      published_at: publishedAt,
+      scheduled_at: scheduledAt,
       min_membership: formData.min_membership,
       tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
       meta_title: formData.meta_title || formData.title,
@@ -328,13 +348,31 @@ const AdminBlog = () => {
                   />
                 </div>
 
-                <div className="flex items-center space-x-2 py-2">
-                  <Switch
-                    id="is_published"
-                    checked={formData.is_published}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_published: checked })}
-                  />
-                  <Label htmlFor="is_published" className="cursor-pointer">Publish immediately</Label>
+                <div className="space-y-4 py-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="scheduled_at">Schedule for later (optional)</Label>
+                    <Input
+                      id="scheduled_at"
+                      type="datetime-local"
+                      value={formData.scheduled_at}
+                      onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value, is_published: false })}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      If set, post will auto-publish at this date/time. Leave empty to publish manually.
+                    </p>
+                  </div>
+
+                  {!formData.scheduled_at && (
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="is_published"
+                        checked={formData.is_published}
+                        onCheckedChange={(checked) => setFormData({ ...formData, is_published: checked })}
+                      />
+                      <Label htmlFor="is_published" className="cursor-pointer">Publish immediately</Label>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2 pt-4">
@@ -385,9 +423,15 @@ const AdminBlog = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={post.is_published ? 'default' : 'secondary'}>
-                            {post.is_published ? 'Published' : 'Draft'}
-                          </Badge>
+                          {post.scheduled_at && !post.is_published ? (
+                            <Badge variant="outline" className="border-blue-500 text-blue-600">
+                              Scheduled: {new Date(post.scheduled_at).toLocaleString()}
+                            </Badge>
+                          ) : (
+                            <Badge variant={post.is_published ? 'default' : 'secondary'}>
+                              {post.is_published ? 'Published' : 'Draft'}
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{membershipLabels[post.min_membership]}</Badge>

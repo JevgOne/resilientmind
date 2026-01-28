@@ -1,0 +1,200 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+// Session duration mapping (minutes)
+const SESSION_DURATIONS: Record<string, number> = {
+  discovery: 30,
+  one_on_one: 60,
+  family: 90,
+  premium_consultation: 60,
+};
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const url = new URL(req.url);
+    const month = url.searchParams.get("month"); // Format: YYYY-MM
+    const sessionType = url.searchParams.get("type");
+
+    // Validation
+    if (!month || !sessionType) {
+      throw new Error("Missing required parameters: month and type");
+    }
+
+    if (!SESSION_DURATIONS[sessionType]) {
+      throw new Error(`Invalid session type: ${sessionType}`);
+    }
+
+    // Parse month
+    const [year, monthNum] = month.split("-").map(Number);
+    if (!year || !monthNum || monthNum < 1 || monthNum > 12) {
+      throw new Error("Invalid month format. Use YYYY-MM");
+    }
+
+    // Calculate start and end of month
+    const startDate = new Date(Date.UTC(year, monthNum - 1, 1));
+    const endDate = new Date(Date.UTC(year, monthNum, 0, 23, 59, 59));
+
+    // 24h minimum notice
+    const minBookingDate = new Date();
+    minBookingDate.setHours(minBookingDate.getHours() + 24);
+
+    // Initialize Supabase client with service role
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Get availability windows (active only)
+    const { data: availability, error: availError } = await supabaseClient
+      .from("availability")
+      .select("*")
+      .eq("is_active", true);
+
+    if (availError) throw availError;
+
+    // Get blocked dates in the month
+    const { data: blockedDates, error: blockedError } = await supabaseClient
+      .from("blocked_dates")
+      .select("date")
+      .gte("date", startDate.toISOString().split("T")[0])
+      .lte("date", endDate.toISOString().split("T")[0]);
+
+    if (blockedError) throw blockedError;
+
+    const blockedSet = new Set(
+      blockedDates?.map((bd: any) => bd.date) || []
+    );
+
+    // Get all bookings in the month (confirmed + pending)
+    const { data: bookings, error: bookingsError } = await supabaseClient
+      .from("session_bookings")
+      .select("session_date, end_time, duration_minutes")
+      .gte("session_date", startDate.toISOString())
+      .lte("session_date", endDate.toISOString())
+      .in("status", ["confirmed", "pending_payment", "scheduled"]);
+
+    if (bookingsError) throw bookingsError;
+
+    // Organize bookings by date
+    const bookingsByDate: Record<string, any[]> = {};
+    bookings?.forEach((booking: any) => {
+      const dateKey = booking.session_date.split("T")[0];
+      if (!bookingsByDate[dateKey]) bookingsByDate[dateKey] = [];
+      bookingsByDate[dateKey].push(booking);
+    });
+
+    // Build availability map by day of week
+    const availabilityByDay: Record<number, any[]> = {};
+    availability?.forEach((avail: any) => {
+      if (!availabilityByDay[avail.day_of_week]) {
+        availabilityByDay[avail.day_of_week] = [];
+      }
+      availabilityByDay[avail.day_of_week].push(avail);
+    });
+
+    // Generate available days
+    const availableDays: string[] = [];
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const dateStr = currentDate.toISOString().split("T")[0];
+      const dayOfWeek = currentDate.getUTCDay();
+
+      // Skip if date is in the past or within 24h
+      if (currentDate < minBookingDate) {
+        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+        continue;
+      }
+
+      // Skip if blocked
+      if (blockedSet.has(dateStr)) {
+        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+        continue;
+      }
+
+      // Check if there's availability for this day of week
+      const dayAvailability = availabilityByDay[dayOfWeek];
+      if (!dayAvailability || dayAvailability.length === 0) {
+        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+        continue;
+      }
+
+      // Calculate available slots for this day
+      const dayBookings = bookingsByDate[dateStr] || [];
+      let hasAvailableSlots = false;
+
+      for (const avail of dayAvailability) {
+        // Parse start/end times
+        const [startHour, startMin] = avail.start_time.split(":").map(Number);
+        const [endHour, endMin] = avail.end_time.split(":").map(Number);
+
+        const startMinutes = startHour * 60 + startMin;
+        const endMinutes = endHour * 60 + endMin;
+        const sessionDuration = SESSION_DURATIONS[sessionType];
+
+        // Check 30-min slots
+        for (
+          let slotMinutes = startMinutes;
+          slotMinutes + sessionDuration <= endMinutes;
+          slotMinutes += 30
+        ) {
+          const slotStart = new Date(currentDate);
+          slotStart.setUTCHours(Math.floor(slotMinutes / 60), slotMinutes % 60, 0, 0);
+          const slotEnd = new Date(slotStart);
+          slotEnd.setUTCMinutes(slotEnd.getUTCMinutes() + sessionDuration);
+
+          // Check if slot conflicts with existing bookings
+          const hasConflict = dayBookings.some((booking: any) => {
+            const bookingStart = new Date(booking.session_date);
+            const bookingEnd = booking.end_time
+              ? new Date(booking.end_time)
+              : new Date(
+                  bookingStart.getTime() + (booking.duration_minutes || 60) * 60000
+                );
+
+            return (
+              (slotStart >= bookingStart && slotStart < bookingEnd) ||
+              (slotEnd > bookingStart && slotEnd <= bookingEnd) ||
+              (slotStart <= bookingStart && slotEnd >= bookingEnd)
+            );
+          });
+
+          if (!hasConflict) {
+            hasAvailableSlots = true;
+            break;
+          }
+        }
+
+        if (hasAvailableSlots) break;
+      }
+
+      if (hasAvailableSlots) {
+        availableDays.push(dateStr);
+      }
+
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+    }
+
+    return new Response(JSON.stringify({ availableDays }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    console.error("Error in booking-available-days:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400,
+    });
+  }
+});

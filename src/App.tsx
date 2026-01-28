@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import ResilientHub from "./pages/ResilientHub";
 import Booking from "./pages/Booking";
+import BookingSuccess from "./pages/BookingSuccess";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Workshopy from "./pages/Workshopy";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/resilient-hub" element={<ResilientHub />} />
             <Route path="/booking" element={<Booking />} />
+            <Route path="/booking/success" element={<BookingSuccess />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/workshopy" element={<Workshopy />} />
