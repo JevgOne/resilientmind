@@ -55,20 +55,26 @@ const ProgramOverview = () => {
 
   useEffect(() => {
     const fetchContent = async () => {
-      const { data: categoriesData } = await supabase
+      const { data: categoriesData, error: catError } = await supabase
         .from('video_categories')
         .select('*')
         .order('month_number');
-      
+
+      if (catError) {
+        console.error('Error fetching video categories:', catError);
+      }
       if (categoriesData) {
         setCategories(categoriesData);
       }
 
-      const { data: videosData } = await supabase
+      const { data: videosData, error: vidError } = await supabase
         .from('videos')
         .select('*')
         .order('sort_order');
-      
+
+      if (vidError) {
+        console.error('Error fetching videos:', vidError);
+      }
       if (videosData) {
         setVideos(videosData as Video[]);
       }
