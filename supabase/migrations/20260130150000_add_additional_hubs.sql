@@ -38,14 +38,17 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_video_categories_hub_slug
   WHERE hub_slug IS NOT NULL;
 
 -- ============================================
--- 3. UPDATE EXISTING CATEGORIES
+-- 3. ADD SORT_ORDER COLUMN
 -- ============================================
 
--- Update existing categories to set sort_order if using month_number
--- This ensures smooth transition to sort_order system
+-- Add sort_order column if it doesn't exist
+ALTER TABLE public.video_categories
+  ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+
+-- Update existing categories to set sort_order from month_number
 UPDATE public.video_categories
 SET sort_order = month_number
-WHERE sort_order IS NULL OR sort_order = 0;
+WHERE sort_order = 0;
 
 -- ============================================
 -- 4. CREATE ADDITIONAL HUB CATEGORIES
