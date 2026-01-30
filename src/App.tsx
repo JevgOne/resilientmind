@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import ResilientHub from "./pages/ResilientHub";
+import ResilientHubs from "./pages/ResilientHubs";
 import EndometriosisHub from "./pages/EndometriosisHub";
 import Booking from "./pages/Booking";
 import BookingSuccess from "./pages/BookingSuccess";
@@ -20,9 +21,12 @@ import Profile from "./pages/Profile";
 import VideoPlayer from "./pages/VideoPlayer";
 import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
+import Pricing from "./pages/Pricing";
+import PricingSuccess from "./pages/PricingSuccess";
 import Admin from "./pages/Admin";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import FreeGuide from "./pages/FreeGuide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +42,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/resilient-hub" element={<ResilientHub />} />
+            <Route path="/resilient-hubs" element={<ResilientHubs />} />
             <Route path="/endometriosis-hub" element={<EndometriosisHub />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/booking/success" element={<BookingSuccess />} />
@@ -51,9 +56,12 @@ const App = () => (
             <Route path="/video/:videoId" element={<VideoPlayer />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/checkout/success" element={<CheckoutSuccess />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/pricing/success" element={<PricingSuccess />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/free-guide" element={<FreeGuide />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

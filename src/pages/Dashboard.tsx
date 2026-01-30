@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
@@ -106,6 +106,7 @@ const membershipColors = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, profile, loading, signOut } = useAuth();
   const [categories, setCategories] = useState<VideoCategory[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
@@ -140,6 +141,19 @@ const Dashboard = () => {
       checkAdminRole();
     }
   }, [user, loading, navigate]);
+
+  // Welcome message for free guide users
+  useEffect(() => {
+    if (!loading && user && searchParams.get('free_guide') === 'true') {
+      toast.success('Welcome! Your free guide content is now accessible below.', {
+        description: 'Start with the intro videos to begin your resilience journey.',
+        duration: 6000,
+      });
+      // Remove the query parameter from URL
+      searchParams.delete('free_guide');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [user, loading, searchParams, setSearchParams]);
 
   useEffect(() => {
     const fetchContent = async () => {
