@@ -26,10 +26,10 @@ const Hero = () => {
 
           {/* Heading */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-tight mb-6 animate-slide-up drop-shadow-sm">
-            <span className="text-foreground">The Expat's</span>{" "}
-            <span className="text-gradient-gold drop-shadow-md">Inner Alchemy</span>
+            <span className="text-foreground">With</span>{" "}
+            <span className="text-gradient-gold drop-shadow-md">Resilient Mind</span>
             <br />
-            <span className="text-foreground/95 font-semibold">Transform Uncertainty Into Your Greatest Strength</span>
+            <span className="text-foreground/95 font-semibold">You Transform Uncertainty Into Your Greatest Strength</span>
           </h1>
 
           {/* Subheading */}
@@ -48,7 +48,7 @@ const Hero = () => {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 animate-fade-in" style={{ animationDelay: "0.4s" }}>
             <Link
-              to="/resilient-hub"
+              to="/resilient-hubs"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-gold text-primary-foreground font-sans font-semibold rounded-full shadow-gold hover:shadow-elevated transition-all duration-300 hover:scale-105"
             >
               Explore Membership
@@ -58,7 +58,13 @@ const Hero = () => {
               to="/booking"
               className="inline-flex items-center gap-2 px-8 py-4 bg-card/90 backdrop-blur-sm border border-border text-foreground font-sans font-medium rounded-full hover:bg-card transition-all duration-300"
             >
-              Book Individual Session
+              Book Individual Session (€87/hour)
+            </Link>
+            <Link
+              to="/free-guide"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-card/90 backdrop-blur-sm border border-border text-foreground font-sans font-medium rounded-full hover:bg-card transition-all duration-300"
+            >
+              Download Free Guide
             </Link>
           </div>
 

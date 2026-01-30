@@ -9,7 +9,7 @@ const services = [
     description:
       "4 transformational programs combining evidence-based techniques, expressive arts, and energy work for lasting resilience.",
     price: "from €27/month",
-    href: "/resilient-hub",
+    href: "/resilient-hubs",
     featured: true,
   },
   {
