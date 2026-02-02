@@ -182,7 +182,7 @@ const VideoPlayer = () => {
     );
   }
 
-  // Not logged in
+  // Not logged in - redirect to free guide
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
@@ -193,14 +193,14 @@ const VideoPlayer = () => {
               <Card className="p-8">
                 <Lock className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
                 <h1 className="text-2xl font-serif font-semibold mb-4">
-                  Sign in to access
+                  Start Free to Watch Videos
                 </h1>
                 <p className="text-muted-foreground mb-6">
-                  You need to sign in to watch videos.
+                  Enter your email to get free access to intro videos — no password needed.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button asChild className="bg-gradient-gold text-white">
-                    <Link to="/auth">Sign in</Link>
+                    <Link to="/free-guide">Start Free</Link>
                   </Button>
                   <Button variant="outline" asChild>
                     <Link to="/resilient-hub">Back to program</Link>

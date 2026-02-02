@@ -37,6 +37,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import UserBookings from '@/components/booking/UserBookings';
+import FreeGuideKit from '@/components/FreeGuideKit';
 
 interface VideoCategory {
   id: string;
@@ -145,8 +146,8 @@ const Dashboard = () => {
   // Welcome message for free guide users
   useEffect(() => {
     if (!loading && user && searchParams.get('free_guide') === 'true') {
-      toast.success('Welcome! Your free guide content is now accessible below.', {
-        description: 'Start with the intro videos to begin your resilience journey.',
+      toast.success('Welcome! Your Free Guide Kit is ready below.', {
+        description: 'Follow the 3-step daily practice to start your resilience journey.',
         duration: 6000,
       });
       // Remove the query parameter from URL
@@ -617,6 +618,14 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Free Guide Kit - shown for free members */}
+          {profile?.membership_type === 'free' && (
+            <FreeGuideKit
+              videos={videos}
+              onNavigateToVideo={(videoId) => navigate(`/video/${videoId}`)}
+            />
+          )}
 
           {/* Content Tabs */}
           <Tabs defaultValue="program" className="w-full">

@@ -142,7 +142,13 @@ const ProgramOverview = () => {
                   isLocked={!canAccessVideo(video)}
                   isFree={video.is_free}
                   membership={video.min_membership}
-                  onClick={() => navigate(`/video/${video.id}`)}
+                  onClick={() => {
+                    if (!user && video.is_free) {
+                      navigate('/free-guide');
+                    } else {
+                      navigate(`/video/${video.id}`);
+                    }
+                  }}
                 />
               ))
             ) : (
@@ -177,7 +183,7 @@ const ProgramOverview = () => {
               workbooks and exclusive content.
             </p>
             <div className="flex gap-4 justify-center">
-              <Link to="/auth">
+              <Link to="/free-guide">
                 <Button className="bg-gold hover:bg-gold-dark text-white shadow-gold">
                   Start Free
                 </Button>
