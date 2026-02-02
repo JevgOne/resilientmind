@@ -1,9 +1,35 @@
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ArrowRight, Heart, MapPin, Palette, Award, BookOpen, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const About = () => {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchVideo = async () => {
+      const { data } = await supabase
+        .from('cms_content')
+        .select('value')
+        .eq('key', 'about_intro_video')
+        .maybeSingle();
+      if (data?.value) setVideoUrl(data.value);
+    };
+    fetchVideo();
+  }, []);
+
+  const getEmbedUrl = (url: string) => {
+    // YouTube
+    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+    // Vimeo
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    return url;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -54,11 +80,23 @@ const About = () => {
                   I help expatriates and globally mobile individuals build mental resilience, blending proven personal development techniques with insights from my own 13 years of living and thriving abroad.
                 </p>
 
-                {/* Video Placeholder - TODO: Add video embed */}
-                <div className="bg-muted rounded-xl p-8 mb-6 text-center">
-                  <div className="text-sm text-muted-foreground font-sans mb-2">Short Introduction Video</div>
-                  <p className="text-xs text-muted-foreground italic">Video embed coming soon</p>
-                </div>
+                {/* Video Section - configurable via Admin CMS (key: about_intro_video) */}
+                {videoUrl ? (
+                  <div className="rounded-xl overflow-hidden mb-6 aspect-video">
+                    <iframe
+                      src={getEmbedUrl(videoUrl)}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="Introduction Video"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-muted rounded-xl p-8 mb-6 text-center">
+                    <div className="text-sm text-muted-foreground font-sans mb-2">Short Introduction Video</div>
+                    <p className="text-xs text-muted-foreground italic">Coming soon</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

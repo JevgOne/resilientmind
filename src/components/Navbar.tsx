@@ -19,7 +19,7 @@ const navLinks = [
   { href: "/resilient-hub", label: "Resilient Hub" },
   { href: "/resilient-hubs", label: "Membership" },
   { href: "/blog", label: "Blog" },
-  { href: "/workshopy", label: "Workshopy" },
+  { href: "/workshopy", label: "Workshops" },
   { href: "/booking", label: "Booking" },
 ];
 

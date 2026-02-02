@@ -204,7 +204,7 @@ const Booking = () => {
 
       const data = await response.json();
 
-      console.log("Booking response:", data);
+      // Booking response received
 
       // Free session (discovery) - redirect to success page
       if (data.status === "confirmed") {

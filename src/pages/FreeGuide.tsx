@@ -94,13 +94,7 @@ const FreeGuide = () => {
         setIsSuccess(true);
       }
 
-      // Track lead in console (you can add analytics here later)
-      console.log('New lead:', {
-        email: formData.email,
-        name: formData.name,
-        source: 'free_guide',
-        timestamp: new Date().toISOString(),
-      });
+      // Lead captured successfully
 
     } catch (error) {
       console.error('Error submitting form:', error);

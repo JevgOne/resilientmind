@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Instagram, Facebook, Linkedin } from "lucide-react";
+import { Mail } from "lucide-react";
 import Logo from "./Logo";
 
 const Footer = () => {
@@ -17,20 +17,12 @@ const Footer = () => {
               through creative art expressive therapy and evidence-based techniques.
             </p>
             <div className="flex gap-4">
-              {[
-                { icon: Instagram, href: "#" },
-                { icon: Facebook, href: "#" },
-                { icon: Linkedin, href: "#" },
-                { icon: Mail, href: "mailto:contact@resilientmind.io" },
-              ].map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
-                >
-                  <social.icon size={18} />
-                </a>
-              ))}
+              <a
+                href="mailto:contact@resilientmind.io"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+              >
+                <Mail size={18} />
+              </a>
             </div>
           </div>
 
