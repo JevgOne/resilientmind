@@ -1,10 +1,15 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProgramOverview from "@/components/ProgramOverview";
-import { Check, Sparkles, Download, ArrowRight, Heart, Brain, Users, Globe, Coins, Fingerprint, Crown, Star, Zap, Video, FileText, Headphones } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Check, Sparkles, Download, ArrowRight, Heart, Brain, Users, Globe, Coins, Fingerprint, Crown, Star, Zap, Video, FileText, Headphones, Shield, Clock, Loader2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import PageHero from "@/components/PageHero";
 import SEO from "@/components/SEO";
@@ -69,7 +74,124 @@ const whyDifferent = [
   }
 ];
 
+const MEMBERSHIP_TIERS = [
+  {
+    id: "monthly_basic",
+    name: "Basic Monthly",
+    price: 27,
+    period: "/month",
+    savings: null,
+    badge: null,
+    icon: Sparkles,
+    features: [
+      "Monthly foundational module (Module A)",
+      "Downloadable worksheets for Module A",
+      "Access to meditation library",
+      "Monthly content updates",
+    ],
+    buttonText: "Start Basic Monthly",
+    highlighted: false,
+  },
+  {
+    id: "yearly_basic",
+    name: "Basic Yearly",
+    price: 270,
+    period: "/year",
+    savings: "Save €54",
+    badge: "Best Value",
+    icon: Sparkles,
+    features: [
+      "All 4 transformational programs (12 months)",
+      "Complete access to all modules (A, B, C)",
+      "All downloadable worksheets & exercises",
+      "Full meditation & visualization library",
+    ],
+    buttonText: "Save with Basic Yearly",
+    highlighted: true,
+  },
+  {
+    id: "monthly_premium",
+    name: "Premium Monthly",
+    price: 47,
+    period: "/month",
+    savings: null,
+    badge: null,
+    icon: Crown,
+    features: [
+      "Modules A & B of current month",
+      "All Basic Monthly benefits",
+      "Access to additional Resilient Hub (Module A)",
+      "Priority support",
+    ],
+    buttonText: "Go Premium Monthly",
+    highlighted: false,
+  },
+  {
+    id: "yearly_premium",
+    name: "Premium Yearly",
+    price: 470,
+    period: "/year",
+    savings: "Save €94",
+    badge: "Most Popular",
+    icon: Crown,
+    features: [
+      "All 4 programs with all modules (A, B, C)",
+      "4 hours personal consultations (€348 value)",
+      "Art expressive therapy materials kit",
+      "Additional Resilient Hubs access",
+      "All worksheets, meditations & exercises",
+    ],
+    buttonText: "Save with Premium Yearly",
+    highlighted: true,
+  },
+];
+
 const ResilientHubs = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+
+  const createCheckoutSession = async (productType: string) => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      toast.error("Please log in first");
+      navigate("/auth");
+      return;
+    }
+    setLoadingTier(productType);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            product_type: productType,
+            user_id: userData.user.id,
+            success_url: `${window.location.origin}/pricing/success`,
+            cancel_url: `${window.location.origin}/resilient-hubs`,
+          }),
+        }
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create checkout session");
+      }
+      const data = await response.json();
+      if (data.url) window.location.href = data.url;
+      else throw new Error("No checkout URL returned");
+    } catch (error: any) {
+      console.error("Checkout error:", error);
+      toast.error(error.message || "Failed to start checkout");
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -198,125 +320,121 @@ const ResilientHubs = () => {
         </section>
 
         {/* Pricing Section */}
-        <section className="py-16 md:py-24 bg-gradient-warm">
+        <section className="py-16 md:py-24 bg-gradient-warm" id="pricing">
           <div className="container px-4">
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
                   <Crown size={16} className="text-primary" />
                   <span className="text-sm font-sans font-medium text-primary">Choose Your Path</span>
                 </div>
                 <h2 className="text-2xl md:text-4xl font-serif font-semibold mb-4">
-                  Membership <span className="text-gradient-gold">Plans</span>
+                  Invest in Your <span className="text-gradient-gold">Transformation</span>
                 </h2>
-                <p className="text-muted-foreground font-sans max-w-2xl mx-auto">
-                  Every plan gives you access to the full 12-month transformational journey. Choose the level of support that fits your needs.
+                <p className="text-lg text-muted-foreground font-sans max-w-2xl mx-auto">
+                  Start building your inner strength today. Every plan includes access to our proven 12-month program — choose the level of support that fits your needs.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
-                {/* Basic Plan */}
-                <Card className="border-2 border-muted hover:border-primary/40 transition-all relative overflow-hidden">
-                  <CardHeader className="text-center pb-2">
-                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Sparkles className="h-8 w-8 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl font-serif mb-1">Basic</CardTitle>
-                    <p className="text-muted-foreground text-sm font-sans">Foundation for your transformation</p>
-                    <div className="mt-4 space-y-1">
-                      <div className="flex items-baseline justify-center gap-2">
-                        <span className="text-5xl font-extrabold text-primary">€27</span>
-                        <span className="text-muted-foreground font-medium">/month</span>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        or <span className="font-semibold text-foreground">€270/year</span>
-                        <Badge className="ml-2 bg-green-100 text-green-700 border-green-300 text-xs">Save €54</Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <ul className="space-y-3 mb-8">
-                      {[
-                        { icon: Video, text: "Monthly foundational video module (Module A)" },
-                        { icon: FileText, text: "Downloadable worksheets & exercises" },
-                        { icon: Headphones, text: "Full meditation & visualization library" },
-                        { icon: Star, text: "Monthly content updates with new themes" },
-                        { icon: Check, text: "Self-paced — work on your own schedule" },
-                      ].map((item, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <item.icon size={18} className="text-primary flex-shrink-0 mt-0.5" />
-                          <span className="text-sm font-sans">{item.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link to="/pricing">
-                      <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white text-base py-6">
-                        Start Basic Plan
-                        <ArrowRight size={18} className="ml-2" />
-                      </Button>
-                    </Link>
-                    <p className="text-xs text-center text-muted-foreground mt-3">
-                      Perfect for self-guided learners
-                    </p>
-                  </CardContent>
-                </Card>
+              {/* 4 Pricing Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                {MEMBERSHIP_TIERS.map((tier) => {
+                  const IconComp = tier.icon;
+                  return (
+                    <Card
+                      key={tier.id}
+                      className={`relative border-2 transition-all hover:shadow-lg ${
+                        tier.highlighted
+                          ? "border-primary shadow-elevated scale-[1.02] lg:scale-105"
+                          : "border-muted hover:border-primary/50"
+                      }`}
+                    >
+                      {tier.badge && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                          <Badge className="bg-gradient-gold text-white px-4 py-1 shadow-md">
+                            {tier.badge}
+                          </Badge>
+                        </div>
+                      )}
 
-                {/* Premium Plan */}
-                <Card className="border-2 border-primary shadow-elevated relative overflow-hidden">
-                  <div className="absolute top-0 left-0 right-0 bg-gradient-gold text-white text-center text-sm font-semibold py-1.5">
-                    ⭐ Most Popular — Best Value
-                  </div>
-                  <CardHeader className="text-center pb-2 pt-10">
-                    <div className="w-16 h-16 bg-gradient-gold rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Crown className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="text-2xl font-serif mb-1">Premium</CardTitle>
-                    <p className="text-muted-foreground text-sm font-sans">Complete transformation with personal support</p>
-                    <div className="mt-4 space-y-1">
-                      <div className="flex items-baseline justify-center gap-2">
-                        <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-gold">€47</span>
-                        <span className="text-muted-foreground font-medium">/month</span>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        or <span className="font-semibold text-foreground">€470/year</span>
-                        <Badge className="ml-2 bg-green-100 text-green-700 border-green-300 text-xs">Save €94</Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <ul className="space-y-3 mb-8">
-                      {[
-                        { icon: Video, text: "All modules (A, B, C) — complete program access" },
-                        { icon: FileText, text: "All worksheets, workbooks & exercises" },
-                        { icon: Headphones, text: "Full meditation & visualization library" },
-                        { icon: Users, text: "4 hours personal consultations (€348 value)" },
-                        { icon: Zap, text: "Art expressive therapy materials kit" },
-                        { icon: Heart, text: "Access to all Specialized Hubs" },
-                        { icon: Star, text: "Priority support & monthly check-ins" },
-                      ].map((item, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <item.icon size={18} className="text-primary flex-shrink-0 mt-0.5" />
-                          <span className="text-sm font-sans">{item.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link to="/pricing">
-                      <Button className="w-full bg-gradient-gold text-white text-base py-6 shadow-gold hover:shadow-elevated transition-all">
-                        Start Premium Plan
-                        <ArrowRight size={18} className="ml-2" />
-                      </Button>
-                    </Link>
-                    <p className="text-xs text-center text-muted-foreground mt-3">
-                      Includes €348+ in personal consultation value
-                    </p>
-                  </CardContent>
-                </Card>
+                      <CardHeader className="text-center pt-8">
+                        <div className="mb-4">
+                          <IconComp className={`h-10 w-10 mx-auto ${tier.highlighted ? 'text-primary' : 'text-primary/70'}`} />
+                        </div>
+                        <CardTitle className="text-xl font-serif mb-3">
+                          {tier.name}
+                        </CardTitle>
+                        <div className="mb-2">
+                          <div className="flex items-baseline justify-center gap-1">
+                            <span className={`text-5xl font-extrabold ${tier.highlighted ? 'text-transparent bg-clip-text bg-gradient-gold' : 'text-primary'}`}>
+                              €{tier.price}
+                            </span>
+                            <span className="text-muted-foreground text-base font-medium">
+                              {tier.period}
+                            </span>
+                          </div>
+                          {tier.savings && (
+                            <Badge className="mt-3 bg-green-100 text-green-700 border-green-300 text-sm px-3 py-1">
+                              {tier.savings}
+                            </Badge>
+                          )}
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="space-y-6">
+                        <ul className="space-y-3">
+                          {tier.features.map((feature, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm">
+                              <Check size={16} className="text-primary flex-shrink-0 mt-0.5" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <Button
+                          onClick={() => createCheckoutSession(tier.id)}
+                          disabled={loadingTier === tier.id}
+                          className={`w-full py-5 ${
+                            tier.highlighted
+                              ? "bg-gradient-gold text-white shadow-gold hover:shadow-elevated"
+                              : "bg-primary"
+                          }`}
+                        >
+                          {loadingTier === tier.id ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            tier.buttonText
+                          )}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
 
-              {/* Money back guarantee */}
-              <div className="text-center">
+              {/* Trust signals */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Shield size={18} className="text-primary" />
+                  <span>Secure payment via Stripe</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock size={18} className="text-primary" />
+                  <span>Cancel anytime — no lock-in</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Heart size={18} className="text-primary" />
+                  <span>Instant access after payment</span>
+                </div>
+              </div>
+
+              {/* Free guide nudge */}
+              <div className="text-center mt-8">
                 <p className="text-sm text-muted-foreground font-sans">
-                  💛 Not sure yet? <Link to="/free-guide" className="text-primary underline underline-offset-4 hover:text-primary/80">Download our free guide</Link> to get a taste of the program first.
+                  💛 Not sure yet? <Link to="/free-guide" className="text-primary underline underline-offset-4 hover:text-primary/80 font-medium">Download our free guide</Link> and experience the program first.
                 </p>
               </div>
             </div>
