@@ -56,7 +56,7 @@ const AdminVideos = () => {
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
   const [openMonths, setOpenMonths] = useState<Set<string>>(new Set());
 
-  const [formData, setFormData] = useState({
+  const defaultForm = {
     title: '',
     description: '',
     video_url: '',
@@ -66,10 +66,11 @@ const AdminVideos = () => {
     min_membership: 'basic' as 'free' | 'basic' | 'premium',
     category_id: '',
     sort_order: '0',
-    week_number: '',
+    week_number: 'none',
     video_type: 'other' as 'eft' | 'art_therapy' | 'meditation' | 'other',
     is_intro: false,
-  });
+  };
+  const [formData, setFormData] = useState(defaultForm);
 
   useEffect(() => {
     fetchData();
@@ -87,18 +88,8 @@ const AdminVideos = () => {
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      description: '',
-      video_url: '',
-      thumbnail_url: '',
-      duration_minutes: '',
-      is_free: false,
-      min_membership: 'basic',
+      ...defaultForm,
       category_id: categories[0]?.id || '',
-      sort_order: '0',
-      week_number: '',
-      video_type: 'other',
-      is_intro: false,
     });
     setEditingVideo(null);
   };
@@ -115,7 +106,7 @@ const AdminVideos = () => {
       min_membership: video.min_membership,
       category_id: video.category_id,
       sort_order: video.sort_order.toString(),
-      week_number: video.week_number?.toString() || '',
+      week_number: video.week_number?.toString() || 'none',
       video_type: video.video_type,
       is_intro: video.is_intro,
     });
@@ -134,18 +125,23 @@ const AdminVideos = () => {
       min_membership: formData.min_membership,
       category_id: formData.category_id,
       sort_order: parseInt(formData.sort_order) || 0,
-      week_number: formData.week_number ? parseInt(formData.week_number) : null,
+      week_number: formData.week_number && formData.week_number !== 'none' ? parseInt(formData.week_number) : null,
       video_type: formData.video_type,
       is_intro: formData.is_intro,
     };
 
+    if (!videoData.category_id) {
+      toast.error('Please select a month');
+      return;
+    }
+
     if (editingVideo) {
       const { error } = await supabase.from('videos').update(videoData).eq('id', editingVideo.id);
-      if (error) { toast.error('Error: ' + error.message); return; }
+      if (error) { console.error('Video update error:', error); toast.error('Error: ' + error.message); return; }
       toast.success('Video updated');
     } else {
       const { error } = await supabase.from('videos').insert(videoData);
-      if (error) { toast.error('Error: ' + error.message); return; }
+      if (error) { console.error('Video insert error:', error); toast.error('Error: ' + error.message); return; }
       toast.success('Video added');
     }
     setDialogOpen(false);
@@ -207,7 +203,7 @@ const AdminVideos = () => {
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="bg-gold hover:bg-gold-dark text-white">
+            <Button className="bg-gold hover:bg-gold-dark text-white" onClick={() => resetForm()}>
               <Plus className="h-4 w-4 mr-2" /> Add Video
             </Button>
           </DialogTrigger>
@@ -252,7 +248,7 @@ const AdminVideos = () => {
                   <Select value={formData.week_number} onValueChange={(v) => setFormData({ ...formData, week_number: v })}>
                     <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Not set</SelectItem>
+                      <SelectItem value="none">Not set</SelectItem>
                       <SelectItem value="1">Week 1</SelectItem>
                       <SelectItem value="2">Week 2</SelectItem>
                       <SelectItem value="3">Week 3</SelectItem>
