@@ -298,15 +298,15 @@ const Pricing = () => {
                       </CardTitle>
                       <div className="mb-4">
                         <div className="flex items-baseline justify-center gap-1">
-                          <span className="text-4xl font-bold text-primary">
+                          <span className={`text-5xl font-extrabold ${tier.highlighted ? 'text-transparent bg-clip-text bg-gradient-gold' : 'text-primary'}`}>
                             €{tier.price}
                           </span>
-                          <span className="text-muted-foreground text-sm">
+                          <span className="text-muted-foreground text-base font-medium">
                             {tier.period}
                           </span>
                         </div>
                         {tier.savings && (
-                          <Badge variant="outline" className="mt-2 text-green-600 border-green-600">
+                          <Badge className="mt-3 bg-green-100 text-green-700 border-green-300 text-sm px-3 py-1">
                             {tier.savings}
                           </Badge>
                         )}

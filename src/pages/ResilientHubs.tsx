@@ -1,7 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProgramOverview from "@/components/ProgramOverview";
-import { Check, Sparkles, Download, ArrowRight, Heart, Brain, Users, Globe, Coins, Fingerprint } from "lucide-react";
+import { Check, Sparkles, Download, ArrowRight, Heart, Brain, Users, Globe, Coins, Fingerprint, Crown, Star, Zap, Video, FileText, Headphones } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PageHero from "@/components/PageHero";
 import SEO from "@/components/SEO";
@@ -194,8 +197,134 @@ const ResilientHubs = () => {
           </div>
         </section>
 
-        {/* Call to Action */}
+        {/* Pricing Section */}
         <section className="py-16 md:py-24 bg-gradient-warm">
+          <div className="container px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
+                  <Crown size={16} className="text-primary" />
+                  <span className="text-sm font-sans font-medium text-primary">Choose Your Path</span>
+                </div>
+                <h2 className="text-2xl md:text-4xl font-serif font-semibold mb-4">
+                  Membership <span className="text-gradient-gold">Plans</span>
+                </h2>
+                <p className="text-muted-foreground font-sans max-w-2xl mx-auto">
+                  Every plan gives you access to the full 12-month transformational journey. Choose the level of support that fits your needs.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
+                {/* Basic Plan */}
+                <Card className="border-2 border-muted hover:border-primary/40 transition-all relative overflow-hidden">
+                  <CardHeader className="text-center pb-2">
+                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle className="text-2xl font-serif mb-1">Basic</CardTitle>
+                    <p className="text-muted-foreground text-sm font-sans">Foundation for your transformation</p>
+                    <div className="mt-4 space-y-1">
+                      <div className="flex items-baseline justify-center gap-2">
+                        <span className="text-5xl font-extrabold text-primary">€27</span>
+                        <span className="text-muted-foreground font-medium">/month</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        or <span className="font-semibold text-foreground">€270/year</span>
+                        <Badge className="ml-2 bg-green-100 text-green-700 border-green-300 text-xs">Save €54</Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ul className="space-y-3 mb-8">
+                      {[
+                        { icon: Video, text: "Monthly foundational video module (Module A)" },
+                        { icon: FileText, text: "Downloadable worksheets & exercises" },
+                        { icon: Headphones, text: "Full meditation & visualization library" },
+                        { icon: Star, text: "Monthly content updates with new themes" },
+                        { icon: Check, text: "Self-paced — work on your own schedule" },
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <item.icon size={18} className="text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-sm font-sans">{item.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to="/pricing">
+                      <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white text-base py-6">
+                        Start Basic Plan
+                        <ArrowRight size={18} className="ml-2" />
+                      </Button>
+                    </Link>
+                    <p className="text-xs text-center text-muted-foreground mt-3">
+                      Perfect for self-guided learners
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Premium Plan */}
+                <Card className="border-2 border-primary shadow-elevated relative overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 bg-gradient-gold text-white text-center text-sm font-semibold py-1.5">
+                    ⭐ Most Popular — Best Value
+                  </div>
+                  <CardHeader className="text-center pb-2 pt-10">
+                    <div className="w-16 h-16 bg-gradient-gold rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Crown className="h-8 w-8 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl font-serif mb-1">Premium</CardTitle>
+                    <p className="text-muted-foreground text-sm font-sans">Complete transformation with personal support</p>
+                    <div className="mt-4 space-y-1">
+                      <div className="flex items-baseline justify-center gap-2">
+                        <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-gold">€47</span>
+                        <span className="text-muted-foreground font-medium">/month</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        or <span className="font-semibold text-foreground">€470/year</span>
+                        <Badge className="ml-2 bg-green-100 text-green-700 border-green-300 text-xs">Save €94</Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ul className="space-y-3 mb-8">
+                      {[
+                        { icon: Video, text: "All modules (A, B, C) — complete program access" },
+                        { icon: FileText, text: "All worksheets, workbooks & exercises" },
+                        { icon: Headphones, text: "Full meditation & visualization library" },
+                        { icon: Users, text: "4 hours personal consultations (€348 value)" },
+                        { icon: Zap, text: "Art expressive therapy materials kit" },
+                        { icon: Heart, text: "Access to all Specialized Hubs" },
+                        { icon: Star, text: "Priority support & monthly check-ins" },
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <item.icon size={18} className="text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-sm font-sans">{item.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to="/pricing">
+                      <Button className="w-full bg-gradient-gold text-white text-base py-6 shadow-gold hover:shadow-elevated transition-all">
+                        Start Premium Plan
+                        <ArrowRight size={18} className="ml-2" />
+                      </Button>
+                    </Link>
+                    <p className="text-xs text-center text-muted-foreground mt-3">
+                      Includes €348+ in personal consultation value
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Money back guarantee */}
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground font-sans">
+                  💛 Not sure yet? <Link to="/free-guide" className="text-primary underline underline-offset-4 hover:text-primary/80">Download our free guide</Link> to get a taste of the program first.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="py-16 md:py-24 bg-card">
           <div className="container px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-4xl font-serif font-semibold mb-4">
