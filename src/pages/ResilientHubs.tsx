@@ -408,11 +408,7 @@ const ResilientHubs = () => {
                 {MEMBERSHIP_TIERS.map((tier) => (
                   <Card
                     key={tier.id}
-                    className={`relative border-2 transition-all ${
-                      tier.highlighted
-                        ? "border-primary shadow-elevated scale-105"
-                        : "border-muted hover:border-primary/50"
-                    }`}
+                    className="relative border-2 border-muted hover:border-primary/50 transition-all"
                   >
                     {tier.badge && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -435,7 +431,7 @@ const ResilientHubs = () => {
                       </CardTitle>
                       <div className="mb-4">
                         <div className="flex items-baseline justify-center gap-1">
-                          <span className={`text-5xl font-extrabold ${tier.highlighted ? 'text-transparent bg-clip-text bg-gradient-gold' : 'text-primary'}`}>
+                          <span className="text-5xl font-extrabold text-primary">
                             €{tier.price}
                           </span>
                           <span className="text-muted-foreground text-base font-medium">
@@ -463,11 +459,7 @@ const ResilientHubs = () => {
                       <Button
                         onClick={() => createCheckoutSession(tier.id)}
                         disabled={loadingTier === tier.id}
-                        className={`w-full ${
-                          tier.highlighted
-                            ? "bg-gradient-gold text-white"
-                            : "bg-primary"
-                        }`}
+                        className="w-full bg-primary"
                       >
                         {loadingTier === tier.id ? (
                           <>
