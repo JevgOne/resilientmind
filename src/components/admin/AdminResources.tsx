@@ -1,39 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Loader2, Trash2, Edit, Plus, FileText, Music, File } from 'lucide-react';
+import {
+  Plus, Trash2, Pencil, Upload, FileText, Music, File, Download,
+  Loader2, ExternalLink, Lock, Unlock
+} from 'lucide-react';
 
 interface Resource {
   id: string;
   category_id: string | null;
-  video_id: string | null;
   title: string;
   description: string | null;
   resource_type: string;
@@ -53,14 +36,28 @@ interface Category {
   month_number: number;
 }
 
+const accessConfig: Record<string, { label: string; color: string; icon: typeof Lock }> = {
+  free: { label: 'Free', color: 'bg-emerald-100 text-emerald-800', icon: Unlock },
+  basic: { label: 'Basic', color: 'bg-amber-100 text-amber-800', icon: Lock },
+  premium: { label: 'Premium', color: 'bg-purple-100 text-purple-800', icon: Lock },
+};
+
+const typeIcons: Record<string, typeof FileText> = {
+  pdf: FileText,
+  worksheet: FileText,
+  audio: Music,
+  meditation: Music,
+};
+
 const AdminResources = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<Resource | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [weekFilter, setWeekFilter] = useState<string>('all');
-  const [subtypeFilter, setSubtypeFilter] = useState<string>('all');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -69,42 +66,25 @@ const AdminResources = () => {
     file_url: '',
     file_size_mb: '',
     category_id: '',
-    min_membership: 'basic',
-    is_free: false,
-    sort_order: 0,
+    min_membership: 'free',
+    is_free: true,
+    sort_order: '0',
     week_number: '',
     resource_subtype: '',
   });
 
   useEffect(() => {
-    fetchResources();
-    fetchCategories();
+    fetchData();
   }, []);
 
-  const fetchResources = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('resources')
-        .select('*')
-        .order('sort_order');
-
-      if (error) throw error;
-      setResources(data || []);
-    } catch (err) {
-      console.error('Error fetching resources:', err);
-      toast.error('Failed to fetch resources');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    const { data } = await supabase
-      .from('video_categories')
-      .select('id, name, month_number')
-      .order('month_number');
-
-    if (data) setCategories(data);
+  const fetchData = async () => {
+    const [resRes, catRes] = await Promise.all([
+      supabase.from('resources').select('*').order('sort_order'),
+      supabase.from('video_categories').select('id, name, month_number').order('month_number'),
+    ]);
+    if (resRes.data) setResources(resRes.data as Resource[]);
+    if (catRes.data) setCategories(catRes.data);
+    setLoading(false);
   };
 
   const resetForm = () => {
@@ -115,56 +95,64 @@ const AdminResources = () => {
       file_url: '',
       file_size_mb: '',
       category_id: '',
-      min_membership: 'basic',
-      is_free: false,
-      sort_order: 0,
+      min_membership: 'free',
+      is_free: true,
+      sort_order: '0',
       week_number: '',
       resource_subtype: '',
     });
-    setEditingId(null);
+    setEditingResource(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
 
     try {
-      const payload = {
-        ...formData,
-        file_size_mb: formData.file_size_mb ? parseFloat(formData.file_size_mb) : null,
-        category_id: formData.category_id || null,
-        week_number: formData.week_number ? parseInt(formData.week_number) : null,
-        resource_subtype: formData.resource_subtype || null,
-      };
+      const { data, error } = await supabase.storage
+        .from('resources')
+        .upload(fileName, file, { contentType: file.type });
 
-      if (editingId) {
-        const { error } = await supabase
-          .from('resources')
-          .update(payload)
-          .eq('id', editingId);
-
-        if (error) throw error;
-        toast.success('Resource updated successfully!');
-      } else {
-        const { error } = await supabase
-          .from('resources')
-          .insert([payload]);
-
-        if (error) throw error;
-        toast.success('Resource added successfully!');
+      if (error) {
+        // If bucket doesn't exist, show helpful message
+        if (error.message?.includes('not found') || error.message?.includes('Bucket')) {
+          toast.error('Storage bucket "resources" not found. Please create it in Supabase Dashboard → Storage → New Bucket (name: resources, public: yes)');
+        } else {
+          toast.error('Upload error: ' + error.message);
+        }
+        setUploading(false);
+        return;
       }
 
-      resetForm();
-      fetchResources();
-    } catch (err) {
-      console.error('Error saving resource:', err);
-      toast.error('Failed to save resource');
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('resources')
+        .getPublicUrl(fileName);
+
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+
+      setFormData(prev => ({
+        ...prev,
+        file_url: urlData.publicUrl,
+        file_size_mb: sizeMb,
+        title: prev.title || file.name.replace(/\.[^/.]+$/, '').replace(/-/g, ' '),
+      }));
+
+      toast.success('File uploaded!');
+    } catch (err: any) {
+      toast.error('Upload failed: ' + err.message);
     } finally {
-      setSubmitting(false);
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const handleEdit = (resource: Resource) => {
+    setEditingResource(resource);
     setFormData({
       title: resource.title,
       description: resource.description || '',
@@ -174,269 +162,208 @@ const AdminResources = () => {
       category_id: resource.category_id || '',
       min_membership: resource.min_membership,
       is_free: resource.is_free,
-      sort_order: resource.sort_order,
+      sort_order: resource.sort_order.toString(),
       week_number: resource.week_number?.toString() || '',
       resource_subtype: resource.resource_subtype || '',
     });
-    setEditingId(resource.id);
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.file_url) {
+      toast.error('Please upload a file or enter a URL');
+      return;
+    }
+
+    setSubmitting(true);
+    const payload = {
+      title: formData.title,
+      description: formData.description || null,
+      resource_type: formData.resource_type,
+      file_url: formData.file_url,
+      file_size_mb: formData.file_size_mb ? parseFloat(formData.file_size_mb) : null,
+      category_id: formData.category_id || null,
+      min_membership: formData.min_membership,
+      is_free: formData.min_membership === 'free',
+      sort_order: parseInt(formData.sort_order) || 0,
+      week_number: formData.week_number ? parseInt(formData.week_number) : null,
+      resource_subtype: formData.resource_subtype || null,
+    };
+
+    if (editingResource) {
+      const { error } = await supabase.from('resources').update(payload).eq('id', editingResource.id);
+      if (error) { toast.error('Error: ' + error.message); setSubmitting(false); return; }
+      toast.success('Resource updated');
+    } else {
+      const { error } = await supabase.from('resources').insert(payload);
+      if (error) { toast.error('Error: ' + error.message); setSubmitting(false); return; }
+      toast.success('Resource added');
+    }
+
+    setDialogOpen(false);
+    resetForm();
+    fetchData();
+    setSubmitting(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this resource?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('resources')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      toast.success('Resource deleted successfully!');
-      fetchResources();
-    } catch (err) {
-      console.error('Error deleting resource:', err);
-      toast.error('Failed to delete resource');
-    }
-  };
-
-  const getResourceIcon = (type: string) => {
-    switch (type) {
-      case 'worksheet':
-      case 'pdf':
-        return FileText;
-      case 'meditation':
-      case 'audio':
-        return Music;
-      default:
-        return File;
-    }
+    if (!confirm('Delete this resource?')) return;
+    const { error } = await supabase.from('resources').delete().eq('id', id);
+    if (error) { toast.error('Error: ' + error.message); return; }
+    toast.success('Deleted');
+    fetchData();
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gold" />
-      </div>
-    );
+    return <div className="text-center py-8 text-muted-foreground">Loading...</div>;
   }
 
+  const freeCount = resources.filter(r => r.is_free || r.min_membership === 'free').length;
+  const paidCount = resources.length - freeCount;
+
   return (
-    <div className="space-y-8">
-      {/* Add/Edit Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {editingId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-            {editingId ? 'Edit Resource' : 'Add New Resource'}
-          </CardTitle>
-          <CardDescription>
-            Upload worksheets, meditations, PDFs, and other downloadable materials
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
+    <div className="space-y-6">
+      {/* Header + Stats */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex gap-3 flex-wrap">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg text-sm">
+            <FileText className="h-4 w-4" /> <span className="font-medium">{resources.length}</span> resources
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-lg text-sm text-emerald-700">
+            <Unlock className="h-3.5 w-3.5" /> {freeCount} free
+          </div>
+          {paidCount > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-lg text-sm text-amber-700">
+              <Lock className="h-3.5 w-3.5" /> {paidCount} paid
+            </div>
+          )}
+        </div>
+
+        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+          <DialogTrigger asChild>
+            <Button className="bg-gold hover:bg-gold-dark text-white">
+              <Plus className="h-4 w-4 mr-2" /> Add Resource
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingResource ? 'Edit Resource' : 'Upload New Resource'}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* File Upload */}
+              <div className="border-2 border-dashed border-gold/30 rounded-xl p-6 text-center hover:border-gold/60 transition-colors">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.mp3,.mp4,.png,.jpg,.jpeg"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+                {uploading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-gold" />
+                    <span className="text-sm">Uploading...</span>
+                  </div>
+                ) : formData.file_url ? (
+                  <div className="space-y-2">
+                    <FileText className="h-8 w-8 mx-auto text-gold" />
+                    <p className="text-sm font-medium truncate">{formData.title || 'File uploaded'}</p>
+                    <p className="text-xs text-muted-foreground truncate">{formData.file_url}</p>
+                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                      Replace File
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Click to upload PDF, audio, or document</p>
+                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                      <Upload className="h-4 w-4 mr-2" /> Choose File
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Or paste URL */}
+              <div className="text-center text-xs text-muted-foreground">or paste a URL directly</div>
+              <Input
+                placeholder="https://... (file URL)"
+                value={formData.file_url}
+                onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
+              />
+
+              {/* Title */}
+              <div>
+                <Label>Title</Label>
                 <Input
-                  id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g., Month 1 Worksheet"
                   required
+                  placeholder="e.g., 7-Day Gratitude Workbook"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="resource_type">Type *</Label>
-                <Select
-                  value={formData.resource_type}
-                  onValueChange={(value) => setFormData({ ...formData, resource_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="worksheet">Worksheet</SelectItem>
-                    <SelectItem value="meditation">Meditation</SelectItem>
-                    <SelectItem value="pdf">PDF</SelectItem>
-                    <SelectItem value="audio">Audio</SelectItem>
-                    <SelectItem value="video">Video</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of the resource"
-                rows={2}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="file_url">File URL *</Label>
-                <Input
-                  id="file_url"
-                  value={formData.file_url}
-                  onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
-                  placeholder="https://..."
-                  required
+              {/* Description */}
+              <div>
+                <Label>Description (optional)</Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={2}
+                  placeholder="Brief description..."
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="file_size_mb">File Size (MB)</Label>
-                <Input
-                  id="file_size_mb"
-                  type="number"
-                  step="0.1"
-                  value={formData.file_size_mb}
-                  onChange={(e) => setFormData({ ...formData, file_size_mb: e.target.value })}
-                  placeholder="e.g., 2.5"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">None</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        Month {cat.month_number}: {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="min_membership">Required Membership *</Label>
-                <Select
-                  value={formData.min_membership}
-                  onValueChange={(value) => setFormData({ ...formData, min_membership: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="free">Free</SelectItem>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="sort_order">Sort Order</Label>
-                <Input
-                  id="sort_order"
-                  type="number"
-                  value={formData.sort_order}
-                  onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="week_number">Week Number</Label>
-                <Select
-                  value={formData.week_number}
-                  onValueChange={(value) => setFormData({ ...formData, week_number: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Not assigned" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Not assigned</SelectItem>
-                    <SelectItem value="1">Week 1</SelectItem>
-                    <SelectItem value="2">Week 2</SelectItem>
-                    <SelectItem value="3">Week 3</SelectItem>
-                    <SelectItem value="4">Week 4</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="resource_subtype">Resource Subtype</Label>
-                <Select
-                  value={formData.resource_subtype}
-                  onValueChange={(value) => setFormData({ ...formData, resource_subtype: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="General" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">General</SelectItem>
-                    <SelectItem value="workbook">Workbook</SelectItem>
-                    <SelectItem value="affirmation">Affirmation</SelectItem>
-                    <SelectItem value="tarot_card">Tarot Card</SelectItem>
-                    <SelectItem value="vision_board">Vision Board</SelectItem>
-                    <SelectItem value="habit_tracker">Habit Tracker</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 pt-4">
-              <Button type="submit" disabled={submitting} className="bg-gold hover:bg-gold-dark">
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>{editingId ? 'Update Resource' : 'Add Resource'}</>
-                )}
-              </Button>
-              {editingId && (
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
-              )}
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Resources List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Existing Resources ({resources.length})</CardTitle>
-          <CardDescription>Manage all downloadable resources</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {resources.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No resources yet. Add your first one above!</p>
-          ) : (
-            <>
-              {/* Filters */}
-              <div className="flex gap-4 mb-6">
-                <div className="space-y-2">
-                  <Label>Filter by Week</Label>
-                  <Select value={weekFilter} onValueChange={setWeekFilter}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
+              {/* Type + Access */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Type</Label>
+                  <Select value={formData.resource_type} onValueChange={(v) => setFormData({ ...formData, resource_type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Weeks</SelectItem>
-                      <SelectItem value="none">Not Assigned</SelectItem>
+                      <SelectItem value="pdf">📄 PDF</SelectItem>
+                      <SelectItem value="worksheet">📝 Worksheet</SelectItem>
+                      <SelectItem value="audio">🎵 Audio</SelectItem>
+                      <SelectItem value="meditation">🧘 Meditation</SelectItem>
+                      <SelectItem value="video">📹 Video</SelectItem>
+                      <SelectItem value="other">📁 Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Access Level</Label>
+                  <Select value={formData.min_membership} onValueChange={(v) => setFormData({ ...formData, min_membership: v, is_free: v === 'free' })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="free">🟢 Free — anyone</SelectItem>
+                      <SelectItem value="basic">🟡 Basic — paid</SelectItem>
+                      <SelectItem value="premium">🟣 Premium only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Month + Week (optional) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Month (optional)</Label>
+                  <Select value={formData.category_id} onValueChange={(v) => setFormData({ ...formData, category_id: v })}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.month_number}. {cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Week (optional)</Label>
+                  <Select value={formData.week_number} onValueChange={(v) => setFormData({ ...formData, week_number: v })}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
                       <SelectItem value="1">Week 1</SelectItem>
                       <SelectItem value="2">Week 2</SelectItem>
                       <SelectItem value="3">Week 3</SelectItem>
@@ -444,133 +371,95 @@ const AdminResources = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="space-y-2">
-                  <Label>Filter by Subtype</Label>
-                  <Select value={subtypeFilter} onValueChange={setSubtypeFilter}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Subtypes</SelectItem>
-                      <SelectItem value="general">General</SelectItem>
-                      <SelectItem value="workbook">Workbook</SelectItem>
-                      <SelectItem value="affirmation">Affirmation</SelectItem>
-                      <SelectItem value="tarot_card">Tarot Card</SelectItem>
-                      <SelectItem value="vision_board">Vision Board</SelectItem>
-                      <SelectItem value="habit_tracker">Habit Tracker</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Week</TableHead>
-                  <TableHead>Subtype</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Membership</TableHead>
-                  <TableHead>Downloads</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {resources
-                  .filter((resource) => {
-                    // Week filter
-                    if (weekFilter !== 'all') {
-                      if (weekFilter === 'none' && resource.week_number !== null) return false;
-                      if (weekFilter !== 'none' && resource.week_number?.toString() !== weekFilter) return false;
-                    }
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                <Button type="submit" className="bg-gold hover:bg-gold-dark text-white" disabled={submitting}>
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  {editingResource ? 'Save' : 'Add Resource'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-                    // Subtype filter
-                    if (subtypeFilter !== 'all') {
-                      if (subtypeFilter === 'general' && resource.resource_subtype !== null && resource.resource_subtype !== '') return false;
-                      if (subtypeFilter !== 'general' && resource.resource_subtype !== subtypeFilter) return false;
-                    }
+      {/* Resources list */}
+      {resources.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="py-12 text-center">
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
+            <h3 className="font-serif text-xl mb-2">No resources yet</h3>
+            <p className="text-muted-foreground mb-4">Upload your first PDF, worksheet, or audio file</p>
+            <Button className="bg-gold hover:bg-gold-dark text-white" onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" /> Add Resource
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {resources.map((resource) => {
+            const access = accessConfig[resource.min_membership] || accessConfig.free;
+            const Icon = typeIcons[resource.resource_type] || File;
+            const category = categories.find(c => c.id === resource.category_id);
 
-                    return true;
-                  })
-                  .map((resource) => {
-                  const Icon = getResourceIcon(resource.resource_type);
-                  const category = categories.find(c => c.id === resource.category_id);
-                  return (
-                    <TableRow key={resource.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4 text-gold" />
-                          {resource.title}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{resource.resource_type}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {resource.week_number ? (
-                          <Badge variant="secondary">Week {resource.week_number}</Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {resource.resource_subtype ? (
-                          <Badge variant="outline" className="capitalize">
-                            {resource.resource_subtype.replace('_', ' ')}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">General</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {category ? `Month ${category.month_number}` : '-'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            resource.min_membership === 'premium'
-                              ? 'bg-gradient-gold text-white'
-                              : 'bg-gold/20 text-gold-dark'
-                          }
-                        >
-                          {resource.min_membership}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{resource.download_count || 0}</TableCell>
-                      <TableCell>
-                        {resource.file_size_mb ? `${resource.file_size_mb.toFixed(1)} MB` : '-'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(resource)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDelete(resource.id)}
-                            className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            return (
+              <div
+                key={resource.id}
+                className="flex items-center gap-3 p-4 rounded-xl border border-border/50 hover:border-gold/30 hover:bg-muted/20 transition-colors group"
+              >
+                <Icon className="h-5 w-5 text-gold flex-shrink-0" />
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-sm">{resource.title}</span>
+                    <Badge variant="outline" className="text-[10px]">{resource.resource_type}</Badge>
+                  </div>
+                  {resource.description && (
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{resource.description}</p>
+                  )}
+                </div>
+
+                {/* Month */}
+                {category && (
+                  <span className="text-xs text-muted-foreground hidden sm:block">M{category.month_number}</span>
+                )}
+
+                {/* Size */}
+                {resource.file_size_mb && (
+                  <span className="text-xs text-muted-foreground hidden sm:block">{resource.file_size_mb}MB</span>
+                )}
+
+                {/* Downloads */}
+                <span className="text-xs text-muted-foreground flex items-center gap-1 hidden sm:flex">
+                  <Download className="h-3 w-3" />{resource.download_count || 0}
+                </span>
+
+                {/* Access */}
+                <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${access.color}`}>
+                  {access.label}
+                </Badge>
+
+                {/* Actions */}
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <a href={resource.file_url} target="_blank" rel="noopener noreferrer">
+                    <Button size="icon" variant="ghost" className="h-7 w-7">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </Button>
+                  </a>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleEdit(resource)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(resource.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
