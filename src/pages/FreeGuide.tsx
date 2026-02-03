@@ -10,14 +10,17 @@ import { toast } from 'sonner';
 import {
   ArrowLeft,
   Download,
-  Heart,
-  Shield,
-  Compass,
+  Sun,
+  Hand,
+  Moon,
   CheckCircle2,
   Mail,
-  Loader2
+  Loader2,
+  FileText,
+  Play
 } from 'lucide-react';
 import Logo from '@/components/Logo';
+import PageHero from '@/components/PageHero';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Please enter a valid email address');
@@ -42,7 +45,6 @@ const FreeGuide = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validate form data
     try {
       nameSchema.parse(formData.name);
       emailSchema.parse(formData.email);
@@ -55,7 +57,6 @@ const FreeGuide = () => {
     }
 
     try {
-      // Check if user already exists
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('user_id, email')
@@ -63,20 +64,14 @@ const FreeGuide = () => {
         .maybeSingle();
 
       if (existingUser) {
-        // User exists, send magic link to login
         const { error } = await supabase.auth.signInWithOtp({
           email: formData.email,
           options: {
             emailRedirectTo: `${window.location.origin}/dashboard?free_guide=true`,
           },
         });
-
         if (error) throw error;
-
-        toast.success('Check your email for login link!');
-        setIsSuccess(true);
       } else {
-        // New user, create account with magic link (passwordless)
         const { error } = await supabase.auth.signInWithOtp({
           email: formData.email,
           options: {
@@ -87,15 +82,11 @@ const FreeGuide = () => {
             },
           },
         });
-
         if (error) throw error;
-
-        toast.success('Welcome! Check your email to access your free guide.');
-        setIsSuccess(true);
       }
 
-      // Lead captured successfully
-
+      toast.success('Check your email for the magic link!');
+      setIsSuccess(true);
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Something went wrong. Please try again.');
@@ -104,11 +95,10 @@ const FreeGuide = () => {
     }
   };
 
-  // Success state UI
+  // Success state — show download links
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-cream to-background flex flex-col">
-        {/* Header */}
         <header className="p-6">
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />
@@ -116,51 +106,79 @@ const FreeGuide = () => {
           </Link>
         </header>
 
-        {/* Success Message */}
         <main className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-md">
+          <div className="w-full max-w-xl">
             <div className="flex justify-center mb-8">
               <Link to="/">
                 <Logo className="h-16 w-auto" />
               </Link>
             </div>
 
-            <Card className="border-gold/20 shadow-elegant text-center">
-              <CardHeader>
+            <Card className="border-gold/20 shadow-elegant">
+              <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
                   <div className="rounded-full bg-gold/10 p-4">
-                    <Mail className="h-12 w-12 text-gold" />
+                    <CheckCircle2 className="h-12 w-12 text-gold" />
                   </div>
                 </div>
-                <CardTitle className="font-serif text-2xl">Check Your Email!</CardTitle>
-                <CardDescription className="text-base mt-4">
-                  We've sent you a magic link to access your free guide
+                <CardTitle className="font-serif text-2xl">
+                  Your Free 7-Day Practice Kit Is Ready!
+                </CardTitle>
+                <CardDescription className="text-base mt-2">
+                  We've also sent a magic link to <span className="font-medium text-foreground">{formData.email}</span> for full dashboard access.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-cream/50 rounded-lg p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-left">
-                      Click the link in your email to get started
-                    </p>
+              <CardContent className="space-y-4">
+                {/* Download: Gratitude Workbook */}
+                <a
+                  href="/downloads/7-Day Gratitude Workbook.pdf"
+                  download
+                  className="flex items-center gap-4 p-4 rounded-xl border border-gold/20 bg-cream/30 hover:bg-gold/5 transition-colors group"
+                >
+                  <div className="rounded-full bg-gold/10 p-3 group-hover:bg-gold/20 transition-colors">
+                    <Sun className="h-6 w-6 text-gold" />
                   </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-left">
-                      Email should arrive within 2 minutes
-                    </p>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">7-Day Gratitude Workbook</p>
+                    <p className="text-sm text-muted-foreground">Morning practice & evening reflection</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-left">
-                      Check your spam folder if you don't see it
-                    </p>
+                  <Download className="h-5 w-5 text-gold" />
+                </a>
+
+                {/* Download: EFT Workbook */}
+                <a
+                  href="/downloads/7-Day EFT Workbook for Expats.pdf"
+                  download
+                  className="flex items-center gap-4 p-4 rounded-xl border border-gold/20 bg-cream/30 hover:bg-gold/5 transition-colors group"
+                >
+                  <div className="rounded-full bg-gold/10 p-3 group-hover:bg-gold/20 transition-colors">
+                    <Hand className="h-6 w-6 text-gold" />
                   </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">7-Day EFT Tapping Workbook</p>
+                    <p className="text-sm text-muted-foreground">Release stress & rebuild confidence</p>
+                  </div>
+                  <Download className="h-5 w-5 text-gold" />
+                </a>
+
+                {/* Video placeholder */}
+                <div className="flex items-center gap-4 p-4 rounded-xl border border-gold/20 bg-cream/30">
+                  <div className="rounded-full bg-gold/10 p-3">
+                    <Play className="h-6 w-6 text-gold" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">Guided EFT Tapping Video</p>
+                    <p className="text-sm text-muted-foreground">Access via your dashboard after email login</p>
+                  </div>
+                  <Mail className="h-5 w-5 text-muted-foreground" />
                 </div>
 
-                <div className="text-sm text-muted-foreground">
-                  Sent to: <span className="font-medium text-foreground">{formData.email}</span>
+                <div className="pt-4 border-t border-gold/10">
+                  <p className="text-sm text-muted-foreground text-center">
+                    💛 Love to share? Send your friends{' '}
+                    <span className="font-medium text-gold">resilientmind.io/free-guide</span>{' '}
+                    so they can get their own copy.
+                  </p>
                 </div>
 
                 <Button
@@ -181,7 +199,6 @@ const FreeGuide = () => {
   // Main form UI
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-background flex flex-col">
-      {/* Header */}
       <header className="p-6">
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />
@@ -189,8 +206,7 @@ const FreeGuide = () => {
         </Link>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 flex items-center justify-center p-6">
+      <main className="flex-1 flex items-center justify-center p-6 pb-16">
         <div className="w-full max-w-2xl">
           {/* Logo */}
           <div className="flex justify-center mb-8">
@@ -199,93 +215,74 @@ const FreeGuide = () => {
             </Link>
           </div>
 
-          {/* Hero Section */}
-          <div className="text-center mb-8">
+          {/* Hero */}
+          <div className="text-center mb-10">
             <div className="flex justify-center mb-6">
               <div className="rounded-full bg-gold/10 p-6">
                 <Download className="h-12 w-12 text-gold" />
               </div>
             </div>
-            <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
-              Immediate Techniques to Find Calm in Cultural Chaos
+            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground mb-4 leading-tight">
+              3 Tools to Shift Your Energy:<br />
+              <span className="text-gold">7 Days to Calm, Clarity & Resilience Overseas</span>
             </h1>
-            <p className="text-xl text-muted-foreground">
-              3 Proven Resilience Techniques You Can Use Right Now
+            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto">
+              Practical daily exercises to release stress, calm your nervous system, and regain focus — even during challenging times abroad.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {/* What You'll Get */}
+          {/* What's Included */}
+          <div className="grid gap-4 mb-8">
             <Card className="border-gold/20 shadow-elegant">
-              <CardHeader>
-                <CardTitle className="font-serif text-xl">What You'll Get</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Free Access to Intro Videos</p>
-                    <p className="text-sm text-muted-foreground">
-                      Instant access after entering email
-                    </p>
+              <CardContent className="p-6">
+                <h2 className="font-serif text-xl mb-6 text-center">Your Free 7-Day Practice Includes</h2>
+                <div className="space-y-5">
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-full bg-gold/10 p-2.5 mt-0.5 flex-shrink-0">
+                      <Sun className="h-5 w-5 text-gold" />
+                    </div>
+                    <div>
+                      <p className="font-medium">🌅 Morning Gratitude Workbook</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Start your day noticing small wins and strengths. Feel calmer, more grounded, and ready to face the challenges of a new country.
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">No Credit Card Required</p>
-                    <p className="text-sm text-muted-foreground">
-                      100% free, no strings attached
-                    </p>
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-full bg-gold/10 p-2.5 mt-0.5 flex-shrink-0">
+                      <Play className="h-5 w-5 text-gold" />
+                    </div>
+                    <div>
+                      <p className="font-medium">🌤 Midday EFT Tapping Video + Workbook</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Release stress, anxiety, and tension from language barriers, job uncertainty, or feeling out of place. Calm your nervous system and regain focus.
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Immediate Relief</p>
-                    <p className="text-sm text-muted-foreground">
-                      Start using techniques right away
-                    </p>
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-full bg-gold/10 p-2.5 mt-0.5 flex-shrink-0">
+                      <Moon className="h-5 w-5 text-gold" />
+                    </div>
+                    <div>
+                      <p className="font-medium">🌙 Evening Reflection</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Pause, reflect, and gently reframe your thoughts. End the day with clarity and a calmer mindset — ready to rest and recharge.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          </div>
 
-            {/* Benefits */}
-            <Card className="border-gold/20 shadow-elegant">
-              <CardHeader>
-                <CardTitle className="font-serif text-xl">You'll Learn</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Heart className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Quick Stress Relief</p>
-                    <p className="text-sm text-muted-foreground">
-                      Techniques for culture shock moments
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Shield className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Grounding Exercises</p>
-                    <p className="text-sm text-muted-foreground">
-                      You can do anywhere, anytime
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Compass className="h-5 w-5 text-gold mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Rebuild Confidence</p>
-                    <p className="text-sm text-muted-foreground">
-                      Simple practices for unfamiliar environments
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Social Proof */}
+          <div className="text-center mb-8">
+            <p className="text-muted-foreground italic text-lg">
+              "In just 30 minutes a day, you'll notice your energy shifting, your nervous system relaxing, and your mind becoming clearer."
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              No perfection, no pressure — just simple, realistic tools for expats who want to feel stronger and more in control.
+            </p>
           </div>
 
           {/* Email Capture Form */}
@@ -293,15 +290,15 @@ const FreeGuide = () => {
             <form onSubmit={handleSubmit}>
               <CardHeader>
                 <CardTitle className="font-serif text-2xl text-center">
-                  Get Your Free Guide
+                  Download Your Free Practice Kit
                 </CardTitle>
                 <CardDescription className="text-center">
-                  Join 500+ expats building resilience
+                  Get instant access to both workbooks + the guided EFT video
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">Your Name</Label>
                   <Input
                     id="name"
                     type="text"
@@ -336,7 +333,7 @@ const FreeGuide = () => {
                     className="border-gold/30 data-[state=checked]:bg-gold data-[state=checked]:border-gold mt-1"
                   />
                   <Label htmlFor="agree" className="text-sm text-muted-foreground font-normal cursor-pointer">
-                    I agree to receive helpful resilience tips (optional)
+                    I'd like to receive resilience tips and updates (optional)
                   </Label>
                 </div>
 
@@ -351,27 +348,41 @@ const FreeGuide = () => {
                       Sending...
                     </>
                   ) : (
-                    'Get My Free Guide'
+                    <>
+                      <Download className="h-5 w-5 mr-2" />
+                      Get My Free 7-Day Practice Kit
+                    </>
                   )}
                 </Button>
 
-                {/* Trust Indicators */}
-                <div className="pt-4 space-y-2 text-center text-sm text-muted-foreground">
-                  <p>No spam, unsubscribe anytime</p>
-                  <p>
-                    By signing up, you agree to our{' '}
-                    <Link to="/terms" className="text-gold hover:underline">
-                      Terms of Service
-                    </Link>
-                    {' '}and{' '}
-                    <Link to="/privacy" className="text-gold hover:underline">
-                      Privacy Policy
-                    </Link>
-                  </p>
+                <div className="flex items-center justify-center gap-6 pt-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <FileText className="h-3.5 w-3.5" /> 2 PDF Workbooks
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Play className="h-3.5 w-3.5" /> Guided Video
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Mail className="h-3.5 w-3.5" /> No spam
+                  </span>
+                </div>
+
+                <div className="pt-2 text-center text-xs text-muted-foreground">
+                  By signing up, you agree to our{' '}
+                  <Link to="/terms" className="text-gold hover:underline">Terms</Link>
+                  {' '}and{' '}
+                  <Link to="/privacy" className="text-gold hover:underline">Privacy Policy</Link>
                 </div>
               </CardContent>
             </form>
           </Card>
+
+          {/* Upsell teaser */}
+          <div className="mt-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              Curious to go deeper? This is just the beginning of your <span className="font-medium text-foreground">Resilient Mind</span> journey — designed to show you the kind of transformation possible when you consistently care for your nervous system, mindset, and self-awareness.
+            </p>
+          </div>
         </div>
       </main>
     </div>
