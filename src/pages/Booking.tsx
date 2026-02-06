@@ -274,8 +274,8 @@ const Booking = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Book a Session — Individual Consultations €87/hour | Resilient Mind"
-        description="Schedule a free discovery call or book an individual art expressive therapy session with Silvie Bogdanova. Online consultations from €87/hour."
+        title="Book a Session — Individual Consultations €107/hour | Resilient Mind"
+        description="Schedule a free discovery call or book an individual art expressive therapy session with Silvie Bogdanova. Online consultations from €107/hour."
         path="/booking"
       />
       <Navbar />

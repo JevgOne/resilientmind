@@ -150,7 +150,7 @@ const FreeGuide = () => {
               <CardContent className="space-y-4">
                 {/* Download: Gratitude Workbook */}
                 <a
-                  href="/downloads/7-Day Gratitude Workbook.pdf"
+                  href="/assets/7-Day-Gratitude-Workbook.pdf"
                   download
                   className="flex items-center gap-4 p-4 rounded-xl border border-gold/20 bg-cream/30 hover:bg-gold/5 transition-colors group"
                 >
@@ -166,7 +166,7 @@ const FreeGuide = () => {
 
                 {/* Download: EFT Workbook */}
                 <a
-                  href="/downloads/7-Day EFT Workbook for Expats.pdf"
+                  href="/assets/7-Day-EFT-Workbook-for-Expats.pdf"
                   download
                   className="flex items-center gap-4 p-4 rounded-xl border border-gold/20 bg-cream/30 hover:bg-gold/5 transition-colors group"
                 >
