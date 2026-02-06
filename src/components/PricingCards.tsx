@@ -1,5 +1,4 @@
-import { Check, Sparkles, Crown, Loader2, Shield, Clock, Heart } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Check, Sparkles, Crown, Loader2, Shield, Clock, Heart, Leaf, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,9 +17,17 @@ interface PricingCardsProps {
   cancelUrl?: string;
 }
 
+const tierEmoji: Record<string, string> = {
+  basic_monthly: '',
+  basic_yearly: '',
+  premium_monthly: '',
+  premium_yearly: '',
+};
+
 const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
   const navigate = useNavigate();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const visibleTiers = getVisibleTiers();
   const earlyBird = isEarlyBird();
 
@@ -65,19 +72,24 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
     }
   };
 
-  // Grid cols based on visible tiers count
   const gridCols = visibleTiers.length <= 2 ? "lg:grid-cols-2" : "lg:grid-cols-4";
 
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 ${gridCols} gap-5 max-w-4xl mx-auto`}>
+    <div className={`grid grid-cols-1 md:grid-cols-2 ${gridCols} gap-5 max-w-5xl mx-auto`}>
       {visibleTiers.map((tier) => {
         const currentPrice = getTierPrice(tier);
         const hasDiscount = earlyBird && tier.regularPrice !== tier.earlyBirdPrice;
+        const isSelected = selectedTier === tier.id;
 
         return (
           <div
             key={tier.id}
-            className="group relative bg-card/80 backdrop-blur-sm rounded-3xl border border-border/60 p-1 hover:border-primary/30 transition-all duration-300 hover:shadow-[0_8px_30px_-12px_hsla(30,25%,30%,0.12)]"
+            onClick={() => setSelectedTier(tier.id)}
+            className={`group relative bg-card/80 backdrop-blur-sm rounded-3xl border-2 p-1 transition-all duration-300 cursor-pointer ${
+              isSelected
+                ? "border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(196,155,65,0.2)] scale-[1.02]"
+                : "border-border/60 hover:border-primary/30 hover:shadow-[0_8px_30px_-12px_hsla(30,25%,30%,0.12)]"
+            }`}
           >
             {/* Badge */}
             {tier.badge && (
@@ -97,22 +109,34 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
               </div>
             )}
 
+            {/* Selected indicator */}
+            {isSelected && (
+              <div className="absolute -top-2.5 left-4 px-3 py-0.5 bg-primary text-primary-foreground text-xs font-semibold rounded-full z-10">
+                Selected
+              </div>
+            )}
+
             <div className="rounded-[1.25rem] bg-gradient-to-b from-background/60 to-background/30 p-6 pt-8 h-full flex flex-col">
               {/* Icon */}
-              <div className="mb-5 flex justify-center">
+              <div className="mb-4 flex justify-center">
                 <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
                   {tier.membershipType === 'premium' ? (
                     <Crown size={20} className="text-primary" />
                   ) : (
-                    <Sparkles size={20} className="text-primary" />
+                    <Leaf size={20} className="text-primary" />
                   )}
                 </div>
               </div>
 
               {/* Name */}
-              <h3 className="text-center text-lg font-serif font-semibold text-foreground mb-5">
+              <h3 className="text-center text-lg font-serif font-semibold text-foreground mb-2">
                 {tier.name}
               </h3>
+
+              {/* Subtitle */}
+              <p className="text-center text-xs text-muted-foreground font-sans mb-4 leading-relaxed">
+                {tier.subtitle}
+              </p>
 
               {/* Price */}
               <div className="text-center mb-2">
@@ -133,10 +157,13 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
               </div>
 
               {/* Divider */}
-              <div className="w-12 h-px bg-border/80 mx-auto my-5" />
+              <div className="w-12 h-px bg-border/80 mx-auto my-4" />
 
-              {/* Features */}
-              <ul className="space-y-3 mb-8 flex-grow">
+              {/* What's included */}
+              <p className="text-xs font-sans font-semibold text-foreground/70 uppercase tracking-wider mb-3">
+                What's included
+              </p>
+              <ul className="space-y-2.5 mb-5">
                 {tier.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-[13px] leading-relaxed text-foreground/80">
                     <div className="w-4 h-4 rounded-full bg-primary/8 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -147,11 +174,52 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
                 ))}
               </ul>
 
+              {/* Quote */}
+              {tier.quote && (
+                <p className="text-xs text-muted-foreground italic font-sans text-center mb-4 px-2">
+                  {tier.quote}
+                </p>
+              )}
+
+              {/* Ideal for */}
+              {tier.idealFor && tier.idealFor.length > 0 && (
+                <div className="mb-5">
+                  <p className="text-xs font-sans font-semibold text-foreground/70 uppercase tracking-wider mb-2">
+                    This is for you if you
+                  </p>
+                  <ul className="space-y-1.5">
+                    {tier.idealFor.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-[12px] text-muted-foreground font-sans">
+                        <Star size={10} className="text-primary mt-0.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Spacer to push button to bottom */}
+              <div className="flex-grow" />
+
+              {/* Pause note */}
+              <p className="text-[11px] text-center text-muted-foreground/60 font-sans mb-3">
+                {tier.interval === 'month'
+                  ? 'You can pause anytime. Continue when it feels right.'
+                  : 'Self-paced — the program stays open until you finish.'}
+              </p>
+
               {/* Button */}
               <Button
-                onClick={() => createCheckoutSession(tier.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  createCheckoutSession(tier.id);
+                }}
                 disabled={loadingTier === tier.id}
-                className="w-full rounded-full h-11 font-sans font-medium text-sm bg-primary hover:bg-primary/90 transition-all"
+                className={`w-full rounded-full h-11 font-sans font-medium text-sm transition-all ${
+                  isSelected
+                    ? "bg-gradient-gold text-white shadow-gold hover:shadow-elevated"
+                    : "bg-primary hover:bg-primary/90"
+                }`}
               >
                 {loadingTier === tier.id ? (
                   <>

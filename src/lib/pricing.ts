@@ -12,13 +12,16 @@ export interface MembershipTier {
   period: '/month' | '/year';
   interval: 'month' | 'year';
   membershipType: 'basic' | 'premium';
+  subtitle: string;
   description: string;
   features: string[];
+  idealFor: string[];
   buttonText: string;
   highlighted: boolean;
   badge: string | null;
   hidden: boolean;
   quote?: string;
+  savingsNote?: string;
 }
 
 export const MEMBERSHIP_TIERS: MembershipTier[] = [
@@ -30,19 +33,25 @@ export const MEMBERSHIP_TIERS: MembershipTier[] = [
     period: '/month',
     interval: 'month',
     membershipType: 'basic',
+    subtitle: 'For when you want to begin gently — without pressure or long-term commitment',
     description:
-      'Access to foundational Module A of current program theme each month. Perfect for starting your resilience journey at your own pace.',
+      'Access for 1 month (pay-as-you-go). Unlocks one month at a time.',
     features: [
-      'Monthly foundational module (Module A)',
-      'Downloadable worksheets for Module A',
-      'Access to meditation library',
-      'Monthly content updates',
+      '4 weekly videos',
+      '4 weekly workbooks & reflective exercises',
+      'Guided meditations',
+      'Unlocks one month at a time',
+    ],
+    idealFor: [
+      'Want to try the program first',
+      'Need flexibility month by month',
+      'Not sure how much space you currently have',
     ],
     buttonText: 'Start Basic Monthly',
     highlighted: false,
     badge: null,
     hidden: false,
-    quote: '"This program helped me find my footing in a new country."',
+    quote: '"I don\'t have to decide everything right now."',
   },
   {
     id: 'basic_yearly',
@@ -52,18 +61,28 @@ export const MEMBERSHIP_TIERS: MembershipTier[] = [
     period: '/year',
     interval: 'year',
     membershipType: 'basic',
+    subtitle: 'For those who want spaciousness, continuity, and fewer decisions',
     description:
-      'Complete access to all 4 programs (12 months) with all modules.',
+      'Full 12-month program access from day one. Self-paced — move in your own rhythm. The program stays open until you finish.',
     features: [
-      'All 4 transformational programs (12 months)',
-      'Complete access to all modules (A, B, C)',
-      'All downloadable worksheets & exercises',
-      'Full meditation & visualization library',
+      'Full 12-month program access from day one',
+      '48 core videos',
+      '48 workbooks & exercises',
+      'Guided meditations',
+      'Self-paced access — move in your own rhythm',
+      'The program stays open until you finish',
+    ],
+    idealFor: [
+      'Already know this kind of inner work matters',
+      'Want a stable anchor for the year',
+      'Like knowing everything is already there when you need it',
     ],
     buttonText: 'Save with Yearly',
     highlighted: false,
-    badge: 'Best Value',
+    badge: 'Save €74',
     hidden: true,
+    quote: '"I don\'t want to keep deciding every month — I want space to actually go deeper."',
+    savingsNote: 'Save €74 compared to monthly',
   },
   {
     id: 'premium_monthly',
@@ -73,20 +92,25 @@ export const MEMBERSHIP_TIERS: MembershipTier[] = [
     period: '/month',
     interval: 'month',
     membershipType: 'premium',
+    subtitle: 'For when you want deeper understanding and shared space — without long-term commitment',
     description:
-      'Enhanced access to foundational and advanced modules (A & B) plus priority support and additional Resilient Hub content.',
+      'Everything from the Basic Membership plus community and additional hubs.',
     features: [
-      'Modules A & B of current month',
-      'All Basic Monthly benefits',
-      'Access to additional Resilient Hub (Module A)',
-      'Priority support',
+      'Everything from Basic Membership',
+      'Access to the Premium Community (Skool)',
+      'Additional Hub: The Transformed Self',
+      'Additional Hub: Navigating Expat Life with Chronic Pain',
+    ],
+    idealFor: [
+      'Community support helps you stay connected',
+      'Want to explore deeper identity shifts',
+      'Value reflection, sharing, and belonging',
     ],
     buttonText: 'Go Premium Monthly',
     highlighted: true,
     badge: 'Most Popular',
     hidden: false,
-    quote:
-      '"The premium content gave me tools I use every single day."',
+    quote: '"I don\'t want to do this completely alone."',
   },
   {
     id: 'premium_yearly',
@@ -96,19 +120,29 @@ export const MEMBERSHIP_TIERS: MembershipTier[] = [
     period: '/year',
     interval: 'year',
     membershipType: 'premium',
+    subtitle: 'For those ready for full support, integration, and real transformation',
     description:
-      'Complete program access with personal consultations and materials kit.',
+      'The most supported way to walk the journey. Self-paced access — the program stays open until you finish.',
     features: [
-      'All 4 programs with all modules (A, B, C)',
-      '4 hours personal consultations (€348 value)',
-      'Art expressive therapy materials kit',
-      'Additional Resilient Hubs access',
-      'All worksheets, meditations & exercises',
+      'Full 12-month program access',
+      'All Basic content (48 videos, workbooks & meditations)',
+      'Premium Community access (Skool)',
+      'Additional Hubs: The Transformed Self + Chronic Pain',
+      'Live Zoom calls (group support & integration)',
+      '1-hour individual session included',
+      'The program stays open until you finish',
     ],
-    buttonText: 'Save with Yearly',
+    idealFor: [
+      'Want to be seen and supported',
+      'Value live connection and real-time reflection',
+      'Ready to integrate emotional, physical, and identity healing',
+    ],
+    buttonText: 'Get Full Access',
     highlighted: true,
-    badge: 'Most Popular',
+    badge: 'Save €94',
     hidden: true,
+    quote: '"I want guidance, not just content."',
+    savingsNote: 'Save €94 compared to monthly',
   },
 ];
 

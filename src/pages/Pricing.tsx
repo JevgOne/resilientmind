@@ -167,9 +167,8 @@ const Pricing = () => {
               From Navigating Life Abroad to Truly Thriving
             </h1>
 
-            <p className="text-lg text-muted-foreground font-sans">
-              Select the membership tier that fits your needs. All plans include
-              access to our transformative 12-month program.
+            <p className="text-lg text-muted-foreground font-sans max-w-2xl mx-auto leading-relaxed">
+              A self-paced journey back to emotional balance, clarity, and inner safety — wherever you are in the world.
             </p>
           </div>
         </PageHero>
@@ -178,9 +177,10 @@ const Pricing = () => {
         <section className="py-8">
           <div className="container px-4">
             <div className="max-w-3xl mx-auto text-center">
-              <p className="text-muted-foreground font-sans leading-relaxed">
-                Our 12-month program combines evidence-based techniques, expressive arts, and energy work to help you build lasting resilience. Each month delivers fresh video content, downloadable worksheets, and guided meditations tailored to the expatriate experience.
-              </p>
+              <div className="space-y-3 text-muted-foreground font-sans leading-relaxed">
+                <p>This is not a program you need to "keep up with." It's a space you return to — at your own rhythm.</p>
+                <p>There are no deadlines, no pressure, and no expectation to be "ready." The program stays open until you finish.</p>
+              </div>
             </div>
           </div>
         </section>
@@ -204,9 +204,12 @@ const Pricing = () => {
         <section className="py-12">
           <div className="container px-4">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-serif font-semibold text-center mb-12">
-                Main Membership Plans
+              <h2 className="text-2xl md:text-3xl font-serif font-semibold text-center mb-4">
+                Resilient Mind Membership
               </h2>
+              <p className="text-center text-muted-foreground font-sans mb-12 max-w-xl mx-auto">
+                This program adapts to you — not the other way around. You move at your own pace.
+              </p>
 
               <PricingCards cancelUrl="/pricing" />
               <PricingTrustSignals />
