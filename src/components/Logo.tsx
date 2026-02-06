@@ -8,7 +8,7 @@ const Logo = ({ className = "" }: { className?: string }) => {
         alt="Resilient Mind Logo"
         className="h-10 w-auto object-contain"
       />
-      <span className="font-serif text-lg font-semibold tracking-tight text-foreground">
+      <span className="font-serif text-lg font-semibold tracking-tight text-gradient-gold">
         Resilient Mind
       </span>
     </Link>
