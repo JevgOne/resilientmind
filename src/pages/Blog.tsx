@@ -57,7 +57,7 @@ const Blog = () => {
           "@type": "Blog",
           "name": "Resilient Mind Blog",
           "description": "Resilience tips and art therapy insights for expatriates.",
-          "url": "https://resilient-journeys.vercel.app/blog",
+          "url": "https://resilient-journeys-ten.vercel.app/blog",
           "publisher": {
             "@type": "Organization",
             "name": "Resilient Mind"

@@ -233,8 +233,8 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.get("origin") || "https://resilient-journeys.vercel.app"}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin") || "https://resilient-journeys.vercel.app"}/booking?cancelled=true`,
+      success_url: `${req.headers.get("origin") || "https://resilient-journeys-ten.vercel.app"}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin") || "https://resilient-journeys-ten.vercel.app"}/booking?cancelled=true`,
       customer_email: client_email,
       metadata: {
         booking_id: booking.id,

@@ -2,12 +2,15 @@ import { Link } from "react-router-dom";
 
 const Logo = ({ className = "" }: { className?: string }) => {
   return (
-    <Link to="/" className={`flex items-center ${className}`}>
+    <Link to="/" className={`flex items-center gap-2 ${className}`}>
       <img
         src="/assets/resilient-mind-logo.png"
         alt="Resilient Mind Logo"
-        className="h-16 w-auto object-contain"
+        className="h-10 w-auto object-contain"
       />
+      <span className="font-serif text-lg font-semibold tracking-tight text-foreground">
+        Resilient Mind
+      </span>
     </Link>
   );
 };

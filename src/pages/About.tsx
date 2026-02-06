@@ -44,7 +44,7 @@ const About = () => {
           "name": "Silvie Bogdanova",
           "jobTitle": "Art Expressive Therapist",
           "description": "Art expressive therapist helping expatriates build resilience and navigate life transitions abroad.",
-          "url": "https://resilient-journeys.vercel.app/about",
+          "url": "https://resilient-journeys-ten.vercel.app/about",
           "worksFor": {
             "@type": "Organization",
             "name": "Resilient Mind"
