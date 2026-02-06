@@ -334,44 +334,61 @@ const Booking = () => {
                     Select Session Type
                   </h2>
 
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {SESSION_TYPES.map((session) => (
-                      <Card
-                        key={session.type}
-                        className={`cursor-pointer transition-all hover:shadow-elevated ${
-                          selectedType === session.type ? "ring-2 ring-primary" : ""
-                        }`}
-                        onClick={() => {
-                          setSelectedType(session.type);
-                        }}
-                      >
-                        <CardHeader>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                            <Clock size={14} />
-                            <span>{session.duration} min</span>
-                          </div>
-                          <CardTitle className="text-xl font-serif">
-                            {session.title}
-                          </CardTitle>
-                          <div className="text-2xl font-serif font-bold text-primary mt-2">
-                            {session.price === 0 ? "Free" : `€${session.price}`}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <CardDescription className="mb-4">
-                            {session.description}
-                          </CardDescription>
-                          <ul className="space-y-2">
-                            {session.features.map((feature, i) => (
-                              <li key={i} className="flex items-center gap-2 text-sm">
-                                <Check size={16} className="text-primary flex-shrink-0" />
-                                <span>{feature}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </CardContent>
-                      </Card>
-                    ))}
+                  <div className="grid md:grid-cols-2 gap-5">
+                    {SESSION_TYPES.map((session) => {
+                      const isSelected = selectedType === session.type;
+                      return (
+                        <Card
+                          key={session.type}
+                          className={`relative cursor-pointer transition-all duration-200 hover:shadow-elevated ${
+                            isSelected
+                              ? "border-2 border-primary bg-primary/5 shadow-[0_0_0_3px_rgba(196,155,65,0.2)] scale-[1.02]"
+                              : "border hover:border-primary/50"
+                          }`}
+                          onClick={() => {
+                            setSelectedType(session.type);
+                          }}
+                        >
+                          {isSelected && (
+                            <div className="absolute -top-2.5 left-4 px-3 py-0.5 bg-primary text-primary-foreground text-xs font-semibold rounded-full z-10">
+                              Selected
+                            </div>
+                          )}
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock size={14} />
+                                <span>{session.duration} min</span>
+                              </div>
+                              {isSelected && (
+                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary">
+                                  <Check size={14} className="text-primary-foreground" strokeWidth={3} />
+                                </div>
+                              )}
+                            </div>
+                            <CardTitle className="text-xl font-serif">
+                              {session.title}
+                            </CardTitle>
+                            <div className="text-2xl font-serif font-bold text-primary mt-2">
+                              {session.price === 0 ? "Free" : `€${session.price}`}
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <CardDescription className="mb-4">
+                              {session.description}
+                            </CardDescription>
+                            <ul className="space-y-2">
+                              {session.features.map((feature, i) => (
+                                <li key={i} className="flex items-center gap-2 text-sm">
+                                  <Check size={16} className="text-primary flex-shrink-0" />
+                                  <span>{feature}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
 
                   <div className="flex justify-end mt-8">
