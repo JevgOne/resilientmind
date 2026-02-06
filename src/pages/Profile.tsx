@@ -286,11 +286,11 @@ const Profile = () => {
                     <p className="text-sm text-muted-foreground mb-4">
                       Upgrade to a paid membership and get access to all materials
                     </p>
-                    <Link to="/resilient-hub">
-                      <Button className="w-full bg-gold hover:bg-gold-dark text-white">
+                    <Button asChild className="w-full bg-gold hover:bg-gold-dark text-white">
+                      <Link to="/resilient-hub">
                         Upgrade Membership
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 )}
 

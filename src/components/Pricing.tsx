@@ -90,11 +90,11 @@ const Pricing = () => {
                   </li>
                 ))}
               </ul>
-              <Link to="/booking">
-                <Button className="w-full rounded-full h-11 font-sans font-medium text-sm bg-primary hover:bg-primary/90 transition-all">
+              <Button asChild className="w-full rounded-full h-11 font-sans font-medium text-sm bg-primary hover:bg-primary/90 transition-all">
+                <Link to="/booking">
                   {SESSION_TIER.buttonText}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

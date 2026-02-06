@@ -136,11 +136,11 @@ const PricingSuccess = () => {
                         <p className="text-sm text-muted-foreground mb-4">
                           Access your weekly video content and start your transformation journey.
                         </p>
-                        <Link to="/dashboard">
-                          <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
+                        <Button asChild variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
+                          <Link to="/dashboard">
                             Go to Dashboard
-                          </Button>
-                        </Link>
+                          </Link>
+                        </Button>
                       </CardContent>
                     </Card>
 
@@ -157,11 +157,11 @@ const PricingSuccess = () => {
                         <p className="text-sm text-muted-foreground mb-4">
                           Get your workbooks, worksheets, and meditation guides.
                         </p>
-                        <Link to="/dashboard?tab=resources">
-                          <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
+                        <Button asChild variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
+                          <Link to="/dashboard?tab=resources">
                             View Resources
-                          </Button>
-                        </Link>
+                          </Link>
+                        </Button>
                       </CardContent>
                     </Card>
 
@@ -178,11 +178,11 @@ const PricingSuccess = () => {
                         <p className="text-sm text-muted-foreground mb-4">
                           Premium members can schedule their consultation sessions.
                         </p>
-                        <Link to="/booking">
-                          <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
+                        <Button asChild variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
+                          <Link to="/booking">
                             Book Now
-                          </Button>
-                        </Link>
+                          </Link>
+                        </Button>
                       </CardContent>
                     </Card>
                   </div>
@@ -196,12 +196,12 @@ const PricingSuccess = () => {
                       <p className="mb-6 opacity-90">
                         Head to your dashboard and begin exploring your personalized program.
                       </p>
-                      <Link to="/dashboard">
-                        <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
+                      <Button asChild size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
+                        <Link to="/dashboard">
                           Go to Dashboard
                           <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                     </CardContent>
                   </Card>
 

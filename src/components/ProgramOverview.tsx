@@ -183,16 +183,12 @@ const ProgramOverview = () => {
               workbooks and exclusive content.
             </p>
             <div className="flex gap-4 justify-center">
-              <Link to="/free-guide">
-                <Button className="bg-gold hover:bg-gold-dark text-white shadow-gold">
-                  Start Free
-                </Button>
-              </Link>
-              <Link to="/pricing">
-                <Button variant="outline" className="border-gold text-gold">
-                  View Pricing
-                </Button>
-              </Link>
+              <Button asChild className="bg-gold hover:bg-gold-dark text-white shadow-gold">
+                <Link to="/free-guide">Start Free</Link>
+              </Button>
+              <Button asChild variant="outline" className="border-gold text-gold">
+                <Link to="/pricing">View Pricing</Link>
+              </Button>
             </div>
           </div>
         )}

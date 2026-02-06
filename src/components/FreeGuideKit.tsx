@@ -152,12 +152,12 @@ const FreeGuideKit = ({ videos, onNavigateToVideo }: FreeGuideKitProps) => {
           <p className="text-sm text-muted-foreground mb-3">
             Ready for the full 12-month transformation?
           </p>
-          <Link to="/pricing">
-            <Button className="bg-gradient-gold text-white hover:shadow-elevated">
+          <Button asChild className="bg-gradient-gold text-white hover:shadow-elevated">
+            <Link to="/pricing">
               <Crown className="h-4 w-4 mr-2" />
               Explore Full Membership
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>

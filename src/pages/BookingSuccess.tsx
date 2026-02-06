@@ -100,11 +100,11 @@ const BookingSuccess = () => {
               <div className="text-6xl mb-4">❌</div>
               <h1 className="text-3xl font-serif font-semibold mb-4">Something went wrong</h1>
               <p className="text-muted-foreground mb-8">{error || "Reservation not found"}</p>
-              <Link to="/booking">
-                <Button className="bg-gradient-gold">
+              <Button asChild className="bg-gradient-gold">
+                <Link to="/booking">
                   Back to Booking
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </main>
@@ -220,11 +220,11 @@ const BookingSuccess = () => {
                 </Button>
               )}
 
-              <Link to="/" className="block">
-                <Button variant="outline" className="w-full" size="lg">
+              <Button asChild variant="outline" className="w-full" size="lg">
+                <Link to="/">
                   Back to Homepage
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
 
             {/* What's Next */}

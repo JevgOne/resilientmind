@@ -350,12 +350,12 @@ const Dashboard = () => {
                 Watch Video
               </Button>
             ) : (
-              <Link to="/resilient-hub" className="block">
-                <Button variant="outline" className="w-full border-gold text-gold hover:bg-gold hover:text-white">
+              <Button asChild variant="outline" className="w-full border-gold text-gold hover:bg-gold hover:text-white">
+                <Link to="/resilient-hub">
                   <Lock className="h-4 w-4 mr-2" />
                   Unlock
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )
           ) : (
             <Button disabled variant="ghost" className="w-full">
@@ -544,11 +544,11 @@ const Dashboard = () => {
                   {membershipLabels[profile?.membership_type || 'free']}
                 </Badge>
                 {profile?.membership_type === 'free' && (
-                  <Link to="/resilient-hub">
-                    <Button variant="outline" size="sm" className="border-gold text-gold hover:bg-gold hover:text-white">
+                  <Button asChild variant="outline" size="sm" className="border-gold text-gold hover:bg-gold hover:text-white">
+                    <Link to="/resilient-hub">
                       Upgrade Membership
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 )}
               </div>
             </div>
@@ -701,11 +701,11 @@ const Dashboard = () => {
                                 Start
                               </Button>
                             ) : (
-                              <Link to="/resilient-hub" onClick={(e) => e.stopPropagation()}>
-                                <Button size="sm" variant="outline" className="border-gold text-gold">
+                              <Button asChild size="sm" variant="outline" className="border-gold text-gold">
+                                <Link to="/resilient-hub" onClick={(e) => e.stopPropagation()}>
                                   Unlock
-                                </Button>
-                              </Link>
+                                </Link>
+                              </Button>
                             )}
                           </div>
                         </CardContent>
@@ -731,11 +731,11 @@ const Dashboard = () => {
                       Downloadable worksheets, meditations, and creative exercises
                     </p>
                     {profile?.membership_type === 'free' ? (
-                      <Link to="/resilient-hub">
-                        <Button className="bg-gold hover:bg-gold-dark text-white">
+                      <Button asChild className="bg-gold hover:bg-gold-dark text-white">
+                        <Link to="/resilient-hub">
                           Get Access to Materials
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                     ) : (
                       <p className="text-sm text-muted-foreground">Materials will be available soon</p>
                     )}

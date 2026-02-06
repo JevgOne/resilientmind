@@ -118,12 +118,12 @@ export const UserBookings = () => {
           <p className="text-muted-foreground mb-6">
             Book your first session to start your resilience journey.
           </p>
-          <Link to="/booking">
-            <Button className="bg-gold hover:bg-gold-dark text-white">
+          <Button asChild className="bg-gold hover:bg-gold-dark text-white">
+            <Link to="/booking">
               <Calendar className="h-4 w-4 mr-2" />
               Book a Session
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     );
@@ -133,12 +133,12 @@ export const UserBookings = () => {
     <div className="space-y-6">
       {/* Book New Session CTA */}
       <div className="flex justify-end">
-        <Link to="/booking">
-          <Button className="bg-gold hover:bg-gold-dark text-white">
+        <Button asChild className="bg-gold hover:bg-gold-dark text-white">
+          <Link to="/booking">
             <Calendar className="h-4 w-4 mr-2" />
             Book New Session
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {/* Upcoming Bookings */}

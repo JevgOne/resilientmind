@@ -120,11 +120,11 @@ const Navbar = () => {
               </DropdownMenu>
             ) : (
               <>
-                <Link to="/auth">
-                  <Button variant="ghost" className="text-foreground/80 hover:text-foreground">
+                <Button asChild variant="ghost" className="text-foreground/80 hover:text-foreground">
+                  <Link to="/auth">
                     Sign In
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
                 <Link
                   to="/resilient-hubs"
                   className="inline-flex items-center justify-center px-6 py-2.5 bg-gradient-gold text-primary-foreground font-sans font-semibold text-sm rounded-full shadow-gold hover:shadow-elevated transition-all duration-300 hover:scale-105"
