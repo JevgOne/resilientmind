@@ -102,6 +102,12 @@ const Footer = () => {
             >
               Terms of Service
             </Link>
+            <Link
+              to="/cookies"
+              className="text-sm text-muted-foreground font-sans hover:text-primary transition-colors"
+            >
+              Cookies Policy
+            </Link>
           </div>
         </div>
       </div>
