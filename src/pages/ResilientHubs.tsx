@@ -59,9 +59,8 @@ const ResilientHubs = () => {
             </div>
 
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold mb-6" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.25)' }}>
-              Stop Surviving Abroad.
-              <br />
-              <span className="text-gradient-gold">Start Thriving.</span>
+              From Navigating Life Abroad to{" "}
+              <span className="text-gradient-gold">Truly Thriving</span>
             </h1>
 
             <p className="text-lg md:text-xl text-foreground/85 font-sans leading-relaxed mb-4 max-w-3xl mx-auto">
