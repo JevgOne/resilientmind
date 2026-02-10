@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Lock, Crown, Play, Clock, Calendar, CheckCircle2, Circle } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -41,7 +41,7 @@ const VideoPlayer = () => {
   const [progressLoading, setProgressLoading] = useState(false);
 
   // Check if user has access based on membership
-  const hasAccess = (videoMinMembership: MembershipType, isFree: boolean): boolean => {
+  const hasAccess = useCallback((videoMinMembership: MembershipType, isFree: boolean): boolean => {
     if (isFree) return true;
     if (!profile) return false;
 
@@ -55,10 +55,10 @@ const VideoPlayer = () => {
     }
 
     return userLevel >= requiredLevel;
-  };
+  }, [profile]);
 
   // Fetch user progress for this video
-  const fetchProgress = async () => {
+  const fetchProgress = useCallback(async () => {
     if (!user || !videoId) return;
 
     try {
@@ -75,7 +75,7 @@ const VideoPlayer = () => {
     } catch (err) {
       console.error('Error fetching progress:', err);
     }
-  };
+  }, [user, videoId]);
 
   // Toggle video completion status
   const toggleCompletion = async () => {
@@ -159,7 +159,7 @@ const VideoPlayer = () => {
     if (!authLoading) {
       fetchVideo();
     }
-  }, [videoId, authLoading, profile, navigate]);
+  }, [videoId, authLoading, profile, navigate, hasAccess, fetchProgress]);
 
   if (authLoading || loading) {
     return (

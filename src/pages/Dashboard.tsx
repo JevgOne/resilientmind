@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -238,20 +238,20 @@ const Dashboard = () => {
     if (user) {
       fetchContent();
     }
-  }, [user]);
+  }, [user, canAccessVideo, profile?.membership_type]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
-  const canAccessVideo = (video: Video) => {
+  const canAccessVideo = useCallback((video: Video) => {
     if (video.is_free) return true;
     if (!profile) return false;
 
     const membershipOrder = { free: 0, basic: 1, premium: 2 };
     return membershipOrder[profile.membership_type] >= membershipOrder[video.min_membership];
-  };
+  }, [profile]);
 
   const getResourceIcon = (type: Resource['resource_type']) => {
     switch (type) {

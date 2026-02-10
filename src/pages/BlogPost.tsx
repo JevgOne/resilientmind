@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,13 +35,7 @@ const BlogPost = () => {
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
 
-  useEffect(() => {
-    if (slug) {
-      fetchPost();
-    }
-  }, [slug]);
-
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     const { data, error } = await supabase
       .from('blog_posts')
       .select('*')
@@ -75,7 +69,13 @@ const BlogPost = () => {
     }
 
     setLoading(false);
-  };
+  }, [slug, profile, navigate]);
+
+  useEffect(() => {
+    if (slug) {
+      fetchPost();
+    }
+  }, [slug, fetchPost]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';

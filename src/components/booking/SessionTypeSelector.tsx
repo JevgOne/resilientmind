@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Clock, Check, Crown, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,14 +29,7 @@ export const SessionTypeSelector = ({
   const [loading, setLoading] = useState(true);
   const [premiumCredits, setPremiumCredits] = useState<number>(0);
 
-  useEffect(() => {
-    fetchSessionTypes();
-    if (profile?.membership_type === 'premium') {
-      fetchPremiumCredits();
-    }
-  }, [profile]);
-
-  const fetchSessionTypes = async () => {
+  const fetchSessionTypes = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('session_type_config')
@@ -55,9 +48,9 @@ export const SessionTypeSelector = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchPremiumCredits = async () => {
+  const fetchPremiumCredits = useCallback(async () => {
     if (!profile?.user_id) return;
 
     const currentYear = new Date().getFullYear();
@@ -71,7 +64,14 @@ export const SessionTypeSelector = ({
     if (data) {
       setPremiumCredits(data.total_credits - data.used_credits);
     }
-  };
+  }, [profile?.user_id]);
+
+  useEffect(() => {
+    fetchSessionTypes();
+    if (profile?.membership_type === 'premium') {
+      fetchPremiumCredits();
+    }
+  }, [profile, fetchSessionTypes, fetchPremiumCredits]);
 
   const getDefaultSessionTypes = (): SessionType[] => [
     {

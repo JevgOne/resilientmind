@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -44,13 +44,7 @@ const WorkshopPost = () => {
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
 
-  useEffect(() => {
-    if (slug) {
-      fetchWorkshop();
-    }
-  }, [slug]);
-
-  const fetchWorkshop = async () => {
+  const fetchWorkshop = useCallback(async () => {
     const { data, error } = await supabase
       .from('blog_posts')
       .select('*')
@@ -82,7 +76,13 @@ const WorkshopPost = () => {
       .eq('id', data.id);
 
     setLoading(false);
-  };
+  }, [slug, profile, navigate]);
+
+  useEffect(() => {
+    if (slug) {
+      fetchWorkshop();
+    }
+  }, [slug, fetchWorkshop]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';

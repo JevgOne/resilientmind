@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Calendar, Clock, Check, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
@@ -110,21 +110,7 @@ const Booking = () => {
     }
   }, [profile]);
 
-  // Fetch available days when type is selected
-  useEffect(() => {
-    if (selectedType && step === 2) {
-      fetchAvailableDays();
-    }
-  }, [selectedType, currentMonth, step]);
-
-  // Fetch available slots when date is selected
-  useEffect(() => {
-    if (selectedDate && selectedType && step === 3) {
-      fetchAvailableSlots();
-    }
-  }, [selectedDate, selectedType, step]);
-
-  const fetchAvailableDays = async () => {
+  const fetchAvailableDays = useCallback(async () => {
     if (!selectedType) return;
 
     setLoadingDays(true);
@@ -152,9 +138,9 @@ const Booking = () => {
     } finally {
       setLoadingDays(false);
     }
-  };
+  }, [selectedType, currentMonth]);
 
-  const fetchAvailableSlots = async () => {
+  const fetchAvailableSlots = useCallback(async () => {
     if (!selectedDate || !selectedType) return;
 
     setLoadingSlots(true);
@@ -181,7 +167,21 @@ const Booking = () => {
     } finally {
       setLoadingSlots(false);
     }
-  };
+  }, [selectedDate, selectedType]);
+
+  // Fetch available days when type is selected
+  useEffect(() => {
+    if (selectedType && step === 2) {
+      fetchAvailableDays();
+    }
+  }, [selectedType, currentMonth, step, fetchAvailableDays]);
+
+  // Fetch available slots when date is selected
+  useEffect(() => {
+    if (selectedDate && selectedType && step === 3) {
+      fetchAvailableSlots();
+    }
+  }, [selectedDate, selectedType, step, fetchAvailableSlots]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

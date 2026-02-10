@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Clock, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -25,15 +25,7 @@ export const TimeSlotPicker = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (selectedDate) {
-      fetchAvailableSlots();
-    } else {
-      setSlots([]);
-    }
-  }, [selectedDate, sessionDuration]);
-
-  const fetchAvailableSlots = async () => {
+  const fetchAvailableSlots = useCallback(async () => {
     if (!selectedDate) return;
 
     setLoading(true);
@@ -64,7 +56,15 @@ export const TimeSlotPicker = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedDate, sessionDuration]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetchAvailableSlots();
+    } else {
+      setSlots([]);
+    }
+  }, [selectedDate, sessionDuration, fetchAvailableSlots]);
 
   // Fallback slot generation when database function is not available
   const generateFallbackSlots = (date: Date, duration: number): TimeSlot[] => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -18,11 +18,7 @@ const BookingSuccess = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchBooking();
-  }, [bookingId, stripeSessionId]);
-
-  const fetchBooking = async () => {
+  const fetchBooking = useCallback(async () => {
     try {
       let query = supabase.from("session_bookings").select("*");
 
@@ -51,7 +47,11 @@ const BookingSuccess = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [bookingId, stripeSessionId]);
+
+  useEffect(() => {
+    fetchBooking();
+  }, [fetchBooking]);
 
   const sessionTypeNames: Record<string, string> = {
     discovery: "Discovery Call",
