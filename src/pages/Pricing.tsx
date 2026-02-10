@@ -10,12 +10,7 @@ import {
   isEarlyBird,
   formatEarlyBirdEnd,
 } from "@/lib/pricing";
-import {
-  Crown,
-  Video,
-  FileText,
-  User,
-} from "lucide-react";
+import { Crown } from "lucide-react";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -76,7 +71,7 @@ const Pricing = () => {
             </h1>
 
             <p className="text-lg text-muted-foreground font-sans max-w-2xl mx-auto leading-relaxed">
-              A self-paced journey back to emotional balance, clarity, and inner safety — wherever you are in the world.
+              A 12-month guided membership program that transforms the loneliness, uncertainty, and cultural stress of expat life into your greatest strengths.
             </p>
           </div>
         </PageHero>
@@ -85,10 +80,9 @@ const Pricing = () => {
         <section className="py-8">
           <div className="container px-4">
             <div className="max-w-3xl mx-auto text-center">
-              <div className="space-y-3 text-muted-foreground font-sans leading-relaxed">
-                <p>This is not a program you need to "keep up with." It's a space you return to — at your own rhythm.</p>
-                <p>There are no deadlines, no pressure, and no expectation to be "ready." The program stays open until you finish.</p>
-              </div>
+              <p className="text-muted-foreground font-sans leading-relaxed">
+                Ongoing emotional support and nervous system regulation for expat women.
+              </p>
             </div>
           </div>
         </section>
@@ -116,7 +110,7 @@ const Pricing = () => {
                 Resilient Mind Membership
               </h2>
               <p className="text-center text-muted-foreground font-sans mb-12 max-w-xl mx-auto">
-                This program adapts to you — not the other way around. You move at your own pace.
+                A monthly online membership offering guided practical tools and video support within a holistic approach.
               </p>
 
               <PricingCards cancelUrl="/pricing" />
@@ -125,30 +119,43 @@ const Pricing = () => {
           </div>
         </section>
 
-        {/* Features Comparison */}
+        {/* What's Included */}
         <section className="py-12">
           <div className="container px-4">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-serif font-semibold text-center mb-12">
-                What's Included
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-serif font-semibold text-center mb-4">
+                What's Included in the Membership
               </h2>
+              <p className="text-center text-muted-foreground font-sans mb-12">
+                Every month you receive:
+              </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
                   {
-                    icon: Video,
-                    title: "Video Content",
-                    desc: "48 weekly videos covering EFT tapping, art therapy, and guided meditations throughout the 12-month journey.",
+                    emoji: "🎧",
+                    title: "Guided EFT Sessions",
+                    desc: "Stress, anxiety, emotional regulation, self-safety",
                   },
                   {
-                    icon: FileText,
-                    title: "Workbooks",
-                    desc: "Downloadable worksheets, reflection exercises, and practical tools to support your transformation.",
+                    emoji: "🧠",
+                    title: "One Monthly Theme",
+                    desc: "e.g. stress abroad, loneliness, health challenges, boundaries, stability",
                   },
                   {
-                    icon: User,
-                    title: "Personal Support",
-                    desc: "Premium members receive individual consultation sessions and priority support throughout their journey.",
+                    emoji: "🫶",
+                    title: "Community Support (Skool)",
+                    desc: "For Premium Membership",
+                  },
+                  {
+                    emoji: "📄",
+                    title: "Practical Tools",
+                    desc: "Worksheets, journaling prompts, integration practices",
+                  },
+                  {
+                    emoji: "🤍",
+                    title: "Safe Members-Only Space",
+                    desc: "Connection without pressure, sharing is always optional",
                   },
                 ].map((item, i) => (
                   <div
@@ -156,9 +163,7 @@ const Pricing = () => {
                     className="group bg-card/80 backdrop-blur-sm rounded-3xl border border-border/60 p-1 hover:border-primary/30 transition-all duration-300"
                   >
                     <div className="rounded-[1.25rem] bg-gradient-to-b from-background/60 to-background/30 p-6">
-                      <div className="w-11 h-11 rounded-2xl bg-primary/8 flex items-center justify-center mb-4 group-hover:bg-primary/12 transition-colors">
-                        <item.icon size={20} className="text-primary" />
-                      </div>
+                      <div className="text-2xl mb-3">{item.emoji}</div>
                       <h3 className="text-lg font-serif font-semibold mb-2">
                         {item.title}
                       </h3>

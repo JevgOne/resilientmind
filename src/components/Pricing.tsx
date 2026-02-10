@@ -41,13 +41,10 @@ const Pricing = () => {
             </span>
           </div>
           <h2 className="text-3xl md:text-5xl font-serif font-semibold mb-4">
-            Invest in Your <span className="text-gradient-gold">Wellbeing</span>
+            From Navigating Life Abroad to Truly <span className="text-gradient-gold">Thriving</span>
           </h2>
-          <p className="text-lg text-foreground/90 font-sans mb-3">
-            <strong>4 Transformational Programs</strong> (12 Months Total) with <strong>12 Modules</strong> (A, B, C)
-          </p>
-          <p className="text-muted-foreground font-sans">
-            Choose the membership that fits your needs. All options include access to our supportive expat community.
+          <p className="text-lg text-foreground/90 font-sans">
+            A 12-month guided membership program that transforms the loneliness, uncertainty, and cultural stress of expat life into your greatest strengths.
           </p>
 
           <div className="mt-6">
