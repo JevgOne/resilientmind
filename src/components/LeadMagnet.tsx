@@ -87,19 +87,22 @@ const LeadMagnet = () => {
                 </div>
 
                 <h2 className="text-2xl md:text-4xl font-serif font-semibold mb-4">
-                  Immediate Techniques to Find Calm in Cultural Chaos
+                  Shift Your Energy & Calm Your Mind in Just 30 Minutes a Day
                 </h2>
 
+                <p className="text-muted-foreground font-sans mb-4">
+                  Feeling anxious, stressed, or stuck while living abroad? Struggling with work, language barriers, or just fitting into a new life?
+                </p>
+
                 <p className="text-muted-foreground font-sans mb-6">
-                  Begin your transformation today with our free guide and discover how our Resilient Mind program can transform your expatriate journey.
+                  This free 7-day practice is designed specifically for expats like you. In just 30 minutes a day, you'll:
                 </p>
 
                 <ul className="space-y-3 mb-6">
                   {[
-                    "3 proven resilience techniques for immediate calm",
-                    "Practical exercises you can use right now",
-                    "Introduction to our transformational approach",
-                    "Downloadable PDF guide",
+                    "Ground your energy with morning gratitude",
+                    "Release stress and tension with a simple EFT tapping practice",
+                    "Quiet your mind and reflect in the evening to end the day calmer and more in control",
                   ].map((item, index) => (
                     <li key={index} className="flex items-center gap-3 font-sans text-sm">
                       <CheckCircle size={18} className="text-primary flex-shrink-0" />
@@ -107,6 +110,10 @@ const LeadMagnet = () => {
                     </li>
                   ))}
                 </ul>
+
+                <p className="text-muted-foreground font-sans text-sm italic mb-6">
+                  Even after the first day, you'll notice: "Wow, I feel lighter. I can handle this. I'm not ruled by anxiety."
+                </p>
               </div>
 
               {/* Form */}
