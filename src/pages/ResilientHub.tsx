@@ -275,7 +275,8 @@ const ResilientHub = () => {
           </div>
         </section>
 
-        {/* Additional Resilient Hubs */}
+        {/* Additional Resilient Hubs — visible from 1 June 2026 */}
+        {new Date() >= new Date('2026-06-01T00:00:00') && (
         <section className="py-16 md:py-24 bg-card">
           <div className="container px-4">
             <div className="max-w-4xl mx-auto text-center mb-12">
@@ -326,6 +327,7 @@ const ResilientHub = () => {
             </div>
           </div>
         </section>
+        )}
 
         {/* Pricing */}
         <div id="pricing">

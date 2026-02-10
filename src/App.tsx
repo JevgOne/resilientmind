@@ -45,7 +45,9 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/resilient-hub" element={<ResilientHub />} />
             <Route path="/resilient-hubs" element={<ResilientHubs />} />
-            <Route path="/endometriosis-hub" element={<EndometriosisHub />} />
+            {new Date() >= new Date('2026-06-01T00:00:00') && (
+              <Route path="/endometriosis-hub" element={<EndometriosisHub />} />
+            )}
             <Route path="/booking" element={<Booking />} />
             <Route path="/booking/success" element={<BookingSuccess />} />
             <Route path="/blog" element={<Blog />} />
