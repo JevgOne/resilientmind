@@ -146,7 +146,7 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
                 className={`w-full rounded-full h-12 font-sans font-semibold text-sm transition-all ${
                   isPremium
                     ? "bg-gradient-gold text-white shadow-gold hover:shadow-elevated hover:scale-[1.02]"
-                    : "bg-foreground text-background hover:bg-foreground/90"
+                    : "bg-muted-foreground/60 text-background hover:bg-muted-foreground/70"
                 }`}
               >
                 {loadingTier === tier.id ? (
