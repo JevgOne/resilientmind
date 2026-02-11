@@ -60,7 +60,7 @@ const EndometriosisHub = () => {
 
               <div className="grid md:grid-cols-3 gap-6 mb-12">
                 <div className="bg-card rounded-2xl p-6 border border-border">
-                  <div className="text-sm font-sans font-semibold text-gold mb-3">Module A</div>
+                  <div className="text-sm font-sans font-semibold text-gold mb-3">1st Month</div>
                   <h3 className="text-xl font-serif font-semibold mb-3">The Invisible Load</h3>
                   <p className="text-sm text-muted-foreground mb-4">When pain is unseen but ever-present.</p>
                   <ul className="space-y-2 text-sm text-muted-foreground">
@@ -80,7 +80,7 @@ const EndometriosisHub = () => {
                 </div>
 
                 <div className="bg-card rounded-2xl p-6 border border-border">
-                  <div className="text-sm font-sans font-semibold text-gold mb-3">Module B</div>
+                  <div className="text-sm font-sans font-semibold text-gold mb-3">2nd Month</div>
                   <h3 className="text-xl font-serif font-semibold mb-3">Safety Over Strength</h3>
                   <p className="text-sm text-muted-foreground mb-4">Redefining resilience.</p>
                   <ul className="space-y-2 text-sm text-muted-foreground">
@@ -100,7 +100,7 @@ const EndometriosisHub = () => {
                 </div>
 
                 <div className="bg-card rounded-2xl p-6 border border-border">
-                  <div className="text-sm font-sans font-semibold text-gold mb-3">Module C</div>
+                  <div className="text-sm font-sans font-semibold text-gold mb-3">3rd Month</div>
                   <h3 className="text-xl font-serif font-semibold mb-3">Living Fully Without Waiting</h3>
                   <p className="text-sm text-muted-foreground mb-4">Life now, not later.</p>
                   <ul className="space-y-2 text-sm text-muted-foreground">

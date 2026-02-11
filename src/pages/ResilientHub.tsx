@@ -19,17 +19,17 @@ const programs = [
     quote: "Fear doesn't mean I made a mistake – it means I left the familiar.",
     modules: [
       {
-        name: "Module A",
+        name: "1st Month",
         title: "First Steps: Finding Solid Ground When Everything is New",
         description: "Practical techniques for calming your nervous system while navigating cultural differences, building daily certainty in an unfamiliar environment."
       },
       {
-        name: "Module B",
+        name: "2nd Month",
         title: "Creating Your New Roots: Identity Beyond Borders",
         description: "The profound process of identity transformation during cultural transition. Practical steps for creating an 'inner home' that remains stable regardless of geographic location."
       },
       {
-        name: "Module C",
+        name: "3rd Month",
         title: "The Integration Path: Becoming Part of Your New World",
         description: "The art of balancing preservation of your cultural identity while opening to new ways of being across cultural differences."
       }
@@ -43,17 +43,17 @@ const programs = [
     quote: "I am not broken – I am in transition.",
     modules: [
       {
-        name: "Module A",
+        name: "4th Month",
         title: "The Emotional Terrain of Expatriation: You Are Not Alone",
         description: "Uncovering the hidden emotional phases most expats experience. Practical techniques for transforming isolation into deeper self-knowledge."
       },
       {
-        name: "Module B",
+        name: "5th Month",
         title: "Reclaiming Your Authentic Self: Identity Beyond Cultural Labels",
         description: "Discovering new dimensions of your identity that awaken only through living between cultures. Transformational work with the Byron Katie method."
       },
       {
-        name: "Module C",
+        name: "6th Month",
         title: "Soul Alignment: Finding Meaning in Your Expat Journey",
         description: "Revealing the hidden meaning and purpose behind your expatriation journey through intuitive practices."
       }
@@ -67,17 +67,17 @@ const programs = [
     quote: "I don't rely on certainty—I rely on my own inner guidance.",
     modules: [
       {
-        name: "Module A",
+        name: "7th Month",
         title: "Money Energy Mastery: Uncovering Your Expat Money Story",
         description: "Practical techniques for identifying inherited money beliefs, understanding how your financial mindset shifts when navigating different cultural money values."
       },
       {
-        name: "Module B",
+        name: "8th Month",
         title: "Trust & Abundance: Creating Financial Security Anywhere",
         description: "Building inner certainty independent of external circumstances, how to develop trust in yourself and your ability to thrive in any environment."
       },
       {
-        name: "Module C",
+        name: "9th Month",
         title: "Prosperity Consciousness: Living in Alignment with Abundance",
         description: "Creating a personal manifestation process for attracting opportunities, techniques for recognizing and utilizing hidden financial opportunities."
       }
@@ -91,17 +91,17 @@ const programs = [
     quote: "Belonging isn't found, it's created—through your courageous presence, the seeds of trust, and the daily tending of meaningful connections.",
     modules: [
       {
-        name: "Module A",
+        name: "10th Month",
         title: "Heart Bridges: Nurturing Love Across Distances",
         description: "Rituals for maintaining deep emotional closeness despite physical distance, creative ways of sharing life beyond texts and calls."
       },
       {
-        name: "Module B",
+        name: "11th Month",
         title: "Soul Family: Creating Your Tribe in a New Land",
         description: "Strategies for finding authentic friendships in a foreign environment, recognizing potential 'kindred spirits,' courage to be vulnerable."
       },
       {
-        name: "Module C",
+        name: "12th Month",
         title: "The Integrated Self: Embracing Your Multi-Dimensional Life",
         description: "The culmination of your transformation journey, where separate skills integrate into your new resilient identity."
       }
