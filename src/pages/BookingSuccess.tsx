@@ -265,8 +265,8 @@ const BookingSuccess = () => {
             {/* Contact Info */}
             <div className="text-center mt-12 text-sm text-muted-foreground">
               <p>Have questions? Contact us at</p>
-              <a href="mailto:silvie@resilientmind.io" className="text-primary hover:underline">
-                silvie@resilientmind.io
+              <a href="mailto:contact@resilientmind.io" className="text-primary hover:underline">
+                contact@resilientmind.io
               </a>
             </div>
           </div>

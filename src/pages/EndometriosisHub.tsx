@@ -184,8 +184,8 @@ const EndometriosisHub = () => {
               </div>
               <p className="text-sm text-muted-foreground font-sans mt-6">
                 Questions? Contact me at{" "}
-                <a href="mailto:silvie@resilientmind.io" className="text-primary hover:underline">
-                  silvie@resilientmind.io
+                <a href="mailto:contact@resilientmind.io" className="text-primary hover:underline">
+                  contact@resilientmind.io
                 </a>
               </p>
             </div>

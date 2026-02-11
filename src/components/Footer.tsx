@@ -78,7 +78,6 @@ const Footer = () => {
             <h4 className="font-serif font-semibold text-lg mb-4">Contact</h4>
             <ul className="space-y-3 text-muted-foreground font-sans">
               <li><a href="mailto:contact@resilientmind.io" className="hover:text-primary transition-colors">contact@resilientmind.io</a></li>
-              <li><a href="mailto:silvie@resilientmind.io" className="hover:text-primary transition-colors">silvie@resilientmind.io</a></li>
               <li>Based in Spain, serving worldwide</li>
               <li className="pt-4">
                 <Link
