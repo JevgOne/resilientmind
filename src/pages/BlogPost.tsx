@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Calendar, Tag, ArrowLeft, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import SEO from '@/components/SEO';
 
 interface BlogPost {
   id: string;
@@ -97,6 +98,29 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={`${post.title} | Resilient Mind Blog`}
+        description={post.excerpt || post.content.substring(0, 160)}
+        path={`/blog/${post.slug}`}
+        ogType="article"
+        ogImage={post.featured_image_url || undefined}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          "headline": post.title,
+          "description": post.excerpt || post.content.substring(0, 160),
+          "image": post.featured_image_url || undefined,
+          "datePublished": post.published_at || undefined,
+          "author": {
+            "@type": "Person",
+            "name": "Silvie Bogdanova"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Resilient Mind"
+          }
+        }}
+      />
       <Navbar />
 
       <main className="pt-20 pb-16">

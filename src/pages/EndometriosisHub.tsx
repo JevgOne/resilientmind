@@ -165,7 +165,7 @@ const EndometriosisHub = () => {
                 Ready to Begin?
               </h2>
               <p className="text-muted-foreground font-sans mb-8">
-                Access all three modules plus personal consultation for a one-time fee of €127.
+                Access all three modules plus personal consultation for a one-time fee of €147.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link

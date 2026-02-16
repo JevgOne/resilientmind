@@ -214,8 +214,8 @@ const PricingSuccess = () => {
                           Book a free discovery call
                         </Link>{" "}
                         or reach out to us at{" "}
-                        <a href="mailto:support@resilient-journeys.com" className="text-primary hover:underline font-medium">
-                          support@resilient-journeys.com
+                        <a href="mailto:contact@resilientmind.io" className="text-primary hover:underline font-medium">
+                          contact@resilientmind.io
                         </a>
                       </p>
                     </CardContent>

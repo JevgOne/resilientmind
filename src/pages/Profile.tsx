@@ -296,10 +296,19 @@ const Profile = () => {
 
                 {profile.membership_type !== 'free' && (
                   <div className="pt-4 border-t border-gold/10">
-                    <Button variant="outline" className="w-full border-gold/30">
+                    <Button
+                      variant="outline"
+                      className="w-full border-gold/30"
+                      onClick={() => {
+                        window.location.href = 'mailto:contact@resilientmind.io?subject=Payment%20Management%20Request';
+                      }}
+                    >
                       <CreditCard className="h-4 w-4 mr-2" />
                       Manage Payment
                     </Button>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                      Contact us to manage your payment details
+                    </p>
                   </div>
                 )}
               </CardContent>

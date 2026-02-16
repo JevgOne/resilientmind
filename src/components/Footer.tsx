@@ -92,29 +92,41 @@ const Footer = () => {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground font-sans">
-            © {new Date().getFullYear()} Resilient Mind. All rights reserved.
-          </p>
-          <div className="flex gap-6">
-            <Link
-              to="/privacy"
-              className="text-sm text-muted-foreground font-sans hover:text-primary transition-colors"
+        <div className="border-t border-border mt-12 pt-8 flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-muted-foreground font-sans">
+              © {new Date().getFullYear()} Resilient Mind. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              <Link
+                to="/privacy"
+                className="text-sm text-muted-foreground font-sans hover:text-primary transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/terms"
+                className="text-sm text-muted-foreground font-sans hover:text-primary transition-colors"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                to="/cookies"
+                className="text-sm text-muted-foreground font-sans hover:text-primary transition-colors"
+              >
+                Cookies Policy
+              </Link>
+            </div>
+          </div>
+          <div className="flex justify-center">
+            <a
+              href="https://weblyx.cz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-muted-foreground/60 font-sans hover:text-primary transition-colors"
             >
-              Privacy Policy
-            </Link>
-            <Link
-              to="/terms"
-              className="text-sm text-muted-foreground font-sans hover:text-primary transition-colors"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              to="/cookies"
-              className="text-sm text-muted-foreground font-sans hover:text-primary transition-colors"
-            >
-              Cookies Policy
-            </Link>
+              Web vytvořil Weblyx
+            </a>
           </div>
         </div>
       </div>

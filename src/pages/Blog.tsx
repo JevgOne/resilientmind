@@ -6,6 +6,7 @@ import { BookOpen, Calendar, ArrowRight, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
 import PageHero from "@/components/PageHero";
 import SEO from "@/components/SEO";
+import { toast } from 'sonner';
 
 interface BlogPost {
   id: string;
@@ -21,6 +22,8 @@ interface BlogPost {
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -38,6 +41,30 @@ const Blog = () => {
       setPosts(data);
     }
     setLoading(false);
+  };
+
+  const handleSubscribe = async () => {
+    if (!email || !email.includes('@')) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+
+    setSubscribing(true);
+    const { error } = await supabase
+      .from('lead_magnets')
+      .insert({ email, source: 'blog_newsletter' });
+
+    if (error) {
+      if (error.code === '23505') {
+        toast.info('You are already subscribed!');
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
+    } else {
+      toast.success('Thank you for subscribing!');
+      setEmail('');
+    }
+    setSubscribing(false);
   };
 
   const formatDate = (dateString: string | null) => {
@@ -167,10 +194,17 @@ const Blog = () => {
                   <input
                     type="email"
                     placeholder="Your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
                     className="flex-1 px-4 py-3 rounded-xl border border-border bg-background font-sans text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
-                  <button className="px-6 py-3 bg-gradient-gold text-primary-foreground font-sans font-semibold rounded-xl shadow-gold hover:shadow-elevated transition-all">
-                    Subscribe
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={subscribing}
+                    className="px-6 py-3 bg-gradient-gold text-primary-foreground font-sans font-semibold rounded-xl shadow-gold hover:shadow-elevated transition-all disabled:opacity-50"
+                  >
+                    {subscribing ? 'Subscribing...' : 'Subscribe'}
                   </button>
                 </div>
               </div>

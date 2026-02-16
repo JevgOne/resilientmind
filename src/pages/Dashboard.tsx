@@ -125,7 +125,9 @@ const Dashboard = () => {
     }
   }, [user, loading, navigate]);
 
-  // Redirect admin users to admin panel
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin (but don't redirect - allow access to dashboard)
   useEffect(() => {
     const checkAdminRole = async () => {
       if (!user) return;
@@ -134,14 +136,14 @@ const Dashboard = () => {
         .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
       if (!error && data) {
-        navigate('/admin');
+        setIsAdmin(true);
       }
     };
 
     if (!loading && user) {
       checkAdminRole();
     }
-  }, [user, loading, navigate]);
+  }, [user, loading]);
 
   // Welcome message for free guide users
   useEffect(() => {

@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Calendar, Tag, ArrowLeft, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import SEO from '@/components/SEO';
 import WorkshopInquiryForm from '@/components/WorkshopInquiryForm';
 import WorkshopRegistration from '@/components/WorkshopRegistration';
 
@@ -104,6 +105,24 @@ const WorkshopPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={`${workshop.title} | Resilient Mind Workshops`}
+        description={workshop.excerpt || workshop.content.substring(0, 160)}
+        path={`/workshopy/${workshop.slug}`}
+        ogType="article"
+        ogImage={workshop.featured_image_url || undefined}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Event",
+          "name": workshop.title,
+          "description": workshop.excerpt || workshop.content.substring(0, 160),
+          "image": workshop.featured_image_url || undefined,
+          "organizer": {
+            "@type": "Organization",
+            "name": "Resilient Mind"
+          }
+        }}
+      />
       <Navbar />
 
       <main className="pt-20 pb-16">
