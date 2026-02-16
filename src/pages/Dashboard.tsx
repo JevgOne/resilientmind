@@ -125,26 +125,6 @@ const Dashboard = () => {
     }
   }, [user, loading, navigate]);
 
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  // Check if user is admin (but don't redirect - allow access to dashboard)
-  useEffect(() => {
-    const checkAdminRole = async () => {
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .rpc('has_role', { _user_id: user.id, _role: 'admin' });
-
-      if (!error && data) {
-        setIsAdmin(true);
-      }
-    };
-
-    if (!loading && user) {
-      checkAdminRole();
-    }
-  }, [user, loading]);
-
   // Welcome message for free guide users
   useEffect(() => {
     if (!loading && user && searchParams.get('free_guide') === 'true') {
