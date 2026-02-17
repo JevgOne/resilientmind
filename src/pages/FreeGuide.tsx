@@ -73,10 +73,13 @@ const FreeGuide = () => {
         });
         if (error) throw error;
 
-        // Fire-and-forget: add contact to Brevo (non-critical)
+        // Fire-and-forget: add contact to Brevo + send free guide email
         supabase.functions.invoke('brevo-add-contact', {
           body: { email: formData.email, name: formData.name || undefined },
-        }).catch(() => { /* Brevo sync is non-blocking */ });
+        }).catch(() => {});
+        supabase.functions.invoke('send-free-guide', {
+          body: { email: formData.email, name: formData.name || undefined },
+        }).catch(() => {});
       } else {
         const { error } = await supabase.auth.signInWithOtp({
           email: formData.email,
@@ -90,10 +93,13 @@ const FreeGuide = () => {
         });
         if (error) throw error;
 
-        // Fire-and-forget: add contact to Brevo (non-critical)
+        // Fire-and-forget: add contact to Brevo + send free guide email
         supabase.functions.invoke('brevo-add-contact', {
           body: { email: formData.email, name: formData.name || undefined },
-        }).catch(() => { /* Brevo sync is non-blocking */ });
+        }).catch(() => {});
+        supabase.functions.invoke('send-free-guide', {
+          body: { email: formData.email, name: formData.name || undefined },
+        }).catch(() => {});
       }
 
       toast.success('Check your email for the magic link!');
