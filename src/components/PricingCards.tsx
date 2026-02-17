@@ -32,29 +32,18 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
     }
     setLoadingTier(productType);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify({
-            product_type: productType,
-            user_id: userData.user.id,
-            success_url: `${window.location.origin}/pricing/success`,
-            cancel_url: `${window.location.origin}${cancelUrl}`,
-          }),
-        }
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create checkout session");
+      const { data, error: fnError } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          planId: productType,
+          successUrl: `${window.location.origin}/pricing/success`,
+          cancelUrl: `${window.location.origin}${cancelUrl}`,
+        },
+      });
+
+      if (fnError) {
+        throw new Error(fnError.message || "Failed to create checkout session");
       }
-      const data = await response.json();
-      if (data.url) window.location.href = data.url;
+      if (data?.url) window.location.href = data.url;
       else throw new Error("No checkout URL returned");
     } catch (error: any) {
       console.error("Checkout error:", error);
