@@ -25,8 +25,6 @@ serve(async (req) => {
       throw new Error("Email is required");
     }
 
-    const firstName = name?.split(" ")[0] || "";
-
     const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -39,50 +37,61 @@ serve(async (req) => {
 
     <div style="text-align:center;margin-bottom:32px;">
       <h1 style="font-size:28px;color:#2d2d2d;margin:0 0 8px;">Resilient Mind</h1>
-      <p style="font-size:14px;color:#8a8578;margin:0;">Your 7-Day Practice Kit</p>
+      <p style="font-size:14px;color:#8a8578;margin:0;">Your Free 7-Day Practice Kit</p>
     </div>
 
     <div style="background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e8e4dc;">
 
-      <p style="font-size:18px;margin:0 0 16px;">Hi${firstName ? ` ${firstName}` : ""},</p>
+      <p style="font-size:18px;margin:0 0 16px;">Hi there,</p>
 
-      <p style="font-size:16px;line-height:1.6;color:#4a4a4a;margin:0 0 24px;">
-        Thank you for signing up! Here are your free resources to start building calm, clarity, and resilience — one day at a time.
+      <p style="font-size:16px;line-height:1.6;color:#4a4a4a;margin:0 0 8px;">
+        Welcome to Resilient Mind! &#127881;
       </p>
 
-      <div style="margin-bottom:16px;">
-        <a href="${SITE_URL}/assets/7-Day-Gratitude-Workbook.pdf"
-           style="display:block;padding:16px 20px;background:#faf5eb;border:1px solid #e8dcc8;border-radius:12px;text-decoration:none;color:#2d2d2d;margin-bottom:12px;">
-          <strong style="display:block;font-size:16px;">&#9776; 7-Day Gratitude Workbook</strong>
-          <span style="font-size:14px;color:#8a8578;">Morning practice &amp; evening reflection (PDF)</span>
-        </a>
+      <p style="font-size:16px;line-height:1.6;color:#4a4a4a;margin:0 0 24px;">
+        Get ready to shift your energy and feel calmer, clearer, and more resilient with simple, practical tools &#8212; designed especially for expats.
+      </p>
+
+      <div style="border-top:1px solid #e8e4dc;padding-top:24px;margin-bottom:24px;">
+        <p style="font-size:16px;font-weight:bold;color:#2d2d2d;margin:0 0 16px;">Your 7-Day Practice Includes:</p>
+
+        <div style="padding:14px 20px;background:#faf5eb;border:1px solid #e8dcc8;border-radius:12px;margin-bottom:12px;">
+          <strong style="font-size:15px;">&#127749; Morning Gratitude Workbook</strong>
+          <span style="display:block;font-size:14px;color:#8a8578;margin-top:4px;">Start your day grounded and focused</span>
+        </div>
+
+        <div style="padding:14px 20px;background:#faf5eb;border:1px solid #e8dcc8;border-radius:12px;margin-bottom:12px;">
+          <strong style="font-size:15px;">&#127780;&#65039; Midday EFT Tapping Video + Workbook</strong>
+          <span style="display:block;font-size:14px;color:#8a8578;margin-top:4px;">Release stress and tension</span>
+        </div>
+
+        <div style="padding:14px 20px;background:#faf5eb;border:1px solid #e8dcc8;border-radius:12px;margin-bottom:12px;">
+          <strong style="font-size:15px;">&#127769; Evening Reflection</strong>
+          <span style="display:block;font-size:14px;color:#8a8578;margin-top:4px;">End your day with clarity and calm</span>
+        </div>
       </div>
 
-      <div style="margin-bottom:16px;">
-        <a href="${SITE_URL}/assets/7-Day-EFT-Workbook-for-Expats.pdf"
-           style="display:block;padding:16px 20px;background:#faf5eb;border:1px solid #e8dcc8;border-radius:12px;text-decoration:none;color:#2d2d2d;margin-bottom:12px;">
-          <strong style="display:block;font-size:16px;">&#9995; 7-Day EFT Tapping Workbook</strong>
-          <span style="font-size:14px;color:#8a8578;">Release stress &amp; rebuild confidence (PDF)</span>
-        </a>
-      </div>
+      <p style="font-size:16px;line-height:1.6;color:#4a4a4a;margin:0 0 24px;">
+        Just 30 minutes a day to feel your energy shift and your mind relax. No pressure, no perfection &#8212; only simple tools for real life abroad.
+      </p>
 
-      <div style="padding:16px 20px;background:#faf5eb;border:1px solid #e8dcc8;border-radius:12px;margin-bottom:24px;">
-        <strong style="display:block;font-size:16px;">&#9654; Guided EFT Tapping Video</strong>
-        <span style="font-size:14px;color:#8a8578;">Check your inbox for a magic link to access the video in your dashboard</span>
-      </div>
-
-      <div style="border-top:1px solid #e8e4dc;padding-top:24px;margin-top:8px;">
-        <p style="font-size:15px;line-height:1.6;color:#4a4a4a;margin:0 0 16px;">
-          <strong>How to use your kit:</strong><br>
-          &#127749; <strong>Morning</strong> — Gratitude Workbook (10 min)<br>
-          &#127780; <strong>Midday</strong> — EFT Tapping Video + Workbook (15 min)<br>
-          &#127769; <strong>Evening</strong> — Reflection in the Gratitude Workbook (5 min)
+      <div style="border-top:1px solid #e8e4dc;padding-top:24px;margin-bottom:24px;">
+        <p style="font-size:16px;font-weight:bold;color:#2d2d2d;margin:0 0 8px;">What&#8217;s next:</p>
+        <p style="font-size:15px;line-height:1.6;color:#4a4a4a;margin:0;">
+          Check your inbox &#8212; in the next email, you&#8217;ll receive all the workbooks, guided EFT video, and links to get started immediately for free.
         </p>
       </div>
 
-      <p style="font-size:14px;color:#8a8578;margin:24px 0 0;text-align:center;">
-        Questions? Reply to this email or contact us at
-        <a href="mailto:contact@resilientmind.io" style="color:#b8976a;">contact@resilientmind.io</a>
+      <div style="text-align:center;padding:20px;background:#faf5eb;border:1px solid #e8dcc8;border-radius:12px;margin-bottom:24px;">
+        <p style="font-size:15px;color:#4a4a4a;margin:0;">
+          &#128155; Love to share? Send your friends<br>
+          <a href="${SITE_URL}/free-guide" style="color:#b8976a;font-weight:bold;text-decoration:none;">resilientmind.io/free-guide</a><br>
+          so they can join too!
+        </p>
+      </div>
+
+      <p style="font-size:16px;color:#4a4a4a;margin:0;">
+        Warmly,<br><strong>Silvie</strong>
       </p>
     </div>
 
@@ -107,7 +116,7 @@ serve(async (req) => {
           email: "contact@resilientmind.io",
         },
         to: [{ email, name: name || undefined }],
-        subject: "Your Free 7-Day Practice Kit is here! 🌿",
+        subject: "Welcome to Resilient Mind \u2013 Your Free 7-Day Practice Kit \ud83c\udf05",
         htmlContent,
       }),
     });
