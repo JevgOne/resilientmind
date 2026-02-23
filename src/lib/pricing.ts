@@ -1,4 +1,4 @@
-export const EARLY_BIRD_END = new Date('2026-04-25T23:59:59Z');
+export const EARLY_BIRD_END = new Date('2026-03-31T23:59:59Z');
 
 export function isEarlyBird(): boolean {
   return new Date() < EARLY_BIRD_END;
@@ -155,5 +155,5 @@ export function getTierPrice(tier: MembershipTier): number {
 }
 
 export function formatEarlyBirdEnd(): string {
-  return '25.4.2026';
+  return '31.3.2026';
 }

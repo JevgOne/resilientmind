@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Early-bird cutoff — must match frontend (src/lib/pricing.ts)
-const EARLY_BIRD_END = new Date('2026-04-25T23:59:59Z');
+const EARLY_BIRD_END = new Date('2026-03-31T23:59:59Z');
 function isEarlyBird(): boolean {
   return new Date() < EARLY_BIRD_END;
 }
