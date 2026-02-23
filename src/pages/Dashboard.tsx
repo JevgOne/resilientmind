@@ -47,6 +47,8 @@ interface VideoCategory {
   description: string;
   month_number: number;
   icon: string;
+  is_additional_hub?: boolean;
+  hub_slug?: string | null;
 }
 
 interface Video {
@@ -127,9 +129,15 @@ const Dashboard = () => {
     if (video.is_free) return true;
     if (!profile) return false;
 
+    // Check if video belongs to a purchased hub
+    const category = categories.find(c => c.id === video.category_id);
+    if (category?.is_additional_hub && category.hub_slug) {
+      return (profile.purchased_hubs || []).includes(category.hub_slug);
+    }
+
     const membershipOrder = { free: 0, basic: 1, premium: 2 };
     return membershipOrder[profile.membership_type] >= membershipOrder[video.min_membership];
-  }, [profile]);
+  }, [profile, categories]);
 
   useEffect(() => {
     if (!loading && !user) {

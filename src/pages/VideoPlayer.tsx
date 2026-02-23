@@ -40,10 +40,15 @@ const VideoPlayer = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [progressLoading, setProgressLoading] = useState(false);
 
-  // Check if user has access based on membership
-  const hasAccess = useCallback((videoMinMembership: MembershipType, isFree: boolean): boolean => {
+  // Check if user has access based on membership or purchased hubs
+  const hasAccess = useCallback((videoMinMembership: MembershipType, isFree: boolean, categoryIsHub?: boolean, categoryHubSlug?: string | null): boolean => {
     if (isFree) return true;
     if (!profile) return false;
+
+    // Check if this is a purchased hub video
+    if (categoryIsHub && categoryHubSlug) {
+      return (profile.purchased_hubs || []).includes(categoryHubSlug);
+    }
 
     const userLevel = membershipHierarchy[profile.membership_type as MembershipType] || 0;
     const requiredLevel = membershipHierarchy[videoMinMembership] || 1;
@@ -129,17 +134,21 @@ const VideoPlayer = () => {
           .single();
 
         if (error) {
-          // If we can't fetch, try to get minimal info to show upgrade prompt
-          // This requires a separate query without RLS (not possible directly)
-          // So we'll just show a generic access denied
           setAccessDenied(true);
           setLoading(false);
           return;
         }
 
         if (data) {
+          // Fetch category to check if it's a hub
+          const { data: category } = await supabase
+            .from('video_categories')
+            .select('is_additional_hub, hub_slug')
+            .eq('id', data.category_id)
+            .single();
+
           // Double-check access on frontend
-          if (!hasAccess(data.min_membership as MembershipType, data.is_free)) {
+          if (!hasAccess(data.min_membership as MembershipType, data.is_free, category?.is_additional_hub, category?.hub_slug)) {
             setAccessDenied(true);
             setRequiredMembership(data.min_membership as MembershipType);
           } else {
