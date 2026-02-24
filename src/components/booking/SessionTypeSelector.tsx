@@ -191,6 +191,11 @@ export const SessionTypeSelector = ({
                   <p className="text-sm text-muted-foreground mb-2">
                     {type.description}
                   </p>
+                  {(type.session_type === 'family' || type.session_type === 'endometriosis_support') && (
+                    <p className="text-xs text-amber-600 font-medium mb-2">
+                      Available for booking from June 2026. Currently being refined to offer you the best possible experience.
+                    </p>
+                  )}
                   <div className="flex items-center gap-3 text-sm">
                     <span className="flex items-center gap-1 text-muted-foreground">
                       <Clock className="h-4 w-4" />
