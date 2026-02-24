@@ -115,19 +115,11 @@ const Blog = () => {
             </div>
         </PageHero>
 
-        {/* Blog Posts */}
-        <section className="py-16 md:py-24 bg-background">
-          <div className="container px-4">
-            <div className="max-w-4xl mx-auto">
-              {loading ? (
-                <div className="text-center py-12">
-                  <div className="animate-pulse text-gold">Loading articles...</div>
-                </div>
-              ) : posts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No articles published yet. Check back soon!</p>
-                </div>
-              ) : (
+        {/* Blog Posts — only show when there are published posts */}
+        {!loading && posts.length > 0 && (
+          <section className="py-16 md:py-24 bg-background">
+            <div className="container px-4">
+              <div className="max-w-4xl mx-auto">
                 <div className="grid gap-8">
                   {posts.map((post) => (
                     <article
@@ -179,10 +171,23 @@ const Blog = () => {
                     </article>
                   ))}
                 </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Coming Soon + Newsletter */}
+        <section className="py-16 md:py-24 bg-background">
+          <div className="container px-4">
+            <div className="max-w-4xl mx-auto">
+              {!loading && posts.length === 0 && (
+                <div className="text-center py-12 mb-8">
+                  <p className="text-lg text-muted-foreground font-sans">Articles coming soon. Subscribe below to be notified!</p>
+                </div>
               )}
 
               {/* Newsletter CTA */}
-              <div className="mt-16 bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5 rounded-3xl p-8 md:p-12 text-center">
+              <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5 rounded-3xl p-8 md:p-12 text-center">
                 <h3 className="text-2xl font-serif font-semibold mb-4">
                   Never Miss an Article
                 </h3>
