@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Play, ChevronDown, ChevronRight, Lock, Unlock, Clock, Film } from 'lucide-react';
+import { Plus, Pencil, Trash2, Play, ChevronDown, ChevronRight, Lock, Unlock, Clock, Film, Upload, FileText, Loader2, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface Video {
@@ -56,6 +56,14 @@ const AdminVideos = () => {
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
   const [openMonths, setOpenMonths] = useState<Set<string>>(new Set());
 
+  // Workbook state
+  const [workbookUrl, setWorkbookUrl] = useState('');
+  const [workbookResourceId, setWorkbookResourceId] = useState<string | null>(null);
+  const [workbookUploading, setWorkbookUploading] = useState(false);
+  const workbookFileRef = useRef<HTMLInputElement>(null);
+  // Map of video_id -> resource for showing workbook indicator in list
+  const [workbookMap, setWorkbookMap] = useState<Record<string, boolean>>({});
+
   const defaultForm = {
     title: '',
     description: '',
@@ -77,12 +85,18 @@ const AdminVideos = () => {
   }, []);
 
   const fetchData = async () => {
-    const [videosRes, categoriesRes] = await Promise.all([
+    const [videosRes, categoriesRes, workbooksRes] = await Promise.all([
       supabase.from('videos').select('*').order('sort_order'),
       supabase.from('video_categories').select('id, name, month_number').order('month_number'),
+      supabase.from('resources').select('video_id').not('video_id', 'is', null),
     ]);
     if (videosRes.data) setVideos(videosRes.data as Video[]);
     if (categoriesRes.data) setCategories(categoriesRes.data);
+    if (workbooksRes.data) {
+      const map: Record<string, boolean> = {};
+      workbooksRes.data.forEach((r: any) => { if (r.video_id) map[r.video_id] = true; });
+      setWorkbookMap(map);
+    }
     setLoading(false);
   };
 
@@ -92,9 +106,11 @@ const AdminVideos = () => {
       category_id: categories[0]?.id || '',
     });
     setEditingVideo(null);
+    setWorkbookUrl('');
+    setWorkbookResourceId(null);
   };
 
-  const handleEdit = (video: Video) => {
+  const handleEdit = async (video: Video) => {
     setEditingVideo(video);
     setFormData({
       title: video.title,
@@ -110,7 +126,85 @@ const AdminVideos = () => {
       video_type: video.video_type,
       is_intro: video.is_intro,
     });
+
+    // Fetch existing workbook for this video
+    const { data: workbookData } = await supabase
+      .from('resources')
+      .select('id, file_url')
+      .eq('video_id', video.id)
+      .maybeSingle();
+
+    if (workbookData) {
+      setWorkbookUrl(workbookData.file_url);
+      setWorkbookResourceId(workbookData.id);
+    } else {
+      setWorkbookUrl('');
+      setWorkbookResourceId(null);
+    }
+
     setDialogOpen(true);
+  };
+
+  const handleWorkbookUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setWorkbookUploading(true);
+    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+
+    try {
+      const { error } = await supabase.storage
+        .from('resources')
+        .upload(fileName, file, { contentType: file.type });
+
+      if (error) {
+        if (error.message?.includes('not found') || error.message?.includes('Bucket')) {
+          toast.error('Storage bucket "resources" not found. Create it in Supabase Dashboard → Storage.');
+        } else {
+          toast.error('Upload error: ' + error.message);
+        }
+        setWorkbookUploading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('resources')
+        .getPublicUrl(fileName);
+
+      setWorkbookUrl(urlData.publicUrl);
+      toast.success('Workbook uploaded!');
+    } catch (err: any) {
+      toast.error('Upload failed: ' + err.message);
+    } finally {
+      setWorkbookUploading(false);
+      if (workbookFileRef.current) workbookFileRef.current.value = '';
+    }
+  };
+
+  const saveWorkbookResource = async (videoId: string, videoData: any) => {
+    if (workbookUrl) {
+      const resourcePayload = {
+        video_id: videoId,
+        title: `${videoData.title} — Workbook`,
+        resource_type: 'pdf' as const,
+        file_url: workbookUrl,
+        min_membership: videoData.min_membership,
+        is_free: videoData.is_free,
+        category_id: videoData.category_id,
+        week_number: videoData.week_number,
+      };
+
+      if (workbookResourceId) {
+        // Update existing
+        await supabase.from('resources').update(resourcePayload).eq('id', workbookResourceId);
+      } else {
+        // Create new
+        await supabase.from('resources').insert(resourcePayload);
+      }
+    } else if (workbookResourceId) {
+      // Workbook was removed — delete the resource row
+      await supabase.from('resources').delete().eq('id', workbookResourceId);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,10 +232,18 @@ const AdminVideos = () => {
     if (editingVideo) {
       const { error } = await supabase.from('videos').update(videoData).eq('id', editingVideo.id);
       if (error) { console.error('Video update error:', error); toast.error('Error: ' + error.message); return; }
+
+      // Handle workbook resource
+      await saveWorkbookResource(editingVideo.id, videoData);
       toast.success('Video updated');
     } else {
-      const { error } = await supabase.from('videos').insert(videoData);
+      const { data: insertedVideo, error } = await supabase.from('videos').insert(videoData).select('id').single();
       if (error) { console.error('Video insert error:', error); toast.error('Error: ' + error.message); return; }
+
+      // Handle workbook resource for new video
+      if (insertedVideo) {
+        await saveWorkbookResource(insertedVideo.id, videoData);
+      }
       toast.success('Video added');
     }
     setDialogOpen(false);
@@ -305,6 +407,54 @@ const AdminVideos = () => {
                 <Input type="url" value={formData.thumbnail_url} onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })} />
               </div>
 
+              {/* Workbook PDF */}
+              <div>
+                <Label className="flex items-center gap-2 mb-2">
+                  <FileText className="h-4 w-4" />
+                  Workbook PDF (optional)
+                </Label>
+                <input
+                  ref={workbookFileRef}
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={handleWorkbookUpload}
+                />
+                {workbookUploading ? (
+                  <div className="border-2 border-dashed border-gold/30 rounded-lg p-4 text-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-gold mx-auto mb-1" />
+                    <span className="text-sm text-muted-foreground">Uploading...</span>
+                  </div>
+                ) : workbookUrl ? (
+                  <div className="flex items-center gap-2 p-3 border border-gold/30 rounded-lg bg-gold/5">
+                    <FileText className="h-5 w-5 text-gold flex-shrink-0" />
+                    <span className="text-sm truncate flex-1">{workbookUrl.split('/').pop()}</span>
+                    <Button type="button" variant="outline" size="sm" onClick={() => workbookFileRef.current?.click()}>
+                      Replace
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setWorkbookUrl('')}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-4 text-center space-y-2">
+                    <Upload className="h-6 w-6 mx-auto text-muted-foreground/50" />
+                    <p className="text-xs text-muted-foreground">Upload PDF or paste URL below</p>
+                    <Button type="button" variant="outline" size="sm" onClick={() => workbookFileRef.current?.click()}>
+                      <Upload className="h-3.5 w-3.5 mr-1.5" /> Choose File
+                    </Button>
+                  </div>
+                )}
+                {!workbookUrl && (
+                  <Input
+                    className="mt-2"
+                    placeholder="https://... (workbook PDF URL)"
+                    value={workbookUrl}
+                    onChange={(e) => setWorkbookUrl(e.target.value)}
+                  />
+                )}
+              </div>
+
               {/* Switches */}
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
@@ -382,6 +532,13 @@ const AdminVideos = () => {
                               <p className="text-xs text-muted-foreground truncate mt-0.5">{video.description}</p>
                             )}
                           </div>
+
+                          {/* Workbook indicator */}
+                          {workbookMap[video.id] && (
+                            <span className="text-xs text-gold hidden sm:flex items-center gap-0.5" title="Has workbook">
+                              <FileText className="h-3 w-3" />
+                            </span>
+                          )}
 
                           {/* Week */}
                           {video.week_number && (

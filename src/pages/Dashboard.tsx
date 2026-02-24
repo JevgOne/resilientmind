@@ -321,78 +321,6 @@ const Dashboard = () => {
     );
   }
 
-  // VideoCard Component
-  const VideoCard = ({
-    video,
-    videoType,
-    hasAccess
-  }: {
-    video: Video | null;
-    videoType: 'eft' | 'art' | 'meditation';
-    hasAccess: boolean;
-  }) => {
-    const typeIcons = {
-      eft: '🎭',
-      art: '🎨',
-      meditation: '🧘'
-    };
-
-    const typeLabels = {
-      eft: 'EFT Tapping',
-      art: 'Art Therapy',
-      meditation: 'Meditation'
-    };
-
-    const isDisabled = !video;
-
-    return (
-      <Card className={`border-gold/20 ${isDisabled ? 'opacity-50 bg-muted/30' : 'hover:shadow-elegant transition-all'}`}>
-        <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">{typeIcons[videoType]}</span>
-            <div>
-              <CardTitle className="font-serif text-lg">
-                {video ? video.title : typeLabels[videoType]}
-              </CardTitle>
-              {!video && (
-                <CardDescription className="text-xs">Coming soon</CardDescription>
-              )}
-            </div>
-          </div>
-          {video?.description && (
-            <CardDescription className="text-sm line-clamp-2">
-              {video.description}
-            </CardDescription>
-          )}
-        </CardHeader>
-        <CardContent>
-          {video ? (
-            hasAccess ? (
-              <Button
-                className="w-full bg-gold hover:bg-gold-dark text-white"
-                onClick={() => navigate(`/video/${video.id}`)}
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Watch Video
-              </Button>
-            ) : (
-              <Button asChild variant="outline" className="w-full border-gold text-gold hover:bg-gold hover:text-white">
-                <Link to="/resilient-hub">
-                  <Lock className="h-4 w-4 mr-2" />
-                  Unlock
-                </Link>
-              </Button>
-            )
-          ) : (
-            <Button disabled variant="ghost" className="w-full">
-              Not Available
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-
   // CategoryWeekView Component
   const CategoryWeekView = () => {
     const category = categories.find(c => c.id === selectedCategory);
@@ -400,16 +328,15 @@ const Dashboard = () => {
 
     const IconComponent = iconMap[category.icon] || Heart;
     const categoryVideos = videos.filter(v => v.category_id === category.id);
-    const categoryResources = resources.filter(r => r.category_id === category.id);
 
-    // Get videos for selected week
-    const weekVideos = categoryVideos.filter(v => v.week_number === selectedWeek && !v.is_intro);
-    const eftVideo = weekVideos.find(v => v.video_type === 'eft') || null;
-    const artVideo = weekVideos.find(v => v.video_type === 'art' || v.video_type === 'art_therapy') || null;
-    const meditationVideo = weekVideos.find(v => v.video_type === 'meditation') || null;
+    // Get video for selected week (1 video per week)
+    const weekVideo = categoryVideos.find(v => v.week_number === selectedWeek && !v.is_intro) || null;
+    const hasAccess = weekVideo ? canAccessVideo(weekVideo) : false;
 
-    // Get resources for selected week
-    const weekResources = categoryResources.filter(r => r.week_number === selectedWeek);
+    // Get workbook linked to this video via video_id
+    const workbook = weekVideo
+      ? resources.find(r => r.video_id === weekVideo.id)
+      : null;
 
     return (
       <div className="space-y-6">
@@ -453,100 +380,85 @@ const Dashboard = () => {
             ))}
           </TabsList>
 
-          {[1, 2, 3, 4].map(week => (
-            <TabsContent key={week} value={week.toString()} className="space-y-8 mt-6">
-              {/* Video Cards Section */}
-              <div>
-                <h3 className="font-serif text-xl mb-4 flex items-center gap-2">
-                  <Play className="h-5 w-5 text-gold" />
-                  Week {week} Videos
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <VideoCard
-                    video={eftVideo}
-                    videoType="eft"
-                    hasAccess={eftVideo ? canAccessVideo(eftVideo) : false}
-                  />
-                  <VideoCard
-                    video={artVideo}
-                    videoType="art"
-                    hasAccess={artVideo ? canAccessVideo(artVideo) : false}
-                  />
-                  <VideoCard
-                    video={meditationVideo}
-                    videoType="meditation"
-                    hasAccess={meditationVideo ? canAccessVideo(meditationVideo) : false}
-                  />
-                </div>
-              </div>
+          {[1, 2, 3, 4].map(week => {
+            const wVideo = categoryVideos.find(v => v.week_number === week && !v.is_intro) || null;
+            const wAccess = wVideo ? canAccessVideo(wVideo) : false;
+            const wWorkbook = wVideo ? resources.find(r => r.video_id === wVideo.id) : null;
 
-              {/* Resources Section */}
-              {weekResources.length > 0 && (
-                <div>
-                  <h3 className="font-serif text-xl mb-4 flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-gold" />
-                    Week {week} Resources
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {weekResources.map((resource) => {
-                      const IconComponent = getResourceIcon(resource.resource_type);
-                      return (
-                        <Card key={resource.id} className="border-gold/20 hover:shadow-elegant transition-all">
-                          <CardHeader>
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-center gap-2">
-                                <div className="p-2 bg-gold/10 rounded-lg">
-                                  <IconComponent className="h-5 w-5 text-gold" />
-                                </div>
-                                <Badge variant="outline" className="text-xs">
-                                  {resource.resource_subtype || resource.resource_type}
-                                </Badge>
-                              </div>
-                              {resource.file_size_mb && (
-                                <span className="text-xs text-muted-foreground">
-                                  {resource.file_size_mb.toFixed(1)} MB
-                                </span>
-                              )}
-                            </div>
-                            <CardTitle className="font-serif text-lg mt-2">
-                              {resource.title}
-                            </CardTitle>
-                            {resource.description && (
-                              <CardDescription className="text-sm">
-                                {resource.description}
-                              </CardDescription>
-                            )}
-                          </CardHeader>
-                          <CardContent>
-                            <Button
-                              onClick={() => handleDownloadResource(resource)}
-                              className="w-full bg-gold hover:bg-gold-dark text-white"
-                              size="sm"
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              Download
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+            return (
+              <TabsContent key={week} value={week.toString()} className="space-y-6 mt-6">
+                {wVideo ? (
+                  <Card className="border-gold/20 hover:shadow-elegant transition-all">
+                    <CardHeader>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="p-3 bg-gold/10 rounded-full">
+                          <Play className="h-6 w-6 text-gold" />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="font-serif text-xl">
+                            {wVideo.title}
+                          </CardTitle>
+                          {wVideo.duration_minutes && (
+                            <CardDescription className="text-xs mt-1">
+                              {wVideo.duration_minutes} min
+                            </CardDescription>
+                          )}
+                        </div>
+                        {wVideo.is_free && (
+                          <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">Free</Badge>
+                        )}
+                      </div>
+                      {wVideo.description && (
+                        <CardDescription className="text-sm">
+                          {wVideo.description}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {wAccess ? (
+                        <Button
+                          className="w-full bg-gold hover:bg-gold-dark text-white"
+                          onClick={() => navigate(`/video/${wVideo.id}`)}
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          Watch Video
+                        </Button>
+                      ) : (
+                        <Button asChild variant="outline" className="w-full border-gold text-gold hover:bg-gold hover:text-white">
+                          <Link to="/resilient-hub">
+                            <Lock className="h-4 w-4 mr-2" />
+                            Unlock
+                          </Link>
+                        </Button>
+                      )}
 
-              {/* Empty state for no resources */}
-              {weekResources.length === 0 && (
-                <Card className="border-gold/20">
-                  <CardContent className="py-8 text-center">
-                    <Sparkles className="h-8 w-8 text-gold/50 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">
-                      No additional resources for this week yet
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-          ))}
+                      {/* Workbook download */}
+                      {wWorkbook && wAccess && (
+                        <Button
+                          variant="outline"
+                          className="w-full border-gold/30 hover:bg-gold/10"
+                          onClick={() => handleDownloadResource(wWorkbook)}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Workbook
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="border-gold/20 opacity-60 bg-muted/30">
+                    <CardContent className="py-12 text-center">
+                      <Sparkles className="h-8 w-8 text-gold/40 mx-auto mb-3" />
+                      <h3 className="font-serif text-lg mb-1">Week {week}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Content coming soon
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+            );
+          })}
         </Tabs>
       </div>
     );
