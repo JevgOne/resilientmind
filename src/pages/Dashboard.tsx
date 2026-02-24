@@ -155,7 +155,6 @@ const Dashboard = () => {
         const { data } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
         if (data) {
           navigate('/admin', { replace: true });
-          // setCheckingAdmin stays true; component will unmount due to navigation
           return;
         }
       } catch (err) {
@@ -167,6 +166,12 @@ const Dashboard = () => {
     if (!loading && user) {
       checkAdmin();
     }
+
+    // Safety timeout — never stay on loading forever
+    const timeout = setTimeout(() => {
+      setCheckingAdmin(false);
+    }, 3000);
+    return () => clearTimeout(timeout);
   }, [user, loading, navigate]);
 
   // Welcome message for free guide users
