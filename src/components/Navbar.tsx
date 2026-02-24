@@ -56,8 +56,16 @@ const Navbar = () => {
     checkAdminRole();
   }, [user]);
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    // Fire and forget — don't wait for API
+    supabase.auth.signOut().catch(() => {});
+    // Clear auth storage directly
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-')) localStorage.removeItem(key);
+      });
+    } catch {}
+    // Hard redirect immediately
     window.location.href = '/';
   };
 
@@ -118,12 +126,11 @@ const Navbar = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onSelect={(e) => { e.preventDefault(); handleSignOut(); }}
-                    className="cursor-pointer text-destructive"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
+                  <DropdownMenuItem asChild>
+                    <button type="button" onClick={handleSignOut} className="w-full text-left cursor-pointer text-destructive">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -156,9 +156,14 @@ const Dashboard = () => {
     }
   }, [user, loading, searchParams, setSearchParams]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+  const handleSignOut = () => {
+    supabase.auth.signOut().catch(() => {});
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-')) localStorage.removeItem(key);
+      });
+    } catch {}
+    window.location.href = '/';
   };
 
   useEffect(() => {
