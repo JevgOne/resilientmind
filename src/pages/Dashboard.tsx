@@ -369,7 +369,7 @@ const Dashboard = () => {
         {/* Week Tabs */}
         <Tabs value={selectedWeek.toString()} onValueChange={(v) => setSelectedWeek(Number(v))}>
           <TabsList className="bg-cream/50">
-            {[1, 2, 3, 4].map(week => (
+            {[1, 2, 3, 4, 5].map(week => (
               <TabsTrigger
                 key={week}
                 value={week.toString()}
@@ -380,7 +380,7 @@ const Dashboard = () => {
             ))}
           </TabsList>
 
-          {[1, 2, 3, 4].map(week => {
+          {[1, 2, 3, 4, 5].map(week => {
             const wVideo = categoryVideos.find(v => v.week_number === week && !v.is_intro) || null;
             const wAccess = wVideo ? canAccessVideo(wVideo) : false;
             const wWorkbook = wVideo ? resources.find(r => r.video_id === wVideo.id) : null;
