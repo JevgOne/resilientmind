@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User, LogOut, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,36 +25,8 @@ const navLinks = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, profile, signOut, loading } = useAuth();
-
-  useEffect(() => {
-    const checkAdminRole = async (retries = 2) => {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
-
-      for (let i = 0; i <= retries; i++) {
-        const { data, error } = await supabase
-          .rpc('has_role', { _user_id: user.id, _role: 'admin' });
-
-        if (!error && data) {
-          setIsAdmin(true);
-          return;
-        }
-
-        if (i < retries) {
-          await new Promise(r => setTimeout(r, 1000));
-        }
-      }
-      setIsAdmin(false);
-    };
-
-    checkAdminRole();
-  }, [user]);
+  const { user, profile, isAdmin, signOut, loading } = useAuth();
 
   const handleSignOut = () => {
     // Fire and forget — don't wait for API

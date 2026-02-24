@@ -20,6 +20,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  isAdmin: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -33,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchProfile = async (userId: string, retries = 3): Promise<Profile | null> => {
     for (let attempt = 0; attempt < retries; attempt++) {
@@ -83,13 +85,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        const profileData = await fetchProfile(session.user.id);
+        // Fetch profile and admin role in parallel
+        const [profileData, adminResult] = await Promise.all([
+          fetchProfile(session.user.id),
+          supabase.rpc('has_role', { _user_id: session.user.id, _role: 'admin' }),
+        ]);
         if (isMounted) {
           setProfile(profileData);
+          setIsAdmin(!!adminResult.data);
           setLoading(false);
         }
       } else {
         setProfile(null);
+        setIsAdmin(false);
         setLoading(false);
       }
     };
@@ -164,6 +172,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setIsAdmin(false);
   };
 
   return (
@@ -172,6 +181,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session,
       profile,
       loading,
+      isAdmin,
       signUp,
       signIn,
       signOut,
