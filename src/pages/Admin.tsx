@@ -42,6 +42,12 @@ const Admin = () => {
       setCheckingAdmin(false);
     };
     if (!loading) checkAdminRole();
+
+    // Safety timeout — never stay on loading forever
+    const timeout = setTimeout(() => {
+      setCheckingAdmin(false);
+    }, 3000);
+    return () => clearTimeout(timeout);
   }, [user, loading]);
 
   useEffect(() => {
@@ -51,15 +57,16 @@ const Admin = () => {
     }
   }, [user, loading, isAdmin, checkingAdmin, navigate]);
 
-  if (loading || checkingAdmin) {
+  if (loading || checkingAdmin || !user || !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-gold">Verifying access...</div>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center pt-24" style={{ minHeight: 'calc(100vh - 6rem)' }}>
+          <div className="animate-pulse text-gold">Verifying access...</div>
+        </div>
       </div>
     );
   }
-
-  if (!user || !isAdmin) return null;
 
   return (
     <div className="min-h-screen bg-background">

@@ -348,10 +348,10 @@ const AdminResources = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Month (optional)</Label>
-                  <Select value={formData.category_id} onValueChange={(v) => setFormData({ ...formData, category_id: v })}>
+                  <Select value={formData.category_id || 'none'} onValueChange={(v) => setFormData({ ...formData, category_id: v === 'none' ? '' : v })}>
                     <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.id}>{cat.month_number}. {cat.name}</SelectItem>
                       ))}
@@ -360,10 +360,10 @@ const AdminResources = () => {
                 </div>
                 <div>
                   <Label>Week (optional)</Label>
-                  <Select value={formData.week_number} onValueChange={(v) => setFormData({ ...formData, week_number: v })}>
+                  <Select value={formData.week_number || 'none'} onValueChange={(v) => setFormData({ ...formData, week_number: v === 'none' ? '' : v })}>
                     <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       <SelectItem value="1">Week 1</SelectItem>
                       <SelectItem value="2">Week 2</SelectItem>
                       <SelectItem value="3">Week 3</SelectItem>
