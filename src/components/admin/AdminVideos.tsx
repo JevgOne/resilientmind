@@ -110,7 +110,7 @@ const AdminVideos = () => {
     setWorkbookResourceId(null);
   };
 
-  const handleEdit = async (video: Video) => {
+  const handleEdit = (video: Video) => {
     setEditingVideo(video);
     setFormData({
       title: video.title,
@@ -126,23 +126,24 @@ const AdminVideos = () => {
       video_type: video.video_type,
       is_intro: video.is_intro,
     });
+    setWorkbookUrl('');
+    setWorkbookResourceId(null);
+    setFormError('');
+    setDialogOpen(true);
 
-    // Fetch existing workbook for this video
-    const { data: workbookData } = await supabase
+    // Fetch workbook in background — dialog is already open
+    supabase
       .from('resources')
       .select('id, file_url')
       .eq('video_id', video.id)
-      .maybeSingle();
-
-    if (workbookData) {
-      setWorkbookUrl(workbookData.file_url);
-      setWorkbookResourceId(workbookData.id);
-    } else {
-      setWorkbookUrl('');
-      setWorkbookResourceId(null);
-    }
-
-    setDialogOpen(true);
+      .maybeSingle()
+      .then(({ data: workbookData }) => {
+        if (workbookData) {
+          setWorkbookUrl(workbookData.file_url);
+          setWorkbookResourceId(workbookData.id);
+        }
+      })
+      .catch(() => {});
   };
 
   const handleWorkbookUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -604,7 +605,7 @@ const AdminVideos = () => {
                           </Badge>
 
                           {/* Actions */}
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleEdit(video)}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
@@ -639,7 +640,7 @@ const AdminVideos = () => {
                   <span className="font-medium text-sm flex-1 truncate">{video.title}</span>
                   <span className="text-sm">{type.emoji}</span>
                   <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${access.color}`}>{access.label}</Badge>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleEdit(video)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
