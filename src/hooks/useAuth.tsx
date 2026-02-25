@@ -79,6 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }, 5000);
 
+    // Full session handling — fetches profile + admin role
     const handleSession = async (session: Session | null) => {
       if (!isMounted) return;
       sessionProcessing = true;
@@ -88,7 +89,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (session?.user) {
         try {
-          // Fetch profile and admin role in parallel
           const [profileData, adminResult] = await Promise.all([
             fetchProfile(session.user.id),
             supabase.rpc('has_role', { _user_id: session.user.id, _role: 'admin' }),
@@ -97,7 +97,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setProfile(profileData);
             if (adminResult.error) {
               console.error('Admin role check failed:', adminResult.error);
-              setIsAdmin(false);
             } else {
               setIsAdmin(!!adminResult.data);
             }
@@ -113,6 +112,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (isMounted) setLoading(false);
     };
 
+    // Light session update — only refreshes session/user, keeps profile + isAdmin
+    const handleTokenRefresh = (session: Session | null) => {
+      if (!isMounted) return;
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!session) {
+        setProfile(null);
+        setIsAdmin(false);
+      }
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -122,8 +132,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (event === 'INITIAL_SESSION') {
           if (initialSessionHandled) return;
           initialSessionHandled = true;
+          await handleSession(session);
+          return;
         }
 
+        // Token refresh — just update session, don't re-check admin/profile
+        if (event === 'TOKEN_REFRESHED') {
+          handleTokenRefresh(session);
+          return;
+        }
+
+        // SIGNED_IN, SIGNED_OUT, etc — full handling
         await handleSession(session);
       }
     );
