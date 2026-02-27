@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Lock, Crown, Play, Clock, Calendar, CheckCircle2, Circle } from "lucide-react";
+import { ArrowLeft, Lock, Crown, Play, Clock, Calendar, CheckCircle2, Circle, Download } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,9 @@ const VideoPlayer = () => {
   // Progress tracking state
   const [isCompleted, setIsCompleted] = useState(false);
   const [progressLoading, setProgressLoading] = useState(false);
+
+  // Workbook resource linked to this video
+  const [workbook, setWorkbook] = useState<{ id: string; title: string; file_url: string } | null>(null);
 
   // Check if user has access based on membership or purchased hubs
   const hasAccess = useCallback((videoMinMembership: MembershipType, isFree: boolean, categoryIsHub?: boolean, categoryHubSlug?: string | null): boolean => {
@@ -150,6 +153,7 @@ const VideoPlayer = () => {
 
       setAccessDenied(false);
       setVideo(null);
+      setWorkbook(null);
 
       try {
         // First try to fetch the video (RLS will handle access control)
@@ -179,6 +183,13 @@ const VideoPlayer = () => {
             setRequiredMembership(data.min_membership as MembershipType);
           } else {
             setVideo(data);
+            // Fetch workbook linked to this video
+            const { data: resourceData } = await supabase
+              .from('resources')
+              .select('id, title, file_url')
+              .eq('video_id', videoId)
+              .maybeSingle();
+            if (resourceData) setWorkbook(resourceData);
             // Fetch progress after video loads successfully
             fetchProgress();
           }
@@ -358,6 +369,18 @@ const VideoPlayer = () => {
                 <p className="text-muted-foreground text-lg mb-6">
                   {video.description}
                 </p>
+              )}
+
+              {/* Workbook download */}
+              {workbook && (
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto border-gold/30 text-gold hover:bg-gold hover:text-white mb-4"
+                  onClick={() => window.open(workbook.file_url, '_blank')}
+                >
+                  <Download className="mr-2 h-5 w-5" />
+                  Download Workbook (PDF)
+                </Button>
               )}
 
               {/* Progress tracking button */}
