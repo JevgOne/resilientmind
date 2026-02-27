@@ -58,6 +58,28 @@ const Pricing = () => {
           <PricingTrustSignals />
         </div>
 
+        {/* How to get started */}
+        <div className="max-w-2xl mx-auto mt-10 p-8 bg-card/80 backdrop-blur-sm rounded-2xl border border-border/60">
+          <h3 className="text-xl md:text-2xl font-serif font-semibold mb-6 text-center">
+            How to Get Started
+          </h3>
+          <div className="space-y-4">
+            {[
+              { step: "1", text: "Choose the membership that suits you." },
+              { step: "2", text: "Click Sign Up to create your personal account." },
+              { step: "3", text: "Complete your secure payment via Stripe." },
+              { step: "4", text: "You'll receive a welcome email and instant access to your private Dashboard with the full 12-month programme." },
+            ].map((item) => (
+              <div key={item.step} className="flex items-start gap-4">
+                <div className="w-8 h-8 bg-gradient-gold rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-bold text-white">{item.step}</span>
+                </div>
+                <p className="text-foreground/80 font-sans pt-1">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Membership description */}
         <p className="text-center text-foreground/80 font-sans leading-relaxed max-w-3xl mx-auto mt-8 mb-4">
           Through Resilient Mind Membership Program, you will explore personal beliefs that may be limiting your progress, develop greater self-awareness, and create space to enjoy the simple, meaningful moments of your life with clarity and presence.
