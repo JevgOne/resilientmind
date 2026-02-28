@@ -354,10 +354,100 @@ serve(async (req) => {
         break;
       }
 
+      case "invoice.paid": {
+        const paidInvoice = event.data.object as Stripe.Invoice;
+        const paidCustomerId = paidInvoice.customer as string;
+        const paidSubId = paidInvoice.subscription as string;
+
+        // Only handle subscription renewal invoices (not the first one — that's handled by checkout.session.completed)
+        if (!paidSubId || paidInvoice.billing_reason === "subscription_create") {
+          console.log(`Skipping invoice.paid — billing_reason: ${paidInvoice.billing_reason}`);
+          break;
+        }
+
+        console.log(`Invoice paid for subscription ${paidSubId}, customer ${paidCustomerId}, reason: ${paidInvoice.billing_reason}`);
+
+        // Find user by customer ID
+        const { data: invoiceProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("user_id, membership_type")
+          .eq("stripe_customer_id", paidCustomerId)
+          .single();
+
+        if (!invoiceProfile) {
+          console.error(`No profile found for customer ${paidCustomerId} on invoice.paid`);
+          break;
+        }
+
+        // Retrieve subscription to get the new period end
+        const renewedSub = await stripe.subscriptions.retrieve(paidSubId);
+        const newExpiresAt = new Date(renewedSub.current_period_end * 1000);
+
+        const { error: renewError } = await supabaseAdmin
+          .from("profiles")
+          .update({
+            membership_expires_at: newExpiresAt.toISOString(),
+          })
+          .eq("user_id", invoiceProfile.user_id);
+
+        if (renewError) {
+          console.error(`Failed to update expiry on renewal for user ${invoiceProfile.user_id}:`, renewError);
+          throw renewError;
+        }
+
+        console.log(`Renewed membership for user ${invoiceProfile.user_id}, new expiry: ${newExpiresAt.toISOString()}`);
+        break;
+      }
+
       case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Payment failed for invoice ${invoice.id}`);
-        // Could send email notification here
+        const failedInvoice = event.data.object as Stripe.Invoice;
+        const failedCustomerId = failedInvoice.customer as string;
+
+        console.log(`Payment failed for invoice ${failedInvoice.id}, customer ${failedCustomerId}`);
+
+        if (!failedCustomerId) break;
+
+        // Find user to send notification
+        const { data: failedProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("user_id, email, full_name")
+          .eq("stripe_customer_id", failedCustomerId)
+          .single();
+
+        if (!failedProfile?.email) {
+          console.error(`No profile/email found for customer ${failedCustomerId} on payment failure`);
+          break;
+        }
+
+        // Send payment failed notification email
+        const brevoKey = Deno.env.get("BREVO_API_KEY");
+        if (brevoKey) {
+          const displayName = failedProfile.full_name || "there";
+          const SITE_URL = "https://resilientmind.io";
+
+          const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;padding:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background-color:#faf9f6;color:#2d2d2d;"><div style="max-width:600px;margin:0 auto;padding:40px 24px;"><div style="text-align:center;margin-bottom:32px;"><h1 style="font-size:28px;color:#2d2d2d;margin:0 0 8px;">Resilient Mind</h1><p style="font-size:14px;color:#8a8578;margin:0;">Payment Update</p></div><div style="background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e8e4dc;"><p style="font-size:18px;margin:0 0 16px;">Hi ${displayName},</p><p style="font-size:16px;line-height:1.6;color:#4a4a4a;margin:0 0 24px;">We were unable to process your latest membership payment. Please update your payment method to keep your access active.</p><div style="text-align:center;margin-bottom:24px;"><a href="${SITE_URL}/dashboard" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#b8976a,#d4b896);color:#ffffff;font-size:16px;font-weight:bold;text-decoration:none;border-radius:50px;">Update Payment Method &#8594;</a></div><p style="font-size:14px;line-height:1.6;color:#8a8578;margin:0;">If you have any questions, reply to this email or contact us at <a href="mailto:contact@resilientmind.io" style="color:#b8976a;">contact@resilientmind.io</a></p></div></div></body></html>`;
+
+          try {
+            const emailRes = await fetch("https://api.brevo.com/v3/smtp/email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "api-key": brevoKey },
+              body: JSON.stringify({
+                sender: { name: "Resilient Mind", email: "contact@resilientmind.io" },
+                to: [{ email: failedProfile.email, name: failedProfile.full_name || undefined }],
+                subject: "Action Required \u2013 Payment Failed for Your Membership",
+                htmlContent,
+              }),
+            });
+
+            if (!emailRes.ok) {
+              console.error("Failed to send payment failure email:", await emailRes.text());
+            } else {
+              console.log(`Payment failure notification sent to ${failedProfile.email}`);
+            }
+          } catch (emailErr) {
+            console.error("Error sending payment failure email:", emailErr);
+          }
+        }
         break;
       }
     }
