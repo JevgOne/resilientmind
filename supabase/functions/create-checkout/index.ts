@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // Allowed origins for redirect URLs to prevent open-redirect attacks
 const ALLOWED_ORIGIN = 'https://resilientmind.io';
-const ALLOWED_ORIGINS = [ALLOWED_ORIGIN, 'https://www.resilientmind.io'];
+const ALLOWED_ORIGINS = [ALLOWED_ORIGIN, 'https://www.resilientmind.io', 'http://localhost:5173', 'http://localhost:8080'];
 
 function isAllowedRedirectUrl(url: string): boolean {
   return ALLOWED_ORIGINS.some((origin) => url.startsWith(origin + '/') || url === origin);
@@ -56,7 +56,7 @@ const hubConfigs: Record<string, {
   name: string;
   description: string;
 }> = {
-  'transformed-self': {
+  'transformed_self': {
     priceAmount: 12700,
     name: 'The Transformed Self Hub',
     description: 'Carrying Your Strength Across Borders'

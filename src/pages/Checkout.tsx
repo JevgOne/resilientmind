@@ -64,7 +64,7 @@ const Checkout = () => {
   // Hub display info
   const hubInfo: Record<string, { name: string; price: number; description: string }> = {
     'endometriosis': { name: 'Endometriosis Management Hub', price: 147, description: 'Managing chronic pain while living abroad' },
-    'transformed-self': { name: 'The Transformed Self Hub', price: 127, description: 'Carrying Your Strength Across Borders' },
+    'transformed_self': { name: 'The Transformed Self Hub', price: 127, description: 'Carrying Your Strength Across Borders' },
   };
   const hub = hubSlug ? hubInfo[hubSlug] : null;
 
