@@ -197,9 +197,6 @@ serve(async (req) => {
         mode: "subscription",
         payment_method_types: ["card"],
         allow_promotion_codes: true,
-        subscription_data: {
-          cancel_at_period_end: true,
-        },
         line_items: [
           {
             price_data: {

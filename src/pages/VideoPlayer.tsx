@@ -53,7 +53,7 @@ const VideoPlayer = () => {
   const { user, profile, loading: authLoading, isAdmin } = useAuth();
 
   const [video, setVideo] = useState<Video | null>(null);
-  const [categoryInfo, setCategoryInfo] = useState<{ is_additional_hub: boolean; hub_slug: string | null } | null>(null);
+  const [categoryInfo, setCategoryInfo] = useState<{ is_additional_hub: boolean; hub_slug: string | null; month_number?: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -96,7 +96,7 @@ const VideoPlayer = () => {
         // Fetch category + workbook in parallel
         const [catRes, resRes] = await Promise.all([
           fetch(
-            `${SUPABASE_URL}/rest/v1/video_categories?id=eq.${data.category_id}&select=is_additional_hub,hub_slug&limit=1`,
+            `${SUPABASE_URL}/rest/v1/video_categories?id=eq.${data.category_id}&select=is_additional_hub,hub_slug,month_number&limit=1`,
             { headers }
           ),
           fetch(
@@ -162,7 +162,21 @@ const VideoPlayer = () => {
       if (new Date(profile.membership_expires_at) < new Date()) return false;
     }
 
-    return userLevel >= requiredLevel;
+    if (userLevel < requiredLevel) return false;
+
+    // Progressive month unlock
+    if (categoryInfo?.month_number && categoryInfo.month_number >= 1 && categoryInfo.month_number <= 12) {
+      if (profile.membership_started_at) {
+        const started = new Date(profile.membership_started_at);
+        const now = new Date();
+        const monthsElapsed = (now.getFullYear() - started.getFullYear()) * 12
+          + (now.getMonth() - started.getMonth());
+        const currentMonth = Math.max(1, Math.min(12, monthsElapsed + 1));
+        if (currentMonth < categoryInfo.month_number) return false;
+      }
+    }
+
+    return true;
   }, [video, categoryInfo, profile, isAdmin, authLoading]);
 
   // Are we still waiting for auth to determine access on a paid video?

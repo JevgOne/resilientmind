@@ -125,6 +125,14 @@ serve(async (req) => {
             try {
               // Calculate expiry based on subscription
               const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+
+              // Ensure subscription doesn't auto-renew (user must actively re-subscribe)
+              if (!subscription.cancel_at_period_end) {
+                await stripe.subscriptions.update(subscription.id, {
+                  cancel_at_period_end: true,
+                });
+              }
+
               const expiresAt = new Date(subscription.current_period_end * 1000);
 
               await supabaseAdmin

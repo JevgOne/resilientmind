@@ -122,6 +122,16 @@ const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
 
+  // Calculate how many months the user has been a member (1-based: month 1 = first month)
+  const currentProgramMonth = useMemo(() => {
+    if (!profile?.membership_started_at) return 0;
+    const started = new Date(profile.membership_started_at);
+    const now = new Date();
+    const monthsElapsed = (now.getFullYear() - started.getFullYear()) * 12
+      + (now.getMonth() - started.getMonth());
+    return Math.max(1, Math.min(12, monthsElapsed + 1));
+  }, [profile?.membership_started_at]);
+
   const canAccessVideo = useCallback((video: Video) => {
     if (isAdmin) return true;
     if (video.is_free) return true;
@@ -134,8 +144,16 @@ const Dashboard = () => {
     }
 
     const membershipOrder = { free: 0, basic: 1, premium: 2 };
-    return membershipOrder[profile.membership_type] >= membershipOrder[video.min_membership];
-  }, [profile, categories, isAdmin]);
+    const hasTier = membershipOrder[profile.membership_type] >= membershipOrder[video.min_membership];
+    if (!hasTier) return false;
+
+    // Progressive month unlock: only allow access to months the user has "earned"
+    if (category && category.month_number >= 1 && category.month_number <= 12) {
+      if (currentProgramMonth < category.month_number) return false;
+    }
+
+    return true;
+  }, [profile, categories, isAdmin, currentProgramMonth]);
 
   // Derived — recalculates when videos/access changes, no re-fetch needed
   const totalAccessibleVideos = useMemo(
@@ -480,7 +498,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Program Month</p>
-                    <p className="text-2xl font-semibold">1 / 12</p>
+                    <p className="text-2xl font-semibold">{currentProgramMonth || 1} / 12</p>
                   </div>
                 </div>
               </CardContent>
