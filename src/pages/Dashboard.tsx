@@ -277,7 +277,7 @@ const Dashboard = () => {
     );
   }
 
-  // CategoryWeekView Component
+  // CategoryWeekView Component (12-month program months)
   const CategoryWeekView = () => {
     const category = categories.find(c => c.id === selectedCategory);
     if (!category) return null;
@@ -285,6 +285,102 @@ const Dashboard = () => {
     const IconComponent = iconMap[category.icon] || Heart;
     const categoryVideos = videos.filter(v => v.category_id === category.id);
 
+    // Additional Hub — simple layout without week tabs
+    if (category.is_additional_hub) {
+      const hubVideos = categoryVideos.filter(v => !v.is_intro);
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedCategory(null)}
+              className="border-gold/30 hover:bg-gold/10"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gold/10 rounded-full">
+                <IconComponent className="h-6 w-6 text-gold" />
+              </div>
+              <div>
+                <h2 className="font-serif text-2xl md:text-3xl text-foreground">
+                  {category.name}
+                </h2>
+                <p className="text-sm text-muted-foreground">{category.description}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {hubVideos.map(hVideo => {
+              const hAccess = canAccessVideo(hVideo);
+              const hWorkbook = resources.find(r => r.video_id === hVideo.id);
+
+              return (
+                <Card key={hVideo.id} className="border-gold/20 hover:shadow-elegant transition-all">
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-3 bg-gold/10 rounded-full">
+                        <Play className="h-6 w-6 text-gold" />
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="font-serif text-xl">{hVideo.title}</CardTitle>
+                        {hVideo.duration_minutes && (
+                          <CardDescription className="text-xs mt-1">{hVideo.duration_minutes} min</CardDescription>
+                        )}
+                      </div>
+                    </div>
+                    {hVideo.description && (
+                      <CardDescription className="text-sm">{hVideo.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {hAccess ? (
+                      <Button
+                        className="w-full bg-gold hover:bg-gold-dark text-white"
+                        onClick={() => navigate(`/video/${hVideo.id}`)}
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Watch Video
+                      </Button>
+                    ) : (
+                      <Button asChild variant="outline" className="w-full border-gold text-gold hover:bg-gold hover:text-white">
+                        <Link to="/resilient-hub">
+                          <Lock className="h-4 w-4 mr-2" />
+                          Unlock
+                        </Link>
+                      </Button>
+                    )}
+                    {hWorkbook && hAccess && (
+                      <Button
+                        variant="outline"
+                        className="w-full border-gold/30 hover:bg-gold/10"
+                        onClick={() => handleDownloadResource(hWorkbook)}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download Workbook
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+            {hubVideos.length === 0 && (
+              <Card className="border-gold/20 opacity-60 bg-muted/30">
+                <CardContent className="py-12 text-center">
+                  <Sparkles className="h-8 w-8 text-gold/40 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Content coming soon</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Regular 12-month program — week tabs
     // Get video for selected week (1 video per week)
     const weekVideo = categoryVideos.find(v => v.week_number === selectedWeek && !v.is_intro) || null;
     const hasAccess = weekVideo ? canAccessVideo(weekVideo) : false;
@@ -644,7 +740,7 @@ const Dashboard = () => {
                               <IconComponent className="h-5 w-5 text-gold" />
                             </div>
                             <Badge variant="outline" className="text-xs">
-                              Month {category.month_number}
+                              {category.is_additional_hub ? 'Additional Hub' : `Month ${category.month_number}`}
                             </Badge>
                           </div>
                           <CardTitle className="font-serif text-xl flex items-center gap-2">
