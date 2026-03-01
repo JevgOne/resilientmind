@@ -15,6 +15,49 @@ const SESSION_DURATIONS: Record<string, number> = {
   premium_consultation: 60,
 };
 
+interface AvailabilityRow {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+  effective_from: string | null;
+  effective_until: string | null;
+  schedule_name: string | null;
+}
+
+/**
+ * Get availability windows for a specific date.
+ * Seasonal rules (effective_from/until filled) override defaults for that date.
+ * If no seasonal rule matches, fall back to default (NULL dates).
+ */
+function getAvailabilityForDate(
+  dateStr: string,
+  dayOfWeek: number,
+  allRows: AvailabilityRow[]
+): AvailabilityRow[] {
+  // Find seasonal rules where effective_from <= date <= effective_until AND day matches
+  const seasonal = allRows.filter(
+    (r) =>
+      r.day_of_week === dayOfWeek &&
+      r.effective_from !== null &&
+      r.effective_until !== null &&
+      r.effective_from <= dateStr &&
+      r.effective_until >= dateStr
+  );
+
+  if (seasonal.length > 0) {
+    return seasonal;
+  }
+
+  // Fallback: default rows (NULL dates) for this day
+  return allRows.filter(
+    (r) =>
+      r.day_of_week === dayOfWeek &&
+      r.effective_from === null &&
+      r.effective_until === null
+  );
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -94,15 +137,6 @@ serve(async (req) => {
       bookingsByDate[dateKey].push(booking);
     });
 
-    // Build availability map by day of week
-    const availabilityByDay: Record<number, any[]> = {};
-    availability?.forEach((avail: any) => {
-      if (!availabilityByDay[avail.day_of_week]) {
-        availabilityByDay[avail.day_of_week] = [];
-      }
-      availabilityByDay[avail.day_of_week].push(avail);
-    });
-
     // Generate available days
     const availableDays: string[] = [];
     const currentDate = new Date(startDate);
@@ -123,9 +157,14 @@ serve(async (req) => {
         continue;
       }
 
-      // Check if there's availability for this day of week
-      const dayAvailability = availabilityByDay[dayOfWeek];
-      if (!dayAvailability || dayAvailability.length === 0) {
+      // Get availability for this specific date (seasonal or default)
+      const dayAvailability = getAvailabilityForDate(
+        dateStr,
+        dayOfWeek,
+        availability || []
+      );
+
+      if (dayAvailability.length === 0) {
         currentDate.setUTCDate(currentDate.getUTCDate() + 1);
         continue;
       }

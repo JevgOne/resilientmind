@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Clock, Calendar } from "lucide-react";
+import { Plus, Pencil, Trash2, Clock, Calendar, Sun } from "lucide-react";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 
@@ -25,12 +25,29 @@ const DAYS_OF_WEEK = [
   { value: 0, label: "Neděle" },
 ];
 
+const getDayLabel = (value: number) =>
+  DAYS_OF_WEEK.find((d) => d.value === value)?.label ?? String(value);
+
+interface TimeSlotEntry {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+}
+
+interface SeasonalGroup {
+  key: string;
+  schedule_name: string;
+  effective_from: string;
+  effective_until: string;
+  rows: any[];
+}
+
 const AdminAvailability = () => {
   const [loading, setLoading] = useState(false);
   const [availabilityList, setAvailabilityList] = useState<any[]>([]);
   const [blockedDatesList, setBlockedDatesList] = useState<any[]>([]);
 
-  // Availability dialog state
+  // Default availability dialog state
   const [availDialogOpen, setAvailDialogOpen] = useState(false);
   const [editingAvail, setEditingAvail] = useState<any>(null);
   const [availForm, setAvailForm] = useState({
@@ -38,6 +55,16 @@ const AdminAvailability = () => {
     start_time: "09:00",
     end_time: "17:00",
     is_active: true,
+  });
+
+  // Seasonal rule dialog state
+  const [seasonalDialogOpen, setSeasonalDialogOpen] = useState(false);
+  const [editingSeasonalKey, setEditingSeasonalKey] = useState<string | null>(null);
+  const [seasonalForm, setSeasonalForm] = useState({
+    schedule_name: "",
+    effective_from: "",
+    effective_until: "",
+    timeSlots: [{ day_of_week: 1, start_time: "09:00", end_time: "17:00" }] as TimeSlotEntry[],
   });
 
   // Blocked dates dialog state
@@ -81,6 +108,17 @@ const AdminAvailability = () => {
     setBlockedDatesList(data || []);
   };
 
+  // ─── Default availability helpers ───
+
+  const defaultAvailability = availabilityList.filter(
+    (a) => a.effective_from === null && a.effective_until === null
+  );
+
+  const availabilityByDay = DAYS_OF_WEEK.reduce((acc, day) => {
+    acc[day.value] = defaultAvailability.filter((a) => a.day_of_week === day.value);
+    return acc;
+  }, {} as Record<number, any[]>);
+
   const resetAvailForm = () => {
     setAvailForm({
       day_of_week: 1,
@@ -96,14 +134,12 @@ const AdminAvailability = () => {
     setLoading(true);
 
     try {
-      // Validation
       if (availForm.end_time <= availForm.start_time) {
         toast.error("Konec času musí být po začátku");
         return;
       }
 
       if (editingAvail) {
-        // Update existing
         const { error } = await supabase
           .from("availability")
           .update(availForm)
@@ -112,9 +148,7 @@ const AdminAvailability = () => {
         if (error) throw error;
         toast.success("Dostupnost aktualizována");
       } else {
-        // Create new
         const { error } = await supabase.from("availability").insert(availForm);
-
         if (error) throw error;
         toast.success("Dostupnost přidána");
       }
@@ -169,12 +203,173 @@ const AdminAvailability = () => {
     fetchAvailability();
   };
 
+  // ─── Seasonal rules helpers ───
+
+  const seasonalAvailability = availabilityList.filter(
+    (a) => a.effective_from !== null && a.effective_until !== null
+  );
+
+  const seasonalGroups: SeasonalGroup[] = (() => {
+    const map = new Map<string, SeasonalGroup>();
+    for (const row of seasonalAvailability) {
+      const key = `${row.schedule_name || ""}|${row.effective_from}|${row.effective_until}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          schedule_name: row.schedule_name || "",
+          effective_from: row.effective_from,
+          effective_until: row.effective_until,
+          rows: [],
+        });
+      }
+      map.get(key)!.rows.push(row);
+    }
+    return Array.from(map.values()).sort(
+      (a, b) => a.effective_from.localeCompare(b.effective_from)
+    );
+  })();
+
+  const resetSeasonalForm = () => {
+    setSeasonalForm({
+      schedule_name: "",
+      effective_from: "",
+      effective_until: "",
+      timeSlots: [{ day_of_week: 1, start_time: "09:00", end_time: "17:00" }],
+    });
+    setEditingSeasonalKey(null);
+  };
+
+  const handleEditSeasonal = (group: SeasonalGroup) => {
+    setEditingSeasonalKey(group.key);
+    setSeasonalForm({
+      schedule_name: group.schedule_name,
+      effective_from: group.effective_from,
+      effective_until: group.effective_until,
+      timeSlots: group.rows.map((r) => ({
+        day_of_week: r.day_of_week,
+        start_time: r.start_time,
+        end_time: r.end_time,
+      })),
+    });
+    setSeasonalDialogOpen(true);
+  };
+
+  const handleSeasonalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { schedule_name, effective_from, effective_until, timeSlots } = seasonalForm;
+
+      if (!schedule_name.trim()) {
+        toast.error("Název pravidla je povinný");
+        return;
+      }
+      if (!effective_from || !effective_until) {
+        toast.error("Datum od a do je povinné");
+        return;
+      }
+      if (effective_until < effective_from) {
+        toast.error("Datum do musí být po datu od");
+        return;
+      }
+      if (timeSlots.length === 0) {
+        toast.error("Přidejte alespoň jeden časový slot");
+        return;
+      }
+      for (const slot of timeSlots) {
+        if (slot.end_time <= slot.start_time) {
+          toast.error(`Konec času musí být po začátku (${getDayLabel(slot.day_of_week)})`);
+          return;
+        }
+      }
+
+      // If editing, delete old rows first
+      if (editingSeasonalKey) {
+        const group = seasonalGroups.find((g) => g.key === editingSeasonalKey);
+        if (group) {
+          const ids = group.rows.map((r: any) => r.id);
+          const { error } = await supabase
+            .from("availability")
+            .delete()
+            .in("id", ids);
+          if (error) throw error;
+        }
+      }
+
+      // Insert new rows
+      const rows = timeSlots.map((slot) => ({
+        day_of_week: slot.day_of_week,
+        start_time: slot.start_time,
+        end_time: slot.end_time,
+        is_active: true,
+        schedule_name: schedule_name.trim(),
+        effective_from,
+        effective_until,
+      }));
+
+      const { error } = await supabase.from("availability").insert(rows);
+      if (error) throw error;
+
+      toast.success(editingSeasonalKey ? "Sezónní pravidlo aktualizováno" : "Sezónní pravidlo přidáno");
+      setSeasonalDialogOpen(false);
+      resetSeasonalForm();
+      fetchAvailability();
+    } catch (error: any) {
+      toast.error("Chyba: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSeasonal = async (group: SeasonalGroup) => {
+    if (!confirm(`Opravdu chcete smazat sezónní pravidlo "${group.schedule_name}"?`)) return;
+
+    const ids = group.rows.map((r: any) => r.id);
+    const { error } = await supabase
+      .from("availability")
+      .delete()
+      .in("id", ids);
+
+    if (error) {
+      toast.error("Chyba při mazání: " + error.message);
+      return;
+    }
+
+    toast.success("Sezónní pravidlo smazáno");
+    fetchAvailability();
+  };
+
+  const addTimeSlot = () => {
+    setSeasonalForm({
+      ...seasonalForm,
+      timeSlots: [
+        ...seasonalForm.timeSlots,
+        { day_of_week: 1, start_time: "09:00", end_time: "17:00" },
+      ],
+    });
+  };
+
+  const removeTimeSlot = (index: number) => {
+    setSeasonalForm({
+      ...seasonalForm,
+      timeSlots: seasonalForm.timeSlots.filter((_, i) => i !== index),
+    });
+  };
+
+  const updateTimeSlot = (index: number, field: keyof TimeSlotEntry, value: any) => {
+    const updated = [...seasonalForm.timeSlots];
+    updated[index] = { ...updated[index], [field]: field === "day_of_week" ? parseInt(value) : value };
+    setSeasonalForm({ ...seasonalForm, timeSlots: updated });
+  };
+
+  // ─── Blocked dates helpers ───
+
   const handleBlockedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Validation
       if (!blockedForm.date) {
         toast.error("Datum je povinné");
         return;
@@ -221,20 +416,14 @@ const AdminAvailability = () => {
     fetchBlockedDates();
   };
 
-  // Group availability by day
-  const availabilityByDay = DAYS_OF_WEEK.reduce((acc, day) => {
-    acc[day.value] = availabilityList.filter((a) => a.day_of_week === day.value);
-    return acc;
-  }, {} as Record<number, any[]>);
-
   return (
     <div className="space-y-8">
-      {/* Weekly Schedule Section */}
+      {/* ═══ 1. Default Weekly Schedule ═══ */}
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-2xl font-serif font-semibold">Týdenní Rozvrh</h3>
-            <p className="text-muted-foreground">Nastavte dostupnost pro jednotlivé dny v týdnu</p>
+            <h3 className="text-2xl font-serif font-semibold">Výchozí Rozvrh</h3>
+            <p className="text-muted-foreground">Základní týdenní dostupnost (platí, pokud není aktivní sezónní pravidlo)</p>
           </div>
           <Dialog open={availDialogOpen} onOpenChange={setAvailDialogOpen}>
             <DialogTrigger asChild>
@@ -382,7 +571,209 @@ const AdminAvailability = () => {
         </div>
       </div>
 
-      {/* Blocked Dates Section */}
+      {/* ═══ 2. Seasonal Rules ═══ */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-2xl font-serif font-semibold">Sezónní Pravidla</h3>
+            <p className="text-muted-foreground">Jiná dostupnost pro určitá období (přebíjí výchozí rozvrh)</p>
+          </div>
+          <Dialog open={seasonalDialogOpen} onOpenChange={setSeasonalDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={resetSeasonalForm}
+                className="bg-gradient-gold"
+              >
+                <Plus className="mr-2" size={16} />
+                Přidat Pravidlo
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingSeasonalKey ? "Upravit Sezónní Pravidlo" : "Přidat Sezónní Pravidlo"}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSeasonalSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="schedule_name">Název pravidla</Label>
+                  <Input
+                    id="schedule_name"
+                    value={seasonalForm.schedule_name}
+                    onChange={(e) => setSeasonalForm({ ...seasonalForm, schedule_name: e.target.value })}
+                    placeholder="např. Léto, Zimní prázdniny..."
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="effective_from">Platí od</Label>
+                    <Input
+                      id="effective_from"
+                      type="date"
+                      value={seasonalForm.effective_from}
+                      onChange={(e) => setSeasonalForm({ ...seasonalForm, effective_from: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="effective_until">Platí do</Label>
+                    <Input
+                      id="effective_until"
+                      type="date"
+                      value={seasonalForm.effective_until}
+                      onChange={(e) => setSeasonalForm({ ...seasonalForm, effective_until: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label>Časové sloty</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={addTimeSlot}>
+                      <Plus size={14} className="mr-1" />
+                      Přidat slot
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    {seasonalForm.timeSlots.map((slot, index) => (
+                      <div key={index} className="flex items-end gap-2 p-3 bg-muted rounded-lg">
+                        <div className="flex-1">
+                          <Label className="text-xs">Den</Label>
+                          <Select
+                            value={String(slot.day_of_week)}
+                            onValueChange={(value) => updateTimeSlot(index, "day_of_week", value)}
+                          >
+                            <SelectTrigger className="h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DAYS_OF_WEEK.map((day) => (
+                                <SelectItem key={day.value} value={String(day.value)}>
+                                  {day.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Od</Label>
+                          <Input
+                            type="time"
+                            className="h-9 w-28"
+                            value={slot.start_time}
+                            onChange={(e) => updateTimeSlot(index, "start_time", e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Do</Label>
+                          <Input
+                            type="time"
+                            className="h-9 w-28"
+                            value={slot.end_time}
+                            onChange={(e) => updateTimeSlot(index, "end_time", e.target.value)}
+                            required
+                          />
+                        </div>
+                        {seasonalForm.timeSlots.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 px-2"
+                            onClick={() => removeTimeSlot(index)}
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setSeasonalDialogOpen(false);
+                      resetSeasonalForm();
+                    }}
+                  >
+                    Zrušit
+                  </Button>
+                  <Button type="submit" disabled={loading} className="bg-gradient-gold">
+                    {loading ? "Ukládám..." : editingSeasonalKey ? "Uložit" : "Přidat"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {seasonalGroups.length === 0 ? (
+          <Card>
+            <CardContent className="py-8">
+              <p className="text-center text-muted-foreground">
+                Žádná sezónní pravidla. Výchozí rozvrh platí po celý rok.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4">
+            {seasonalGroups.map((group) => (
+              <Card key={group.key}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Sun size={18} className="text-amber-500" />
+                        {group.schedule_name || "Bez názvu"}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {format(new Date(group.effective_from + "T00:00:00"), "d. MMM yyyy", { locale: cs })}
+                        {" — "}
+                        {format(new Date(group.effective_until + "T00:00:00"), "d. MMM yyyy", { locale: cs })}
+                      </p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => handleEditSeasonal(group)}>
+                        <Pencil size={14} />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteSeasonal(group)}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-1.5">
+                    {group.rows
+                      .sort((a: any, b: any) => a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time))
+                      .map((row: any) => (
+                        <div key={row.id} className="flex items-center gap-2 text-sm">
+                          <Badge variant="outline" className="min-w-[70px] justify-center">
+                            {getDayLabel(row.day_of_week)}
+                          </Badge>
+                          <Clock size={12} className="text-muted-foreground" />
+                          <span>{row.start_time} - {row.end_time}</span>
+                          {!row.is_active && (
+                            <Badge variant="secondary" className="text-xs">Neaktivní</Badge>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ═══ 3. Blocked Dates ═══ */}
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>

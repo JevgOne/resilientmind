@@ -15,6 +15,46 @@ const SESSION_DURATIONS: Record<string, number> = {
   premium_consultation: 60,
 };
 
+interface AvailabilityRow {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+  effective_from: string | null;
+  effective_until: string | null;
+  schedule_name: string | null;
+}
+
+/**
+ * Get availability windows for a specific date.
+ * Seasonal rules override defaults for that date.
+ */
+function getAvailabilityForDate(
+  dateStr: string,
+  dayOfWeek: number,
+  allRows: AvailabilityRow[]
+): AvailabilityRow[] {
+  const seasonal = allRows.filter(
+    (r) =>
+      r.day_of_week === dayOfWeek &&
+      r.effective_from !== null &&
+      r.effective_until !== null &&
+      r.effective_from <= dateStr &&
+      r.effective_until >= dateStr
+  );
+
+  if (seasonal.length > 0) {
+    return seasonal;
+  }
+
+  return allRows.filter(
+    (r) =>
+      r.day_of_week === dayOfWeek &&
+      r.effective_from === null &&
+      r.effective_until === null
+  );
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -89,14 +129,11 @@ serve(async (req) => {
       );
     }
 
-    // Get availability for this day of week (optimized with LIMIT 1)
-    const { data: availability, error: availError } = await supabaseClient
+    // Get all active availability rows
+    const { data: allAvailability, error: availError } = await supabaseClient
       .from("availability")
-      .select("start_time, end_time")
-      .eq("day_of_week", dayOfWeek)
-      .eq("is_active", true)
-      .limit(1)
-      .single();
+      .select("*")
+      .eq("is_active", true);
 
     if (availError) {
       console.error("Availability error:", availError);
@@ -112,7 +149,14 @@ serve(async (req) => {
       );
     }
 
-    if (!availability) {
+    // Filter to relevant windows (seasonal or default) for this date
+    const availability = getAvailabilityForDate(
+      date,
+      dayOfWeek,
+      allAvailability || []
+    );
+
+    if (availability.length === 0) {
       return new Response(
         JSON.stringify({
           slots: [],
@@ -125,7 +169,7 @@ serve(async (req) => {
       );
     }
 
-    // Get existing bookings for this date (optimized query)
+    // Get existing bookings for this date
     const startOfDay = new Date(requestedDate);
     startOfDay.setUTCHours(0, 0, 0, 0);
     const endOfDay = new Date(requestedDate);
@@ -140,74 +184,78 @@ serve(async (req) => {
 
     if (bookingsError) {
       console.error("Bookings error:", bookingsError);
-      // Continue even if bookings query fails (just show all slots as available)
     }
 
-    // Generate time slots (optimized - no loop over availability array)
+    // Generate time slots from ALL matching availability windows
+    const slotSet = new Set<string>();
     const slots: Array<{ time: string; available: boolean; reason?: string }> = [];
 
-    // Parse start/end times
-    const [startHour, startMin] = availability.start_time.split(":").map(Number);
-    const [endHour, endMin] = availability.end_time.split(":").map(Number);
+    for (const avail of availability) {
+      const [startHour, startMin] = avail.start_time.split(":").map(Number);
+      const [endHour, endMin] = avail.end_time.split(":").map(Number);
 
-    const startMinutes = startHour * 60 + startMin;
-    const endMinutes = endHour * 60 + endMin;
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
 
-    // Generate 30-min slots
-    for (
-      let slotMinutes = startMinutes;
-      slotMinutes + sessionDuration <= endMinutes;
-      slotMinutes += 30
-    ) {
-      const hours = Math.floor(slotMinutes / 60);
-      const minutes = slotMinutes % 60;
-      const timeStr = `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`;
+      for (
+        let slotMinutes = startMinutes;
+        slotMinutes + sessionDuration <= endMinutes;
+        slotMinutes += 30
+      ) {
+        const hours = Math.floor(slotMinutes / 60);
+        const minutes = slotMinutes % 60;
+        const timeStr = `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`;
 
-      // Create slot datetime
-      const slotStart = new Date(requestedDate);
-      slotStart.setUTCHours(hours, minutes, 0, 0);
-      const slotEnd = new Date(slotStart);
-      slotEnd.setUTCMinutes(slotEnd.getUTCMinutes() + sessionDuration);
+        // Deduplicate: skip if we already processed this time
+        if (slotSet.has(timeStr)) continue;
+        slotSet.add(timeStr);
 
-      // Skip if slot is in the past or within 24h
-      if (slotStart < minBookingDate) {
-        slots.push({
-          time: timeStr,
-          available: false,
-          reason: "Too soon (24h minimum notice required)",
+        // Create slot datetime
+        const slotStart = new Date(requestedDate);
+        slotStart.setUTCHours(hours, minutes, 0, 0);
+        const slotEnd = new Date(slotStart);
+        slotEnd.setUTCMinutes(slotEnd.getUTCMinutes() + sessionDuration);
+
+        // Skip if slot is in the past or within 24h
+        if (slotStart < minBookingDate) {
+          slots.push({
+            time: timeStr,
+            available: false,
+            reason: "Too soon (24h minimum notice required)",
+          });
+          continue;
+        }
+
+        // Check if slot conflicts with existing bookings
+        const conflict = bookings?.find((booking: any) => {
+          const bookingStart = new Date(booking.session_date);
+          const bookingEnd = booking.end_time
+            ? new Date(booking.end_time)
+            : new Date(
+                bookingStart.getTime() + (booking.duration_minutes || 60) * 60000
+              );
+
+          return (
+            (slotStart >= bookingStart && slotStart < bookingEnd) ||
+            (slotEnd > bookingStart && slotEnd <= bookingEnd) ||
+            (slotStart <= bookingStart && slotEnd >= bookingEnd)
+          );
         });
-        continue;
-      }
 
-      // Check if slot conflicts with existing bookings
-      const conflict = bookings?.find((booking: any) => {
-        const bookingStart = new Date(booking.session_date);
-        const bookingEnd = booking.end_time
-          ? new Date(booking.end_time)
-          : new Date(
-              bookingStart.getTime() + (booking.duration_minutes || 60) * 60000
-            );
-
-        return (
-          (slotStart >= bookingStart && slotStart < bookingEnd) ||
-          (slotEnd > bookingStart && slotEnd <= bookingEnd) ||
-          (slotStart <= bookingStart && slotEnd >= bookingEnd)
-        );
-      });
-
-      if (conflict) {
-        slots.push({
-          time: timeStr,
-          available: false,
-          reason: "Already booked",
-        });
-      } else {
-        slots.push({
-          time: timeStr,
-          available: true,
-        });
+        if (conflict) {
+          slots.push({
+            time: timeStr,
+            available: false,
+            reason: "Already booked",
+          });
+        } else {
+          slots.push({
+            time: timeStr,
+            available: true,
+          });
+        }
       }
     }
 
