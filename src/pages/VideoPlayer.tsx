@@ -152,6 +152,8 @@ const VideoPlayer = () => {
     if (!profile) return false;
 
     if (categoryInfo?.is_additional_hub && categoryInfo.hub_slug) {
+      // Premium members get access to all additional hubs
+      if ((profile.membership_type as string) === 'premium') return true;
       return (profile.purchased_hubs || []).includes(categoryInfo.hub_slug);
     }
 

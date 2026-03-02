@@ -133,6 +133,8 @@ const Dashboard = () => {
     // Check if video belongs to a purchased hub
     const category = categories.find(c => c.id === video.category_id);
     if (category?.is_additional_hub && category.hub_slug) {
+      // Premium members get access to all additional hubs
+      if (profile.membership_type === 'premium') return true;
       return (profile.purchased_hubs || []).includes(category.hub_slug);
     }
 
