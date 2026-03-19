@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,16 +11,13 @@ import {
   ArrowLeft,
   Download,
   Sun,
-  Hand,
   Moon,
-  CheckCircle2,
   Mail,
   Loader2,
   FileText,
   Play
 } from 'lucide-react';
 import Logo from '@/components/Logo';
-import PageHero from '@/components/PageHero';
 import SEO from '@/components/SEO';
 import { z } from 'zod';
 
@@ -34,13 +31,13 @@ interface FormData {
 }
 
 const FreeGuide = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     agreeToEmails: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +76,7 @@ const FreeGuide = () => {
       }).catch(() => {});
 
       toast.success('Your free practice kit is on the way!');
-      setIsSuccess(true);
+      navigate('/free-guide/thank-you');
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Something went wrong. Please try again.');
@@ -87,107 +84,6 @@ const FreeGuide = () => {
       setIsLoading(false);
     }
   };
-
-  // Success state — show download links
-  if (isSuccess) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-cream to-background flex flex-col">
-        <header className="p-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            Back to home
-          </Link>
-        </header>
-
-        <main className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-xl">
-            <div className="flex justify-center mb-8">
-              <Link to="/">
-                <Logo className="h-16 w-auto" />
-              </Link>
-            </div>
-
-            <Card className="border-gold/20 shadow-elegant">
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="rounded-full bg-gold/10 p-4">
-                    <CheckCircle2 className="h-12 w-12 text-gold" />
-                  </div>
-                </div>
-                <CardTitle className="font-serif text-2xl">
-                  Your Free 7-Day Practice Kit Is Ready!
-                </CardTitle>
-                <CardDescription className="text-base mt-2">
-                  We've also sent the kit to <span className="font-medium text-foreground">{formData.email}</span> so you can access it anytime.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Download: Gratitude Workbook */}
-                <a
-                  href="/assets/7-Day-Gratitude-Workbook.pdf"
-                  download
-                  className="flex items-center gap-4 p-4 rounded-xl border border-gold/20 bg-cream/30 hover:bg-gold/5 transition-colors group"
-                >
-                  <div className="rounded-full bg-gold/10 p-3 group-hover:bg-gold/20 transition-colors">
-                    <Sun className="h-6 w-6 text-gold" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">7-Day Gratitude Workbook</p>
-                    <p className="text-sm text-muted-foreground">Morning practice & evening reflection</p>
-                  </div>
-                  <Download className="h-5 w-5 text-gold" />
-                </a>
-
-                {/* Download: EFT Workbook */}
-                <a
-                  href="/assets/7-Day-EFT-Workbook-for-Expats.pdf"
-                  download
-                  className="flex items-center gap-4 p-4 rounded-xl border border-gold/20 bg-cream/30 hover:bg-gold/5 transition-colors group"
-                >
-                  <div className="rounded-full bg-gold/10 p-3 group-hover:bg-gold/20 transition-colors">
-                    <Hand className="h-6 w-6 text-gold" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">7-Day EFT Tapping Workbook</p>
-                    <p className="text-sm text-muted-foreground">Release stress & rebuild confidence</p>
-                  </div>
-                  <Download className="h-5 w-5 text-gold" />
-                </a>
-
-                {/* Video placeholder */}
-                <div className="flex items-center gap-4 p-4 rounded-xl border border-gold/20 bg-cream/30">
-                  <div className="rounded-full bg-gold/10 p-3">
-                    <Play className="h-6 w-6 text-gold" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">Guided EFT Tapping Video</p>
-                    <p className="text-sm text-muted-foreground">Create a free account at resilientmind.io/auth to access</p>
-                  </div>
-                  <Mail className="h-5 w-5 text-muted-foreground" />
-                </div>
-
-                <div className="pt-4 border-t border-gold/10">
-                  <p className="text-sm text-muted-foreground text-center">
-                    💛 Love to share? Send your friends{' '}
-                    <span className="font-medium text-gold">resilientmind.io/free-guide</span>{' '}
-                    so they can get their own copy.
-                  </p>
-                </div>
-
-                <Button
-                  asChild
-                  variant="outline"
-                  className="w-full border-gold/30 hover:bg-gold/5"
-                >
-                  <Link to="/">Return to homepage</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   // Main form UI
   return (

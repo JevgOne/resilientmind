@@ -34,6 +34,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const FreeGuide = lazy(() => import("./pages/FreeGuide"));
+const FreeGuideThankYou = lazy(() => import("./pages/FreeGuideThankYou"));
 const Cookies = lazy(() => import("./pages/Cookies"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -118,6 +119,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/free-guide" element={<FreeGuide />} />
+                <Route path="/free-guide/thank-you" element={<FreeGuideThankYou />} />
                 <Route path="/cookies" element={<Cookies />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
