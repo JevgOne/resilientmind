@@ -76,7 +76,7 @@ const FreeGuide = () => {
       }).catch(() => {});
 
       toast.success('Your free practice kit is on the way!');
-      navigate('/free-guide/thank-you');
+      navigate('/thank-you');
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Something went wrong. Please try again.');

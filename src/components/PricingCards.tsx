@@ -74,7 +74,7 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
         },
         body: JSON.stringify({
           planId: productType,
-          successUrl: `${window.location.origin}/pricing/success`,
+          successUrl: `${window.location.origin}/thank-you-membership`,
           cancelUrl: `${window.location.origin}${cancelUrl}`,
         }),
       });

@@ -1,5 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
 import { CheckCircle, Loader2, PartyPopper, AlertTriangle, LogIn, XCircle, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -93,6 +99,17 @@ const CheckoutSuccess = () => {
 
   // Determine if activation actually worked
   const activationFailed = pageState === "success" && profile && profile.membership_type === "free";
+
+  // Fire Meta Pixel Purchase event on successful activation (once)
+  const purchaseFired = useRef(false);
+  useEffect(() => {
+    if (pageState === "success" && !activationFailed && !purchaseFired.current) {
+      purchaseFired.current = true;
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'Purchase');
+      }
+    }
+  }, [pageState, activationFailed]);
 
   return (
     <div className="min-h-screen bg-background">

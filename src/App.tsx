@@ -115,11 +115,12 @@ const App = () => (
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/pricing/success" element={<PricingSuccess />} />
+                <Route path="/thank-you-membership" element={<PricingSuccess />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/free-guide" element={<FreeGuide />} />
-                <Route path="/free-guide/thank-you" element={<FreeGuideThankYou />} />
+                <Route path="/thank-you" element={<FreeGuideThankYou />} />
                 <Route path="/cookies" element={<Cookies />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

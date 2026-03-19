@@ -94,12 +94,12 @@ const Checkout = () => {
         ? {
             product_type: 'hub',
             hub_slug: hubSlug,
-            successUrl: `${window.location.origin}/checkout/success`,
+            successUrl: `${window.location.origin}/thank-you-membership`,
             cancelUrl: `${window.location.origin}/checkout?product=hub&hub=${hubSlug}`,
           }
         : {
             planId,
-            successUrl: `${window.location.origin}/checkout/success`,
+            successUrl: `${window.location.origin}/thank-you-membership`,
             cancelUrl: `${window.location.origin}/checkout?plan=${planId}`,
           };
 

@@ -25,7 +25,7 @@ const FreeGuideThankYou = () => {
       <SEO
         title="Thank You — Your Free Practice Kit Is Ready! | Resilient Mind"
         description="Download your free 7-day practice kit with workbooks and guided EFT video."
-        path="/free-guide/thank-you"
+        path="/thank-you"
       />
       <header className="p-6">
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
