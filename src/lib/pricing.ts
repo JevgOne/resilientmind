@@ -1,14 +1,7 @@
-export const EARLY_BIRD_END = new Date('2026-03-31T23:59:59Z');
-
-export function isEarlyBird(): boolean {
-  return new Date() < EARLY_BIRD_END;
-}
-
 export interface MembershipTier {
   id: string;
   name: string;
-  regularPrice: number;
-  earlyBirdPrice: number;
+  price: number;
   period: '/month' | '/year';
   interval: 'month' | 'year';
   membershipType: 'basic' | 'premium';
@@ -28,8 +21,7 @@ export const MEMBERSHIP_TIERS: MembershipTier[] = [
   {
     id: 'basic_monthly',
     name: 'Basic Monthly',
-    regularPrice: 37,
-    earlyBirdPrice: 27,
+    price: 37,
     period: '/month',
     interval: 'month',
     membershipType: 'basic',
@@ -56,8 +48,7 @@ export const MEMBERSHIP_TIERS: MembershipTier[] = [
   {
     id: 'basic_yearly',
     name: 'Basic Yearly',
-    regularPrice: 370,
-    earlyBirdPrice: 370,
+    price: 370,
     period: '/year',
     interval: 'year',
     membershipType: 'basic',
@@ -88,8 +79,7 @@ export const MEMBERSHIP_TIERS: MembershipTier[] = [
   {
     id: 'premium_monthly',
     name: 'Premium Monthly',
-    regularPrice: 47,
-    earlyBirdPrice: 37,
+    price: 47,
     period: '/month',
     interval: 'month',
     membershipType: 'premium',
@@ -116,8 +106,7 @@ export const MEMBERSHIP_TIERS: MembershipTier[] = [
   {
     id: 'premium_yearly',
     name: 'Premium Yearly',
-    regularPrice: 470,
-    earlyBirdPrice: 470,
+    price: 470,
     period: '/year',
     interval: 'year',
     membershipType: 'premium',
@@ -153,9 +142,5 @@ export function getVisibleTiers(): MembershipTier[] {
 }
 
 export function getTierPrice(tier: MembershipTier): number {
-  return isEarlyBird() ? tier.earlyBirdPrice : tier.regularPrice;
-}
-
-export function formatEarlyBirdEnd(): string {
-  return '31.3.2026';
+  return tier.price;
 }

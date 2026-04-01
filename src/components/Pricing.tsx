@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import PricingCards, { PricingTrustSignals, EarlyBirdBanner } from "@/components/PricingCards";
+import PricingCards, { PricingTrustSignals } from "@/components/PricingCards";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -47,9 +47,6 @@ const Pricing = () => {
             A 12-month guided membership program that transforms the loneliness, uncertainty, and cultural stress of expat life into your greatest strengths.
           </p>
 
-          <div className="mt-6">
-            <EarlyBirdBanner />
-          </div>
         </div>
 
         {/* Membership Cards */}

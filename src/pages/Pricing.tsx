@@ -6,22 +6,17 @@ import { useAuth } from "@/hooks/useAuth";
 import PageHero from "@/components/PageHero";
 import SEO from "@/components/SEO";
 import PricingCards, { PricingTrustSignals } from "@/components/PricingCards";
-import {
-  isEarlyBird,
-  formatEarlyBirdEnd,
-} from "@/lib/pricing";
 import { Crown } from "lucide-react";
 
 const Pricing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const earlyBird = isEarlyBird();
 
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Pricing — Membership Plans from €27 | Resilient Mind"
-        description="Choose from Basic or Premium membership plans. Pay as you go from €27 or yearly from €270. One-time payments, no auto-renewal. Includes video lessons, workbooks and more."
+        title="Pricing — Membership Plans from €37 | Resilient Mind"
+        description="Choose from Basic or Premium membership plans. Pay as you go from €37 or yearly from €370. One-time payments, no auto-renewal. Includes video lessons, workbooks and more."
         path="/pricing"
         jsonLd={{
           "@context": "https://schema.org",
@@ -37,7 +32,7 @@ const Pricing = () => {
             {
               "@type": "Offer",
               name: "Basic Monthly",
-              price: "27",
+              price: "37",
               priceCurrency: "EUR",
               availability: "https://schema.org/InStock",
               url: "https://resilientmind.io/pricing",
@@ -86,21 +81,6 @@ const Pricing = () => {
             </div>
           </div>
         </section>
-
-        {/* Early-bird banner */}
-        {earlyBird && (
-          <section className="py-4">
-            <div className="container px-4">
-              <div className="max-w-3xl mx-auto">
-                <div className="bg-gradient-gold text-primary-foreground rounded-xl px-6 py-4 text-center">
-                  <p className="font-sans font-semibold text-lg">
-                    Save €10/month! Early-bird pricing ends on {formatEarlyBirdEnd()}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Main Membership Tiers */}
         <section className="py-12">

@@ -11,8 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   MEMBERSHIP_TIERS,
   getTierPrice,
-  isEarlyBird,
-  formatEarlyBirdEnd,
 } from "@/lib/pricing";
 
 // Build plans from centralized pricing (only monthly visible)
@@ -22,7 +20,6 @@ const buildPlans = () => {
     name: string;
     subtitle: string;
     price: number;
-    regularPrice: number;
     interval: string;
     membershipType: 'basic' | 'premium';
     features: string[];
@@ -35,7 +32,6 @@ const buildPlans = () => {
       name: tier.membershipType === 'basic' ? 'Basic' : 'Premium',
       subtitle: tier.interval === 'month' ? 'Monthly' : 'Yearly',
       price: getTierPrice(tier),
-      regularPrice: tier.regularPrice,
       interval: tier.interval,
       membershipType: tier.membershipType,
       features: tier.features,
@@ -59,7 +55,6 @@ const Checkout = () => {
   const isHubPurchase = productParam === 'hub' && !!hubSlug;
   const planId = (searchParams.get('plan') || 'basic_monthly') as PlanId;
   const plan = plans[planId] || plans.basic_monthly;
-  const earlyBird = isEarlyBird();
 
   // Hub display info
   const hubInfo: Record<string, { name: string; price: number; description: string }> = {
@@ -183,13 +178,6 @@ const Checkout = () => {
                   </div>
                 ) : (
                   <>
-                    {/* Early-bird notice */}
-                    {earlyBird && plan.regularPrice !== plan.price && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-center text-sm text-green-800 font-medium">
-                        Early-bird pricing active until {formatEarlyBirdEnd()}!
-                      </div>
-                    )}
-
                     {/* Plan summary */}
                     <div className="p-4 bg-gradient-warm rounded-xl">
                       <div className="flex justify-between items-start mb-2">
@@ -199,11 +187,6 @@ const Checkout = () => {
                           </h3>
                         </div>
                         <div className="text-right">
-                          {earlyBird && plan.regularPrice !== plan.price && (
-                            <span className="text-sm text-muted-foreground line-through mr-2">
-                              €{plan.regularPrice}
-                            </span>
-                          )}
                           <span className="text-2xl font-serif font-bold">€{plan.price}</span>
                           <span className="text-muted-foreground text-sm">/{plan.interval}</span>
                         </div>

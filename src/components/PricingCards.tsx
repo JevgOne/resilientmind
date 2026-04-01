@@ -8,8 +8,6 @@ import { toast } from "sonner";
 import {
   getVisibleTiers,
   getTierPrice,
-  isEarlyBird,
-  formatEarlyBirdEnd,
 } from "@/lib/pricing";
 
 interface PricingCardsProps {
@@ -21,7 +19,6 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
   const { session: authSession } = useAuth();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const visibleTiers = getVisibleTiers();
-  const earlyBird = isEarlyBird();
 
   const createCheckoutSession = async (productType: string) => {
     setLoadingTier(productType);
@@ -109,7 +106,6 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
       {visibleTiers.map((tier) => {
         const currentPrice = getTierPrice(tier);
-        const hasDiscount = earlyBird && tier.regularPrice !== tier.earlyBirdPrice;
         const isPremium = tier.membershipType === 'premium';
 
         return (
@@ -122,19 +118,12 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
             }`}
           >
             {/* Badges */}
-            {(tier.badge || hasDiscount) && (
+            {tier.badge && (
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-                {tier.badge && (
-                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-gold text-white text-xs font-sans font-semibold rounded-full shadow-md whitespace-nowrap">
-                    {isPremium && <Crown size={12} className="flex-shrink-0" />}
-                    {tier.badge}
-                  </span>
-                )}
-                {hasDiscount && (
-                  <span className="inline-flex items-center px-4 py-1.5 bg-muted text-muted-foreground text-xs font-sans font-semibold rounded-full shadow-md whitespace-nowrap">
-                    Early Bird
-                  </span>
-                )}
+                <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-gold text-white text-xs font-sans font-semibold rounded-full shadow-md whitespace-nowrap">
+                  {isPremium && <Crown size={12} className="flex-shrink-0" />}
+                  {tier.badge}
+                </span>
               </div>
             )}
 
@@ -151,11 +140,6 @@ const PricingCards = ({ cancelUrl = "/" }: PricingCardsProps) => {
 
               {/* Price */}
               <div className="text-center mb-6">
-                {hasDiscount && (
-                  <div className="text-sm font-sans text-muted-foreground/60 line-through mb-0.5">
-                    €{tier.regularPrice}
-                  </div>
-                )}
                 <div className="inline-flex items-baseline">
                   <span className="text-lg font-sans text-muted-foreground/70">€</span>
                   <span className="text-5xl font-serif font-bold tracking-tight text-foreground">
@@ -223,15 +207,5 @@ export const PricingTrustSignals = () => (
     </div>
   </div>
 );
-
-export const EarlyBirdBanner = () => {
-  const earlyBird = isEarlyBird();
-  if (!earlyBird) return null;
-  return (
-    <div className="mb-8 inline-block bg-gradient-gold text-primary-foreground rounded-full px-6 py-2 font-sans font-semibold text-sm">
-      Early-bird pricing until {formatEarlyBirdEnd()} — Save €10 per month (€120 total)
-    </div>
-  );
-};
 
 export default PricingCards;
