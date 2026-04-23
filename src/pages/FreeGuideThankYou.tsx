@@ -57,6 +57,14 @@ const FreeGuideThankYou = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="rounded-lg border border-gold/30 bg-gold/5 p-4 text-center text-sm">
+                <p className="font-semibold text-foreground">
+                  📧 Can't find the email?
+                </p>
+                <p className="mt-1 text-muted-foreground">
+                  Please check your <span className="font-medium text-foreground">Promotions</span> or <span className="font-medium text-foreground">Spam</span> folder, and add <span className="font-medium text-gold">contact@resilientmind.io</span> to your contacts so you don't miss your materials.
+                </p>
+              </div>
               {/* Download: Gratitude Workbook */}
               <a
                 href="/assets/7-Day-Gratitude-Workbook.pdf"

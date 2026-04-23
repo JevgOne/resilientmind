@@ -278,6 +278,15 @@ const FreeGuide = () => {
                   </span>
                 </div>
 
+                <div className="mt-4 rounded-lg border border-gold/20 bg-cream/40 p-3 text-center text-xs text-muted-foreground">
+                  <p className="font-medium text-foreground">
+                    📧 Please check your Promotions or Spam folder
+                  </p>
+                  <p className="mt-1">
+                    Add <span className="font-medium text-gold">contact@resilientmind.io</span> to your contacts so you don't miss your free practice materials.
+                  </p>
+                </div>
+
                 <div className="pt-2 text-center text-xs text-muted-foreground">
                   By signing up, you agree to our{' '}
                   <Link to="/terms" className="text-gold hover:underline">Terms</Link>
