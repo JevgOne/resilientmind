@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import PageHero from "@/components/PageHero";
 import SEO from "@/components/SEO";
 import PricingCards, { PricingTrustSignals } from "@/components/PricingCards";
-import { Crown, Sparkles } from "lucide-react";
+import { Crown } from "lucide-react";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -51,13 +51,13 @@ const Pricing = () => {
       <Navbar />
 
       <main className="pt-20 pb-16">
-        {/* Hero — Headline + Problem */}
+        {/* Hero Section */}
         <PageHero>
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
-              <Sparkles size={16} className="text-primary" />
+              <Crown size={16} className="text-primary" />
               <span className="text-sm font-sans font-medium text-primary">
-                For Expats Ready to Thrive
+                Membership Pricing
               </span>
             </div>
 
@@ -66,35 +66,35 @@ const Pricing = () => {
             </h1>
 
             <p className="text-lg text-muted-foreground font-sans max-w-2xl mx-auto leading-relaxed">
-              For expat women who feel overwhelmed, disconnected, or stuck between two worlds.
+              A 12-month guided membership program that transforms the loneliness, uncertainty, and cultural stress of expat life into your greatest strengths.
             </p>
           </div>
         </PageHero>
 
-        {/* Solution — Pricing (moved to top) */}
-        <section className="py-12">
+        {/* Program description */}
+        <section className="py-8">
           <div className="container px-4">
-            <div className="max-w-7xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-serif font-semibold text-center mb-4">
-                Invest in Your Transformation
-              </h2>
-              <p className="text-center text-muted-foreground font-sans mb-12 max-w-2xl mx-auto leading-relaxed">
-                Now is your moment to invest in your body, mind, and resilience — and step into a life of clarity, calm and confidence, no matter where the world takes you.
+            <div className="max-w-3xl mx-auto text-center">
+              <p className="text-muted-foreground font-sans leading-relaxed">
+                Ongoing emotional support and nervous system regulation for expat women.
               </p>
-
-              <PricingCards cancelUrl="/pricing" />
-              <PricingTrustSignals />
             </div>
           </div>
         </section>
 
-        {/* Trust / Authority */}
+        {/* Main Membership Tiers */}
         <section className="py-12">
           <div className="container px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <p className="text-lg text-muted-foreground font-sans leading-relaxed">
-                Using my <span className="text-foreground font-medium">13 years of experience living abroad</span> and my expertise in personal development, expressive arts, and holistic therapies, I created an online membership program that transforms these challenges into opportunities for growth and inner strength.
+            <div className="max-w-7xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-serif font-semibold text-center mb-4">
+                Resilient Mind Membership
+              </h2>
+              <p className="text-center text-muted-foreground font-sans mb-12 max-w-xl mx-auto">
+                An online membership with guided practical tools and video support. Pay as you go — no auto-renewal.
               </p>
+
+              <PricingCards cancelUrl="/pricing" />
+              <PricingTrustSignals />
             </div>
           </div>
         </section>
