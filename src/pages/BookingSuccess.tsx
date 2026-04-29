@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { CheckCircle, Calendar, Clock, Mail, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,6 +119,12 @@ const BookingSuccess = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Booking Confirmed | Resilient Mind"
+        description="Your booking has been confirmed."
+        path="/booking/success"
+        noindex
+      />
       <Navbar />
 
       <main className="pt-32 pb-16">

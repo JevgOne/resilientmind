@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import SEO from "@/components/SEO";
+import { breadcrumb, faqPage, product } from "@/lib/schema";
 import {
   ArrowRight,
   Brain,
@@ -55,9 +56,35 @@ const Membership = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Resilient Mind Membership — Feel Like Yourself Again"
-        description="A gentle, step-by-step membership for expat women who feel overwhelmed, disconnected, or not quite themselves — so you can feel calm, grounded, and at home within."
+        title="Resilient Mind Membership — Feel Like Yourself Again | Online Support for Expat Women"
+        description="A gentle online membership for expat women who feel overwhelmed, disconnected, or not quite themselves. EFT tapping, expressive arts and nervous system regulation — feel calm, grounded, and at home within."
         path="/membership"
+        keywords="expat women membership, EFT for expats, expat emotional support, feel like yourself abroad, nervous system regulation, expat loneliness, online therapy membership"
+        jsonLd={[
+          breadcrumb([
+            { name: "Home", path: "/" },
+            { name: "Membership", path: "/membership" },
+          ]),
+          product({
+            name: "Resilient Mind Membership",
+            description:
+              "A gentle, structured online membership for expat women combining EFT tapping, expressive art therapy, nervous system regulation, and reflective workbooks. Pay as you go, cancel anytime.",
+            url: "https://resilientmind.io/membership",
+            offers: [
+              {
+                name: "Basic Monthly",
+                price: "37",
+                url: "https://resilientmind.io/pricing",
+              },
+              {
+                name: "Premium Monthly",
+                price: "47",
+                url: "https://resilientmind.io/pricing",
+              },
+            ],
+          }),
+          faqPage(faqs),
+        ]}
       />
       <Navbar />
 

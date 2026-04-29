@@ -1,11 +1,18 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Home, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEO
+        title="Page Not Found (404) | Resilient Mind"
+        description="The page you're looking for doesn't exist or has been moved."
+        path="/404"
+        noindex
+      />
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center pt-20 pb-16">

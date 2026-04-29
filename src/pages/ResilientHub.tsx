@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageHero from "@/components/PageHero";
 import SEO from "@/components/SEO";
+import { breadcrumb, course, service } from "@/lib/schema";
 
 const programs = [
   {
@@ -124,9 +125,29 @@ const ResilientHub = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Resilient Hub — Monthly Video Lessons & Workbooks for Expats | Resilient Mind"
-        description="Access monthly video lessons, guided workbooks and creative exercises to build resilience as an expatriate. Start your journey today."
+        title="Resilient Hub — A 12-Month Membership for Expat Women | Resilient Mind"
+        description="A structured 12-month online membership combining EFT, nervous system regulation and reflective tools. Monthly themes, video lessons, and guided practices to support your emotional wellbeing while living abroad."
         path="/resilient-hub"
+        keywords="12-month membership, expat women, EFT tapping, nervous system regulation, expressive art therapy, expatriate wellbeing, online program for expats"
+        jsonLd={[
+          breadcrumb([
+            { name: "Home", path: "/" },
+            { name: "Resilient Hub", path: "/resilient-hub" },
+          ]),
+          service({
+            name: "Resilient Hub — 12-month Membership",
+            description:
+              "A structured 12-month online membership combining EFT (Emotional Freedom Techniques), nervous system regulation practices and reflective tools to support emotional wellbeing while living abroad.",
+            url: "https://resilientmind.io/resilient-hub",
+            serviceType: "Online membership program",
+          }),
+          course({
+            name: "Resilient Hub — 12-Month Program for Expat Women",
+            description:
+              "A 12-month structured program combining EFT, expressive arts, guided meditation and nervous system regulation. Monthly themes covering loneliness, cultural stress, identity, financial uncertainty, boundaries, and emotional stability.",
+            url: "https://resilientmind.io/resilient-hub",
+          }),
+        ]}
       />
       <Navbar />
       

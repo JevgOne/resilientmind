@@ -9,6 +9,7 @@ declare global {
 import { CheckCircle, Loader2, PartyPopper, AlertTriangle, LogIn, XCircle, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
@@ -113,6 +114,12 @@ const CheckoutSuccess = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Checkout Confirmed | Resilient Mind"
+        description="Your purchase was confirmed."
+        path="/checkout/success"
+        noindex
+      />
       <Navbar />
       <main className="pt-24 pb-16">
         <div className="container px-4">

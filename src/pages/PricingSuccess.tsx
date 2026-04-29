@@ -8,6 +8,7 @@ declare global {
 }
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Crown, Loader2, ArrowRight, Video, FileText, Calendar, AlertTriangle, LogIn, XCircle } from "lucide-react";
@@ -119,6 +120,12 @@ const PricingSuccess = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Welcome to Resilient Mind Membership"
+        description="Your membership is active."
+        path="/pricing/success"
+        noindex
+      />
       <Navbar />
 
       <main className="pt-20 pb-16">
